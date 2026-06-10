@@ -1185,6 +1185,7 @@ def get_customer(customer_id: str):
             "product_line": c.product_line, "direction": c.direction,
             "avg_score": c.avg_score, "agent_name": c.agent_name, "status": c.status,
             "turns": len(c.transcript or []),
+            "transcript": c.transcript or [],
             "created_at": c.created_at.isoformat() if c.created_at else None,
             "closed_at": c.closed_at.isoformat() if c.closed_at else None,
         } for c in rows]

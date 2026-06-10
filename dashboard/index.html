@@ -839,7 +839,7 @@ function renderCustomerModal(d) {
     `<span style="background:#f3f4f6;color:#374151;font-size:11px;padding:2px 8px;border-radius:10px;margin:0 4px 4px 0;display:inline-block">${escHtml(t.name)} <b>${t.count}</b></span>`).join('');
   document.getElementById('cust-modal-summary').innerHTML =
     `<div style="padding:4px 0"><div style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Topics</div>${chips || '<span style="color:#9ca3af;font-size:12px">—</span>'}</div>`;
-  // timeline grouped by day (each conversation = a block)
+  // история по датам: на каждый диалог — заголовок + сами реплики (клиент ↔ оператор)
   const convs = d.conversations || [];
   let body = '';
   let lastDay = null;
@@ -848,18 +848,37 @@ function renderCustomerModal(d) {
     if (day !== lastDay) {
       lastDay = day;
       const dayLbl = c.created_at ? formatPlain(c.created_at).split(',')[0] : 'No date';
-      body += `<div style="font-size:11px;font-weight:700;color:#7c3aed;margin:12px 0 4px;text-transform:uppercase;letter-spacing:.04em">${dayLbl}</div>`;
+      body += `<div style="font-size:11px;font-weight:700;color:#7c3aed;margin:18px 0 4px;text-transform:uppercase;letter-spacing:.04em;border-top:1px solid #eef0f4;padding-top:14px">${dayLbl}</div>`;
     }
     const tag = (c.product_line && c.product_line !== 'NA' ? c.product_line : '') + (c.direction === 'outbound' ? ' ↗' : '');
     const time = c.created_at ? (formatPlain(c.created_at).split(',')[1] || '').trim() : '';
-    body += `<div style="display:flex;align-items:center;gap:10px;padding:7px 8px;border-bottom:1px solid #f3f4f6;cursor:pointer" onclick="closeCustModal();openConv('${c.id}')">
-      <span style="color:#9ca3af;font-size:11px;width:60px;flex-shrink:0">${time}</span>
-      <span>${convTypeBadge(c.type)}</span>
-      <span style="flex:1;color:#1f2937;font-size:13px">${escHtml(c.topic_name || c.topic || '—')} <span style="color:#9ca3af;font-size:10px;font-weight:700">${escHtml(tag)}</span></span>
-      <span style="font-size:11px;color:#9ca3af">${escHtml(c.agent_name || '')}</span>
-      <span>${scorePill(c.avg_score)}</span>
-      <span style="color:#7c3aed;font-size:12px;white-space:nowrap">view →</span>
+    // заголовок диалога
+    body += `<div style="display:flex;align-items:center;gap:8px;margin:8px 0 10px;font-size:12px">
+      <span style="color:#9ca3af">${time}</span>
+      ${convTypeBadge(c.type)}
+      <span style="font-weight:600;color:#374151">${escHtml(c.topic_name || c.topic || '—')}</span>
+      <span style="color:#9ca3af;font-size:10px;font-weight:700">${escHtml(tag)}</span>
+      ${c.agent_name ? `<span style="color:#9ca3af">· ${escHtml(c.agent_name)}</span>` : ''}
+      <span style="margin-left:auto">${scorePill(c.avg_score)}</span>
+      <a onclick="closeCustModal();openConv('${c.id}')" style="cursor:pointer;color:#7c3aed">open ↗</a>
     </div>`;
+    // сами реплики
+    const tr = c.transcript || [];
+    if (!tr.length) body += `<div style="color:#9ca3af;font-size:12px;padding:2px 0 8px">(no transcript)</div>`;
+    for (const turn of tr) {
+      const isCust = turn.role === 'customer';
+      const side = isCust ? 'customer' : 'agent';
+      const initial = isCust ? 'C' : 'A';
+      const textEn = turn.text_en || '';
+      body += `
+        <div class="bubble-row ${side}" style="margin-bottom:3px">
+          <div class="avatar ${side}">${initial}</div>
+          <div><div class="bubble ${side}">${escHtml(turn.text || '')}</div></div>
+        </div>
+        <div class="bubble-en-wrap ${side}" style="margin-bottom:8px">
+          <div class="bubble-en ${textEn ? '' : 'empty'}">${textEn ? escHtml(textEn) : '…not translated'}</div>
+        </div>`;
+    }
   }
   document.getElementById('cust-modal-body').innerHTML = body || '<div class="loading">No conversations.</div>';
 }

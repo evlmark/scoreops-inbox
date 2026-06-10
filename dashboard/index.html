@@ -470,6 +470,7 @@
   <div class="modal" onclick="event.stopPropagation()" style="width:720px;position:relative">
     <div class="modal-header">
       <div class="modal-header-info">
+        <button id="cust-back" onclick="backToChat()" style="display:none;cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;color:#374151;margin-bottom:8px">‹ Back to chat</button>
         <div class="modal-title" id="cust-modal-title">Customer</div>
         <div class="modal-meta" id="cust-modal-meta"></div>
       </div>
@@ -805,7 +806,18 @@ async function loadUsers(q) {
   wrap.innerHTML = h + '</tbody></table>';
 }
 
-async function openCustomer(customerId) {
+let custBackConvId = null;
+
+function backToChat() {
+  const id = custBackConvId;
+  closeCustModal();
+  if (id) openConv(id);
+}
+
+async function openCustomer(customerId, backConvId) {
+  custBackConvId = backConvId || null;
+  const backBtn = document.getElementById('cust-back');
+  if (backBtn) backBtn.style.display = custBackConvId ? 'inline-block' : 'none';
   document.getElementById('cust-modal').classList.add('open');
   document.getElementById('cust-modal-title').textContent = 'Customer';
   document.getElementById('cust-modal-meta').innerHTML = '';
@@ -1621,7 +1633,7 @@ function renderConvModal(c) {
     dur          ? `<span>⏱ ${dur}</span>` : '',
     c.created_at ? `<span>🕐 ${formatPlain(c.created_at)}</span>` : '',
     c.closed_at  ? `<span>🏁 ${formatPlain(c.closed_at)}</span>` : '',
-    c.customer_id ? `<span>🆔 Customer: <code style="font-size:11px">${escHtml(c.customer_id)}</code> <a onclick="closeConvModal();openCustomer('${c.customer_id}')" style="cursor:pointer;color:#7c3aed;font-weight:600;margin-left:4px">👥 all chats →</a></span>` : '',
+    c.customer_id ? `<span>🆔 Customer: <code style="font-size:11px">${escHtml(c.customer_id)}</code> <a onclick="closeConvModal();openCustomer('${c.customer_id}','${c.id}')" style="cursor:pointer;color:#7c3aed;font-weight:600;margin-left:4px">👥 all chats →</a></span>` : '',
     `<span style="color:#9ca3af">Task ID: <code style="font-size:11px">${escHtml(c.id)}</code></span>`,
   ].filter(Boolean).join('');
 

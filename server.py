@@ -950,14 +950,17 @@ def reject_topic_suggestion(sug_id: int):
 @app.get("/conversations")
 def list_conversations(limit: int = 500, cohort: Optional[str] = None,
                        topic_slug: Optional[str] = None, days: Optional[int] = None,
-                       exclude_outbound: int = 0):
+                       exclude_outbound: int = 0, customer_id: Optional[str] = None):
     """Список реальных обращений (последние первые).
     cohort=<метка> — только эта выборка; без параметра — обычный Real Inbox (без когорт).
-    topic_slug/days/exclude_outbound — фильтры для drill-down по топику."""
+    topic_slug/days/exclude_outbound/customer_id — фильтры (drill-down по топику / по пользователю)."""
     db = SessionLocal()
     try:
         q = db.query(DBConversation)
-        if cohort:
+        if customer_id:
+            # по конкретному пользователю — игнорируем фильтр когорт
+            q = q.filter(DBConversation.customer_id == customer_id)
+        elif cohort:
             q = q.filter(DBConversation.cohort == cohort)
         else:
             q = q.filter(DBConversation.cohort.is_(None))
@@ -1103,7 +1106,7 @@ def get_conversation(conv_id: str):
             "id":          c.id,
             "type":        c.type,
             "queue_name":  c.queue_name,
-            "customer_id": c.customer_id,
+            "customer_id": cust_id,
             "agent_name":  c.agent_name,
             "topic":       c.topic,
             "topic_es":    c.topic_es,
@@ -1121,6 +1124,83 @@ def get_conversation(conv_id: str):
             "in_progress_at": c.in_progress_at.isoformat() if c.in_progress_at else None,
             "closed_at":   c.closed_at.isoformat() if c.closed_at else None,
             "customer_history": customer_history,
+        }
+    finally:
+        db.close()
+
+
+@app.get("/customers")
+def list_customers(q: Optional[str] = None, limit: int = 300):
+    """Список пользователей (по customer_id) с агрегатами. q — поиск по подстроке id."""
+    db = SessionLocal()
+    try:
+        query = db.query(DBConversation).filter(DBConversation.customer_id.isnot(None))
+        if q:
+            query = query.filter(DBConversation.customer_id.ilike(f"%{q.strip()}%"))
+        rows = query.all()
+        agg = {}
+        for c in rows:
+            cid = clean_customer_id(c.customer_id)
+            if not cid:
+                continue
+            a = agg.setdefault(cid, {"customer_id": cid, "count": 0, "first": None,
+                                     "last": None, "topics": {}, "scores": []})
+            a["count"] += 1
+            if c.created_at:
+                iso = c.created_at.isoformat()
+                if a["first"] is None or iso < a["first"]:
+                    a["first"] = iso
+                if a["last"] is None or iso > a["last"]:
+                    a["last"] = iso
+            if c.topic_slug:
+                a["topics"][c.topic_slug] = a["topics"].get(c.topic_slug, 0) + 1
+            if c.avg_score is not None:
+                a["scores"].append(c.avg_score)
+        out = []
+        for a in agg.values():
+            top = max(a["topics"].items(), key=lambda x: x[1])[0] if a["topics"] else None
+            out.append({
+                "customer_id": a["customer_id"], "count": a["count"],
+                "first_at": a["first"], "last_at": a["last"], "top_topic": top,
+                "avg_score": round(sum(a["scores"]) / len(a["scores"]), 1) if a["scores"] else None,
+            })
+        out.sort(key=lambda x: (-x["count"], x["last_at"] or ""))
+        return {"total": len(out), "customers": out[:limit]}
+    finally:
+        db.close()
+
+
+@app.get("/customers/{customer_id}")
+def get_customer(customer_id: str):
+    """Профиль пользователя: все его обращения (даты-блоки) + сводка."""
+    db = SessionLocal()
+    try:
+        tmap = {t["slug"]: t for t in load_topics()}
+        rows = (db.query(DBConversation)
+                  .filter(DBConversation.customer_id == customer_id)
+                  .order_by(desc(DBConversation.created_at)).all())
+        convs = [{
+            "id": c.id, "type": c.type, "topic": c.topic, "topic_slug": c.topic_slug,
+            "topic_name": (tmap.get(c.topic_slug) or {}).get("name_en") or c.topic,
+            "product_line": c.product_line, "direction": c.direction,
+            "avg_score": c.avg_score, "agent_name": c.agent_name, "status": c.status,
+            "turns": len(c.transcript or []),
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "closed_at": c.closed_at.isoformat() if c.closed_at else None,
+        } for c in rows]
+        scores = [c.avg_score for c in rows if c.avg_score is not None]
+        topics = {}
+        for c in rows:
+            if c.topic_slug:
+                topics[c.topic_slug] = topics.get(c.topic_slug, 0) + 1
+        return {
+            "customer_id": customer_id, "count": len(rows),
+            "first_at": convs[-1]["created_at"] if convs else None,
+            "last_at": convs[0]["created_at"] if convs else None,
+            "avg_score": round(sum(scores) / len(scores), 1) if scores else None,
+            "topics": [{"slug": s, "name": (tmap.get(s) or {}).get("name_en") or s, "count": n}
+                       for s, n in sorted(topics.items(), key=lambda x: -x[1])],
+            "conversations": convs,
         }
     finally:
         db.close()

@@ -361,6 +361,7 @@
     <div class="tab active" data-tab="inbox"     onclick="switchTab('inbox')">📥 Real Inbox</div>
     <div class="tab"        data-tab="knowledge" onclick="switchTab('knowledge')">🧠 Knowledge Base</div>
     <div class="tab"        data-tab="topics"    onclick="switchTab('topics')">🏷 Topics</div>
+    <div class="tab"        data-tab="users"     onclick="switchTab('users')">👥 Users</div>
   </div>
 
   <!-- Real Inbox -->
@@ -452,6 +453,31 @@
     <div class="card" id="topic-bank"><div class="loading">Loading...</div></div>
   </div>
 
+  <!-- Users -->
+  <div class="tab-panel" id="tab-users">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:16px">
+      <div class="section-title" style="margin:0">Users <span id="users-count" style="color:#9ca3af;font-weight:500;font-size:13px"></span></div>
+      <input id="users-search" type="text" placeholder="Search by customer ID…" oninput="onUsersSearch()"
+             style="flex:0 0 320px;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+    </div>
+    <div class="card" id="users-wrap"><div class="loading">Loading...</div></div>
+  </div>
+
+</div>
+
+<!-- ══════════ Customer profile modal ══════════ -->
+<div class="modal-overlay" id="cust-modal" onclick="closeCustModal(event)">
+  <div class="modal" onclick="event.stopPropagation()" style="width:720px;position:relative">
+    <div class="modal-header">
+      <div class="modal-header-info">
+        <div class="modal-title" id="cust-modal-title">Customer</div>
+        <div class="modal-meta" id="cust-modal-meta"></div>
+      </div>
+      <button class="modal-close" onclick="closeCustModal()">✕</button>
+    </div>
+    <div class="modal-summary" id="cust-modal-summary"></div>
+    <div class="chat-body" id="cust-modal-body" style="padding:8px 24px 20px"><div class="loading">Loading…</div></div>
+  </div>
 </div>
 
 <!-- ══════════ Conversation Modal (real inbox) ══════════ -->
@@ -734,10 +760,109 @@ function switchTab(name) {
     topicsTabInited = true;
     loadTopicsTab();
   }
+  if (name === 'users' && !usersTabInited) {
+    usersTabInited = true;
+    loadUsers();
+  }
 }
 
 let knowledgeTabInited = false;
 let topicsTabInited = false;
+let usersTabInited = false;
+
+/* ── Users tab ── */
+let usersSearchTimer = null;
+
+function onUsersSearch() {
+  clearTimeout(usersSearchTimer);
+  usersSearchTimer = setTimeout(() => loadUsers(document.getElementById('users-search').value.trim()), 300);
+}
+
+async function loadUsers(q) {
+  const wrap = document.getElementById('users-wrap');
+  wrap.innerHTML = '<div class="loading">Loading…</div>';
+  let data;
+  try { data = await fetch(`${API}/customers${q ? `?q=${encodeURIComponent(q)}` : ''}`).then(r => r.json()); }
+  catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
+  document.getElementById('users-count').textContent = data.total != null ? `· ${data.total}` : '';
+  const list = data.customers || [];
+  if (!list.length) { wrap.innerHTML = '<div class="loading" style="padding:16px">No users found.</div>'; return; }
+  let h = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="text-align:left;color:#6b7280;border-bottom:1px solid #e5e7eb">
+      <th style="padding:8px 10px">Customer ID</th><th>Contacts</th><th>First</th><th>Last</th><th>Top topic</th><th>Avg</th><th></th>
+    </tr></thead><tbody>`;
+  for (const u of list) {
+    h += `<tr style="border-bottom:1px solid #f1f1f4;cursor:pointer" onclick="openCustomer('${u.customer_id}')">
+      <td style="padding:7px 10px"><code style="font-size:11px">${escHtml(u.customer_id)}</code></td>
+      <td style="font-weight:600">${u.count}</td>
+      <td style="color:#6b7280">${u.first_at ? formatPlain(u.first_at).split(',')[0] : '—'}</td>
+      <td style="color:#6b7280">${u.last_at ? formatPlain(u.last_at).split(',')[0] : '—'}</td>
+      <td style="color:#374151">${escHtml(u.top_topic || '—')}</td>
+      <td>${scorePill(u.avg_score)}</td>
+      <td style="color:#7c3aed;white-space:nowrap">view →</td>
+    </tr>`;
+  }
+  wrap.innerHTML = h + '</tbody></table>';
+}
+
+async function openCustomer(customerId) {
+  document.getElementById('cust-modal').classList.add('open');
+  document.getElementById('cust-modal-title').textContent = 'Customer';
+  document.getElementById('cust-modal-meta').innerHTML = '';
+  document.getElementById('cust-modal-summary').innerHTML = '';
+  document.getElementById('cust-modal-body').innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    await ensureTopics();
+    const d = await fetch(`${API}/customers/${encodeURIComponent(customerId)}`).then(r => r.json());
+    if (d.error) throw new Error(d.error);
+    renderCustomerModal(d);
+  } catch (e) {
+    document.getElementById('cust-modal-body').innerHTML = `<div class="loading">Error: ${e.message}</div>`;
+  }
+}
+
+function closeCustModal(e) {
+  if (!e || e.target === document.getElementById('cust-modal')) {
+    document.getElementById('cust-modal').classList.remove('open');
+  }
+}
+
+function renderCustomerModal(d) {
+  document.getElementById('cust-modal-title').innerHTML = `👥 Customer <code style="font-size:13px">${escHtml(d.customer_id)}</code>`;
+  const range = (d.first_at && d.last_at)
+    ? `${formatPlain(d.first_at).split(',')[0]} → ${formatPlain(d.last_at).split(',')[0]}` : '—';
+  document.getElementById('cust-modal-meta').innerHTML =
+    `<span>📨 ${d.count} contact${d.count === 1 ? '' : 's'}</span><span>🗓 ${range}</span>`
+    + (d.avg_score != null ? `<span>⭐ avg ${d.avg_score}</span>` : '');
+  // topic chips
+  const chips = (d.topics || []).map(t =>
+    `<span style="background:#f3f4f6;color:#374151;font-size:11px;padding:2px 8px;border-radius:10px;margin:0 4px 4px 0;display:inline-block">${escHtml(t.name)} <b>${t.count}</b></span>`).join('');
+  document.getElementById('cust-modal-summary').innerHTML =
+    `<div style="padding:4px 0"><div style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Topics</div>${chips || '<span style="color:#9ca3af;font-size:12px">—</span>'}</div>`;
+  // timeline grouped by day (each conversation = a block)
+  const convs = d.conversations || [];
+  let body = '';
+  let lastDay = null;
+  for (const c of convs) {
+    const day = (c.created_at || '').slice(0, 10);
+    if (day !== lastDay) {
+      lastDay = day;
+      const dayLbl = c.created_at ? formatPlain(c.created_at).split(',')[0] : 'No date';
+      body += `<div style="font-size:11px;font-weight:700;color:#7c3aed;margin:12px 0 4px;text-transform:uppercase;letter-spacing:.04em">${dayLbl}</div>`;
+    }
+    const tag = (c.product_line && c.product_line !== 'NA' ? c.product_line : '') + (c.direction === 'outbound' ? ' ↗' : '');
+    const time = c.created_at ? (formatPlain(c.created_at).split(',')[1] || '').trim() : '';
+    body += `<div style="display:flex;align-items:center;gap:10px;padding:7px 8px;border-bottom:1px solid #f3f4f6;cursor:pointer" onclick="closeCustModal();openConv('${c.id}')">
+      <span style="color:#9ca3af;font-size:11px;width:60px;flex-shrink:0">${time}</span>
+      <span>${convTypeBadge(c.type)}</span>
+      <span style="flex:1;color:#1f2937;font-size:13px">${escHtml(c.topic_name || c.topic || '—')} <span style="color:#9ca3af;font-size:10px;font-weight:700">${escHtml(tag)}</span></span>
+      <span style="font-size:11px;color:#9ca3af">${escHtml(c.agent_name || '')}</span>
+      <span>${scorePill(c.avg_score)}</span>
+      <span style="color:#7c3aed;font-size:12px;white-space:nowrap">view →</span>
+    </div>`;
+  }
+  document.getElementById('cust-modal-body').innerHTML = body || '<div class="loading">No conversations.</div>';
+}
 
 async function loadKnowledge() {
   try {
@@ -1477,7 +1602,7 @@ function renderConvModal(c) {
     dur          ? `<span>⏱ ${dur}</span>` : '',
     c.created_at ? `<span>🕐 ${formatPlain(c.created_at)}</span>` : '',
     c.closed_at  ? `<span>🏁 ${formatPlain(c.closed_at)}</span>` : '',
-    c.customer_id ? `<span>🆔 Customer: <code style="font-size:11px">${escHtml(c.customer_id)}</code></span>` : '',
+    c.customer_id ? `<span>🆔 Customer: <code style="font-size:11px">${escHtml(c.customer_id)}</code> <a onclick="openCustomer('${c.customer_id}')" style="cursor:pointer;color:#7c3aed;font-weight:600;margin-left:4px">👥 all chats →</a></span>` : '',
     `<span style="color:#9ca3af">Task ID: <code style="font-size:11px">${escHtml(c.id)}</code></span>`,
   ].filter(Boolean).join('');
 

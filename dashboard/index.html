@@ -1621,7 +1621,7 @@ function renderConvModal(c) {
     dur          ? `<span>⏱ ${dur}</span>` : '',
     c.created_at ? `<span>🕐 ${formatPlain(c.created_at)}</span>` : '',
     c.closed_at  ? `<span>🏁 ${formatPlain(c.closed_at)}</span>` : '',
-    c.customer_id ? `<span>🆔 Customer: <code style="font-size:11px">${escHtml(c.customer_id)}</code> <a onclick="openCustomer('${c.customer_id}')" style="cursor:pointer;color:#7c3aed;font-weight:600;margin-left:4px">👥 all chats →</a></span>` : '',
+    c.customer_id ? `<span>🆔 Customer: <code style="font-size:11px">${escHtml(c.customer_id)}</code> <a onclick="closeConvModal();openCustomer('${c.customer_id}')" style="cursor:pointer;color:#7c3aed;font-weight:600;margin-left:4px">👥 all chats →</a></span>` : '',
     `<span style="color:#9ca3af">Task ID: <code style="font-size:11px">${escHtml(c.id)}</code></span>`,
   ].filter(Boolean).join('');
 

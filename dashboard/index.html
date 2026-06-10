@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScoreOPS Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #f5f6fa;
+      color: #1e1e2e;
+      font-family: -apple-system, 'Segoe UI', sans-serif;
+      font-size: 14px;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    header h1 { font-size: 18px; font-weight: 700; color: #6d28d9; }
+    header .sub { color: #9ca3af; font-size: 13px; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .badge-live {
+      background: #d1fae5; color: #065f46;
+      padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .badge-offline { background: #fee2e2; color: #991b1b; }
+    .refresh-btn {
+      background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd;
+      padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500;
+      transition: background .15s;
+    }
+    .refresh-btn:hover { background: #ddd6fe; }
+
+    /* ── Layout ── */
+    .container { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+
+    /* ── KPI row ── */
+    .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 28px; }
+    .kpi-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+    .kpi-val { font-size: 28px; font-weight: 700; margin-bottom: 4px; color: #1e1e2e; }
+    .kpi-lbl { font-size: 12px; color: #9ca3af; }
+    .c-green  { color: #059669; }
+    .c-yellow { color: #d97706; }
+    .c-red    { color: #dc2626; }
+    .c-purple { color: #7c3aed; }
+    .c-blue   { color: #2563eb; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
+    .tab {
+      padding: 9px 20px; cursor: pointer; font-size: 13px; color: #6b7280;
+      border-bottom: 2px solid transparent; margin-bottom: -2px; font-weight: 500;
+      transition: color .15s;
+    }
+    .tab:hover { color: #4b5563; }
+    .tab.active { color: #7c3aed; border-bottom-color: #7c3aed; font-weight: 600; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Section title ── */
+    .section-title { font-size: 15px; font-weight: 600; color: #374151; margin-bottom: 14px; }
+
+    /* ── Cards/tables ── */
+    .card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+      overflow: hidden; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+    /* Matrix card: horizontal scroll */
+    #matrix-wrap { overflow-x: auto; overflow-y: visible; }
+    table { width: max-content; border-collapse: collapse; }
+    th {
+      background: #f9fafb; color: #6b7280; font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .06em;
+      padding: 10px 16px; text-align: left; border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+    td { padding: 11px 16px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; white-space: nowrap; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+    th.col-avg, td.col-avg { border-left: 1px solid #e2e8f0; }
+    th.col-sessions, td.col-sessions { border-left: 1px solid #f1f5f9; }
+
+    /* ── Score pill ── */
+    .score-pill {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 46px; height: 24px; border-radius: 20px;
+      font-size: 12px; font-weight: 700; padding: 0 8px;
+    }
+    .score-high   { background: #d1fae5; color: #065f46; }
+    .score-mid    { background: #fef3c7; color: #92400e; }
+    .score-low    { background: #fee2e2; color: #991b1b; }
+    .score-none   { background: #f3f4f6; color: #9ca3af; border: 1px dashed #d1d5db; }
+
+    .count-badge {
+      background: #f3f4f6; color: #6b7280;
+      font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-left: 4px;
+    }
+    .agent-name { font-weight: 600; color: #374151; }
+    .empty-cell { color: #d1d5db; font-size: 12px; }
+    .time-text  { color: #9ca3af; font-size: 12px; white-space: nowrap; }
+    .scenario-chip {
+      display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 11px;
+      font-weight: 500; background: #ede9fe; color: #6d28d9; white-space: nowrap;
+    }
+
+    /* ── Session row clickable ── */
+    .session-row { cursor: pointer; }
+    .session-row:hover td { background: #f5f3ff !important; }
+
+    /* ── Viewed / last-opened conversation rows ── */
+    .conv-viewed td       { color: #9ca3af; }
+    .conv-viewed .agent-name { color: #9ca3af; }
+    .conv-viewed .conv-topic-main { color: #9ca3af !important; }
+    .conv-last td         { background: #fffbeb !important; }
+    .conv-last            { box-shadow: inset 4px 0 0 #f59e0b; }
+    .conv-last:hover td   { background: #fef3c7 !important; }
+    .read-chip {
+      display: inline-block; margin-left: 8px; font-size: 10px; font-weight: 600;
+      color: #6b7280; background: #f3f4f6; border-radius: 8px; padding: 1px 6px;
+    }
+    .here-chip {
+      display: inline-block; margin-left: 8px; font-size: 10px; font-weight: 700;
+      color: #92400e; background: #fde68a; border-radius: 8px; padding: 1px 6px;
+    }
+    .group-chip {
+      display: inline-block; margin-left: 8px; font-size: 10px; font-weight: 600;
+      color: #1e40af; background: #dbeafe; border-radius: 8px; padding: 1px 7px;
+    }
+    .conv-grouped td       { background: #f0f9ff; }
+    .conv-grouped:hover td { background: #e0f2fe !important; }
+    .conv-grouped          { box-shadow: inset 3px 0 0 #60a5fa; }
+    .conv-group-first td   { border-top: 2px solid #93c5fd; }
+    .conv-group-last  td   { border-bottom: 2px solid #93c5fd; }
+
+    /* Customer history block in conv modal */
+    .cust-history {
+      background: #fef9c3; border: 1px solid #fde68a; border-radius: 10px;
+      padding: 10px 14px;
+    }
+    .cust-history-header {
+      font-size: 12px; font-weight: 700; color: #92400e;
+      text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px;
+    }
+    .cust-history-list { display: flex; flex-direction: column; gap: 4px; }
+    .cust-hist-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 8px; background: #fff; border-radius: 6px;
+      cursor: pointer; transition: background .15s;
+    }
+    .cust-hist-item:hover { background: #fffbeb; }
+    .view-link {
+      color: #7c3aed; font-size: 11px; font-weight: 500;
+      text-decoration: none; opacity: 0;
+      transition: opacity .15s;
+    }
+    .session-row:hover .view-link { opacity: 1; }
+
+    /* ── Loading / empty ── */
+    .loading { padding: 40px; text-align: center; color: #9ca3af; }
+
+    /* ══════════════════════════════════════════
+       CHAT MODAL
+    ══════════════════════════════════════════ */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.35); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 16px; width: 720px; max-width: 95vw;
+      max-height: 90vh; display: flex; flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal-header {
+      padding: 18px 24px 14px; border-bottom: 1px solid #e2e8f0;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .modal-header-info { flex: 1; min-width: 0; }
+    .modal-title { font-size: 16px; font-weight: 700; color: #1e1e2e; margin-bottom: 4px; }
+    .modal-meta { font-size: 12px; color: #9ca3af; display: flex; flex-wrap: wrap; gap: 10px; }
+    .modal-close {
+      background: #f3f4f6; border: none; border-radius: 8px;
+      width: 30px; height: 30px; cursor: pointer; font-size: 16px; color: #6b7280;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .modal-close:hover { background: #e5e7eb; }
+    .copy-link-btn {
+      background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd;
+      border-radius: 8px; height: 30px; padding: 0 12px; cursor: pointer;
+      font-size: 12px; font-weight: 600; flex-shrink: 0; white-space: nowrap;
+      transition: background .15s;
+    }
+    .copy-link-btn:hover { background: #ddd6fe; }
+    .copy-link-btn.copied { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+    .modal-summary {
+      padding: 12px 24px; background: #f9fafb; border-bottom: 1px solid #e2e8f0;
+      display: flex; gap: 20px; flex-wrap: wrap;
+    }
+    .modal-stat { text-align: center; }
+    .modal-stat-val { font-size: 20px; font-weight: 700; }
+    .modal-stat-lbl { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+    /* Chat bubbles */
+    .chat-body {
+      flex: 1; overflow-y: auto; padding: 20px 24px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .turn-block { display: flex; flex-direction: column; gap: 8px; }
+    .turn-label {
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .06em; color: #9ca3af; margin-bottom: 2px;
+    }
+    .bubble-row { display: flex; gap: 10px; align-items: flex-start; }
+    .bubble-row.customer { flex-direction: row; }
+    .bubble-row.agent    { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      font-size: 13px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-weight: 700;
+    }
+    .avatar.customer { background: #ede9fe; color: #6d28d9; }
+    .avatar.agent    { background: #d1fae5; color: #065f46; }
+
+    .bubble {
+      max-width: 75%; padding: 10px 14px; border-radius: 14px;
+      font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+    }
+    .bubble.customer { background: #ede9fe; color: #1e1e2e; border-bottom-left-radius: 4px; }
+    .bubble.agent    { background: #f0fdf4; color: #1e1e2e; border-bottom-right-radius: 4px; }
+
+    /* English translation under each bubble (subtitle style) */
+    .bubble-en {
+      max-width: 75%; padding: 3px 14px 0; margin-top: 3px;
+      font-size: 11px; color: #9ca3af; line-height: 1.45;
+      font-style: italic; white-space: pre-wrap; word-break: break-word;
+    }
+    .bubble-en.empty { color: #d1d5db; font-style: normal; }
+    .bubble-en-wrap { display: flex; }
+    .bubble-en-wrap.customer { justify-content: flex-start; padding-left: 40px; }
+    .bubble-en-wrap.agent    { justify-content: flex-end;   padding-right: 40px; }
+
+    /* Evaluation card */
+    .eval-card {
+      background: #f9fafb; border: 1px solid #e2e8f0; border-radius: 10px;
+      padding: 10px 14px; font-size: 12px;
+      display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;
+    }
+    .eval-score-big {
+      font-size: 18px; font-weight: 700; flex-shrink: 0;
+    }
+    .eval-explanation { color: #4b5563; line-height: 1.5; flex: 1; min-width: 200px; }
+    .eval-breakdown { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .eval-tag {
+      background: #e0e7ff; color: #3730a3; padding: 2px 8px;
+      border-radius: 10px; font-size: 10px; font-weight: 500;
+    }
+    .eval-tag.crit { background: #fee2e2; color: #991b1b; }
+    .source-article {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #fef9c3; color: #713f12; border: 1px solid #fde68a;
+      border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 500;
+      margin-top: 6px;
+    }
+    .source-article-icon { font-size: 13px; }
+
+    /* ── Auth gate ── */
+    #auth-gate {
+      position: fixed; inset: 0; z-index: 5000;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #f5f6fa 0%, #ede9fe 100%);
+    }
+    .gate-card {
+      background: #fff; border-radius: 16px; padding: 40px 48px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.12);
+      text-align: center; max-width: 380px;
+    }
+    .gate-card h1 { font-size: 22px; color: #6d28d9; margin-bottom: 6px; }
+    .gate-card .gate-sub { color: #6b7280; font-size: 14px; margin-bottom: 22px; line-height: 1.5; }
+    .gate-card .gate-domains { color: #374151; font-size: 12px; margin-top: 18px; }
+    #g_signin_btn { display: flex; justify-content: center; }
+    .signout-btn {
+      background: transparent; color: #6b7280; border: 1px solid #e5e7eb;
+      padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;
+    }
+    .signout-btn:hover { background: #f3f4f6; color: #1f2937; }
+    .user-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; color: #6b7280;
+    }
+    .user-chip img { width: 22px; height: 22px; border-radius: 50%; }
+
+    /* ── Conv nav arrows (prev / next inside conv modal) ── */
+    .conv-nav-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,.95); border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 14px rgba(0,0,0,.15);
+      cursor: pointer; font-size: 20px; color: #6d28d9;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10; transition: background .15s, opacity .15s;
+    }
+    .conv-nav-btn:hover:not(:disabled) { background: #ede9fe; }
+    .conv-nav-btn:disabled { opacity: .25; cursor: not-allowed; }
+    .conv-nav-btn.prev { left: -22px; }
+    .conv-nav-btn.next { right: -22px; }
+    .conv-nav-counter {
+      position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,.55); color: #fff; padding: 3px 12px;
+      border-radius: 12px; font-size: 11px; font-weight: 600;
+      white-space: nowrap;
+    }
+  </style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<!-- Auth gate (shown while not authed) -->
+<div id="auth-gate" style="display:none">
+  <div class="gate-card">
+    <h1>🔍 ScoreOPS</h1>
+    <div class="gate-sub">QA Dashboard · Plata Bank PFAE</div>
+    <div class="gate-sub" style="margin-bottom:16px">Sign in with your corporate Google account</div>
+    <div id="g_signin_btn"></div>
+    <span id="gate-domains-list" style="display:none"></span>
+    <div id="gate-error" style="color:#dc2626;font-size:12px;margin-top:12px;display:none"></div>
+  </div>
+</div>
+
+<header>
+  <span style="font-size:22px">🔍</span>
+  <h1>ScoreOPS</h1>
+  <span class="sub">QA Dashboard · Plata Bank PFAE</span>
+  <div class="header-right">
+    <span class="badge-live" id="live-badge">● Live</span>
+    <button class="refresh-btn" onclick="switchTab('inbox')">↻ Refresh</button>
+    <span class="user-chip" id="user-chip" style="display:none"></span>
+    <button class="signout-btn" id="signout-btn" onclick="signOut()" style="display:none">Sign out</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="inbox"     onclick="switchTab('inbox')">📥 Real Inbox</div>
+    <div class="tab"        data-tab="knowledge" onclick="switchTab('knowledge')">🧠 Knowledge Base</div>
+    <div class="tab"        data-tab="topics"    onclick="switchTab('topics')">🏷 Topics</div>
+  </div>
+
+  <!-- Real Inbox -->
+  <div class="tab-panel active" id="tab-inbox">
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px">
+      <div class="kpi-card"><div class="kpi-val c-purple" id="inbox-total">—</div><div class="kpi-lbl">Total conversations</div></div>
+      <div class="kpi-card"><div class="kpi-val c-blue"   id="inbox-chats">—</div><div class="kpi-lbl">Chats</div></div>
+      <div class="kpi-card"><div class="kpi-val c-blue"   id="inbox-calls">—</div><div class="kpi-lbl">Calls</div></div>
+      <div class="kpi-card"><div class="kpi-val"          id="inbox-score">—</div><div class="kpi-lbl">Avg score</div></div>
+    </div>
+
+    <!-- Daily activity + top topics -->
+    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:20px;margin-bottom:24px">
+      <div class="card" style="padding:16px 20px">
+        <div class="section-title" style="margin-bottom:14px">Conversations per day</div>
+        <div id="inbox-daychart"><div class="loading">Loading...</div></div>
+      </div>
+      <div class="card" style="padding:16px 20px">
+        <div class="section-title" style="margin-bottom:14px">Top topics</div>
+        <div id="inbox-topics"><div class="loading">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- Nightly pull log -->
+    <div class="section-title" onclick="togglePullRuns()" style="cursor:pointer;user-select:none">
+      <span id="pull-runs-caret" style="color:#9ca3af;font-size:12px;margin-right:6px">▸</span>Nightly chat pulls (Snowflake → Inbox)
+    </div>
+    <div class="card" id="pull-runs-wrap" style="margin-bottom:24px;display:none"><div class="loading">Loading...</div></div>
+
+    <!-- Conversation list -->
+    <div class="section-title">Real conversations — click a row to view transcript</div>
+    <div class="card" id="inbox-wrap"><div class="loading">Loading...</div></div>
+  </div>
+
+  <!-- Knowledge Base / Parser -->
+  <div class="tab-panel" id="tab-knowledge">
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px">
+      <div class="kpi-card"><div class="kpi-val c-purple" id="kb-docs">—</div><div class="kpi-lbl">Active documents</div></div>
+      <div class="kpi-card"><div class="kpi-val"          id="kb-last-status">—</div><div class="kpi-lbl">Last crawl</div></div>
+      <div class="kpi-card"><div class="kpi-val c-blue"   id="kb-last-chars">—</div><div class="kpi-lbl">Characters</div></div>
+      <div class="kpi-card"><div class="kpi-val c-blue"   id="kb-last-tables">—</div><div class="kpi-lbl">Tables</div></div>
+    </div>
+
+    <!-- Run history -->
+    <div class="section-title">Crawl history — click a row to see changes</div>
+    <div class="card" id="kb-runs-wrap" style="margin-bottom:24px"><div class="loading">Loading...</div></div>
+
+    <!-- Documents list -->
+    <div class="section-title">Documents in the knowledge base</div>
+    <div class="card" id="kb-docs-wrap"><div class="loading">Loading...</div></div>
+  </div>
+
+  <!-- Topics: bank + trends + emerging suggestions -->
+  <div class="tab-panel" id="tab-topics">
+    <!-- Trends -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="section-title" style="margin:0">Topic trends</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div style="display:flex;gap:6px;margin-right:10px">
+          <button class="tp-mode" data-m="topic" onclick="setTrendMode('topic')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Topics</button>
+          <button class="tp-mode" data-m="group" onclick="setTrendMode('group')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Groups</button>
+        </div>
+        <label style="font-size:11px;color:#6b7280;display:flex;align-items:center;gap:4px;margin-right:8px">
+          <input type="checkbox" id="topic-exclude-out" onchange="loadTopicTrends()"> exclude outbound
+        </label>
+        <button class="tp-period" data-p="day"   onclick="setTopicPeriod('day')"   style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Day</button>
+        <button class="tp-period" data-p="week"  onclick="setTopicPeriod('week')"  style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Week</button>
+        <button class="tp-period" data-p="month" onclick="setTopicPeriod('month')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Month</button>
+      </div>
+    </div>
+    <div class="card" id="topic-trends" style="padding:16px 20px;margin-bottom:24px"><div class="loading">Loading...</div></div>
+
+    <!-- Emerging topic suggestions -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="section-title" style="margin:0">Emerging topic suggestions</div>
+      <button onclick="detectEmerging()" style="cursor:pointer;border:1px solid #7c3aed;color:#7c3aed;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">🔍 Detect now</button>
+    </div>
+    <div class="card" id="topic-suggestions" style="padding:12px 20px;margin-bottom:24px"><div class="loading">Loading...</div></div>
+
+    <!-- Topic bank -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="section-title" style="margin:0">Topic bank</div>
+      <button onclick="addTopic()" style="cursor:pointer;border:1px solid #16a34a;color:#16a34a;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">+ Add topic</button>
+    </div>
+    <div class="card" id="topic-bank"><div class="loading">Loading...</div></div>
+  </div>
+
+</div>
+
+<!-- ══════════ Conversation Modal (real inbox) ══════════ -->
+<div class="modal-overlay" id="conv-modal" onclick="closeConvModal(event)">
+  <div class="modal" onclick="event.stopPropagation()" style="width:760px;position:relative">
+    <button class="conv-nav-btn prev" id="conv-nav-prev" onclick="navigateConv(-1)" title="Previous (←)">‹</button>
+    <button class="conv-nav-btn next" id="conv-nav-next" onclick="navigateConv(1)" title="Next (→)">›</button>
+    <span class="conv-nav-counter" id="conv-nav-counter"></span>
+    <div class="modal-header">
+      <div class="modal-header-info">
+        <div class="modal-title" id="conv-modal-title">Conversation</div>
+        <div class="modal-meta" id="conv-modal-meta"></div>
+      </div>
+      <button class="copy-link-btn" id="conv-copy-link" onclick="copyShareLink('conv')">🔗 Copy link</button>
+      <button class="modal-close" onclick="closeConvModal()">✕</button>
+    </div>
+    <div class="modal-summary" id="conv-modal-summary"></div>
+    <div id="conv-topic-editor" style="padding:10px 24px;border-bottom:1px solid #eef0f4"></div>
+    <div class="chat-body" id="conv-chat-body"><div class="loading">Loading transcript...</div></div>
+  </div>
+</div>
+
+<script>
+// Dashboard is served by the same FastAPI server — use relative URLs
+// Works both on localhost:8000 and on Railway automatically
+const API = '';
+
+// ══════════════════════════════════════════
+//  AUTH: Google Sign-In + corp-domain gate
+// ══════════════════════════════════════════
+const TOKEN_KEY = 'scoreops_id_token';
+const USER_KEY  = 'scoreops_user';
+let AUTH_CONFIG = null;
+
+function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
+function clearToken() { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY); }
+
+function getStoredUser() {
+  try { return JSON.parse(localStorage.getItem(USER_KEY) || 'null'); } catch { return null; }
+}
+
+function jwtDecode(token) {
+  try {
+    const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(decodeURIComponent(escape(atob(part))));
+  } catch { return null; }
+}
+
+function showGate(errMsg) {
+  document.getElementById('auth-gate').style.display = 'flex';
+  document.querySelector('header').style.visibility = 'hidden';
+  document.querySelector('.container').style.visibility = 'hidden';
+  const errEl = document.getElementById('gate-error');
+  if (errMsg) { errEl.textContent = errMsg; errEl.style.display = 'block'; }
+  else        { errEl.style.display = 'none'; }
+}
+
+function hideGate() {
+  document.getElementById('auth-gate').style.display = 'none';
+  document.querySelector('header').style.visibility = 'visible';
+  document.querySelector('.container').style.visibility = 'visible';
+  const u = getStoredUser();
+  if (u) {
+    const chip = document.getElementById('user-chip');
+    chip.innerHTML = (u.picture ? `<img src="${u.picture}" alt="">` : '') + `<span>${u.email}</span>`;
+    chip.style.display = 'inline-flex';
+    document.getElementById('signout-btn').style.display = '';
+  }
+}
+
+function signOut() {
+  clearToken();
+  if (window.google && google.accounts && google.accounts.id) {
+    try { google.accounts.id.disableAutoSelect(); } catch {}
+  }
+  location.reload();
+}
+
+window.handleGoogleSignIn = function(response) {
+  const token = response.credential;
+  const claims = jwtDecode(token);
+  if (!claims) { showGate('Invalid token from Google'); return; }
+  const domain = (claims.email || '').split('@')[1];
+  if (AUTH_CONFIG && AUTH_CONFIG.auth_enabled !== false && !AUTH_CONFIG.allowed_domains.includes(domain)) {
+    showGate(`Access denied — @${domain} not allowed. Use: ${AUTH_CONFIG.allowed_domains.map(d=>'@'+d).join(', ')}`);
+    return;
+  }
+  setToken(token);
+  localStorage.setItem(USER_KEY, JSON.stringify({
+    email: claims.email, name: claims.name, picture: claims.picture, hd: claims.hd,
+  }));
+  hideGate();
+  bootApp();
+};
+
+async function fetchAuthConfig() {
+  try {
+    const r = await origFetch(`${API}/auth-config`);
+    AUTH_CONFIG = await r.json();
+  } catch {
+    AUTH_CONFIG = { google_client_id: '', allowed_domains: [], auth_enabled: false };
+  }
+  document.getElementById('gate-domains-list').textContent =
+    (AUTH_CONFIG.allowed_domains || []).map(d => '@'+d).join(', ');
+}
+
+function renderGoogleButton() {
+  if (!window.google || !google.accounts || !AUTH_CONFIG || !AUTH_CONFIG.google_client_id) {
+    return setTimeout(renderGoogleButton, 200);
+  }
+  google.accounts.id.initialize({
+    client_id: AUTH_CONFIG.google_client_id,
+    callback:  window.handleGoogleSignIn,
+    auto_select: true,
+  });
+  google.accounts.id.renderButton(document.getElementById('g_signin_btn'), {
+    theme: 'outline', size: 'large', text: 'signin_with', width: 280,
+  });
+  google.accounts.id.prompt();
+}
+
+// Wrap fetch to inject Authorization header on our API calls + handle 401
+const origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  opts = opts || {};
+  if (typeof url === 'string' && !/^https?:\/\//.test(url)) {
+    const t = getToken();
+    if (t) opts.headers = Object.assign({}, opts.headers || {}, { 'Authorization': 'Bearer ' + t });
+  }
+  return origFetch(url, opts).then(r => {
+    if (r.status === 401 && typeof url === 'string' && !/^https?:\/\//.test(url)) {
+      clearToken();
+      showGate('Your session expired. Please sign in again.');
+      renderGoogleButton();
+    }
+    return r;
+  });
+};
+
+let _appBooted = false;
+function bootApp() {
+  if (_appBooted) return;
+  _appBooted = true;
+  switchTab('inbox');
+  openFromHash();
+  window.addEventListener('hashchange', () => { if (location.hash) openFromHash(); });
+}
+
+(async function init() {
+  await fetchAuthConfig();
+  // Если бэкенд сообщает что auth выключен — бутим без логина (защита от полной поломки)
+  if (AUTH_CONFIG && AUTH_CONFIG.auth_enabled === false) {
+    hideGate();
+    bootApp();
+    return;
+  }
+  if (getToken()) {
+    hideGate();
+    bootApp();
+  } else {
+    showGate();
+    renderGoogleButton();
+  }
+})();
+
+// ── Deep-link / share state ──
+let openConvId    = null;   // id текущего открытого реального обращения
+
+function copyShareLink(type) {
+  const id = openConvId;
+  if (!id) return;
+  const url = `${location.origin}${location.pathname}#${type}/${id}`;
+  const btn = document.getElementById('conv-copy-link');
+  navigator.clipboard.writeText(url).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '🔗 Copy link'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {
+    // Фоллбэк: показать prompt с URL
+    prompt('Copy this link:', url);
+  });
+}
+
+// Открыть модалку по хэшу в URL (#conv/<id>)
+function openFromHash() {
+  const h = location.hash.replace(/^#/, '');
+  const m = h.match(/^(conv)\/(.+)$/);
+  if (!m) return;
+  openConv(m[2], true);
+}
+
+const SCENARIO_LABELS = {
+  rechazado:                  '🚫 Rejected',
+  dudas_planes:               '📋 Plan questions',
+  primer_banco_digital:       '🏦 First digital bank',
+  congelar_tarjeta:           '🔒 Card freeze',
+  cambio_plan:                '🔄 Plan change',
+  limites_depositos:          '💰 Deposit limits',
+  comisiones_tarifas:         '💸 Fees & pricing',
+  apartado_impuestos:         '🧾 Tax reserve',
+  cierre_sesion_dispositivos: '📱 Device sign-out',
+  solicitud_en_revision:      '🕐 Application review',
+  facturacion_cfdi:           '🧾 CFDI invoicing',
+};
+
+/* ── Helpers ── */
+
+function scorePill(val) {
+  if (val == null) return `<span class="score-pill score-none">—</span>`;
+  const cls = val >= 7 ? 'score-high' : val >= 4 ? 'score-mid' : 'score-low';
+  return `<span class="score-pill ${cls}">${parseFloat(val).toFixed(1)}</span>`;
+}
+
+function scoreColor(val) {
+  if (val == null) return '';
+  return val >= 7 ? 'c-green' : val >= 4 ? 'c-yellow' : 'c-red';
+}
+
+const MX_TZ = 'America/Mexico_City';
+
+// Normalize ISO string to UTC (append Z if no timezone info)
+function toUTC(iso) {
+  if (!iso) return null;
+  // If no Z or +/- offset, treat as UTC
+  return iso.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(iso) ? new Date(iso) : new Date(iso + 'Z');
+}
+
+function formatMX(iso, opts = {}) {
+  const d = toUTC(iso);
+  if (!d) return '—';
+  return d.toLocaleString('en-US', { timeZone: MX_TZ, ...opts });
+}
+
+function formatDateTimeMX(iso) {
+  const d = toUTC(iso);
+  if (!d) return '—';
+  return d.toLocaleString('en-US', {
+    timeZone: MX_TZ,
+    month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+    hour12: false,
+  });
+}
+
+// Для импортированных обращений — время уже в локальном MX, показываем как есть (без сдвига)
+function formatPlain(iso) {
+  if (!iso) return '—';
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+  if (!m) return iso;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[+m[2]-1]} ${+m[3]} at ${m[4]}:${m[5]}`;
+}
+
+function timeAgo(iso) {
+  const d = toUTC(iso);
+  if (!d) return '—';
+  const diff = (Date.now() - d.getTime()) / 1000;
+  if (diff < 60)    return `${Math.round(diff)}s ago`;
+  if (diff < 3600)  return `${Math.round(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.round(diff/3600)}h ago`;
+  return formatDateTimeMX(iso);
+}
+
+/* ── Tabs ── */
+
+let inboxTabInited = false;
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-'+name));
+  if (name === 'inbox' && !inboxTabInited) {
+    inboxTabInited = true;
+    loadInbox();
+  }
+  if (name === 'knowledge' && !knowledgeTabInited) {
+    knowledgeTabInited = true;
+    loadKnowledge();
+  }
+  if (name === 'topics' && !topicsTabInited) {
+    topicsTabInited = true;
+    loadTopicsTab();
+  }
+}
+
+let knowledgeTabInited = false;
+let topicsTabInited = false;
+
+async function loadKnowledge() {
+  try {
+    const [runsData, docsData] = await Promise.all([
+      fetch(`${API}/admin/crawl-runs?limit=30`).then(r => r.json()),
+      fetch(`${API}/admin/kb-documents`).then(r => r.json()),
+    ]);
+
+    document.getElementById('kb-docs').textContent = runsData.docs_active ?? '—';
+    const last = (runsData.runs || [])[0];
+    if (last) {
+      const map = { success: '✅ OK', partial: '⚠️ Partial', failed: '❌ Failed', running: '⏳ Running' };
+      document.getElementById('kb-last-status').textContent = map[last.status] || last.status;
+      document.getElementById('kb-last-chars').textContent = (last.chars_total || 0).toLocaleString();
+      document.getElementById('kb-last-tables').textContent = last.tables_total ?? '—';
+    }
+
+    // Run history
+    const runs = runsData.runs || [];
+    let rh = '';
+    if (!runs.length) {
+      rh = '<div class="loading">No crawls yet.</div>';
+    } else {
+      rh = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="text-align:left;color:#6b7280;border-bottom:1px solid #e5e7eb">
+          <th style="padding:8px 10px">Date</th><th>Status</th><th>Pages</th>
+          <th>+ new</th><th>~ changed</th><th>- removed</th><th>Characters</th>
+        </tr></thead><tbody>`;
+      for (const r of runs) {
+        const badge = { success: '#16a34a', partial: '#d97706', failed: '#dc2626', running: '#6b7280' }[r.status] || '#6b7280';
+        const dt = r.started_at ? new Date(r.started_at).toLocaleString() : '—';
+        rh += `<tr style="border-bottom:1px solid #f1f1f4;cursor:pointer" onclick="toggleRunChanges(${r.id})">
+          <td style="padding:8px 10px">${dt}</td>
+          <td><span style="color:${badge};font-weight:600">${r.status}</span></td>
+          <td>${r.pages_total ?? 0}</td>
+          <td style="color:#16a34a">${r.pages_added ?? 0}</td>
+          <td style="color:#d97706">${r.pages_updated ?? 0}</td>
+          <td style="color:#dc2626">${r.pages_removed ?? 0}</td>
+          <td>${(r.chars_total || 0).toLocaleString()}</td>
+        </tr>
+        <tr id="run-changes-${r.id}" style="display:none"><td colspan="7" style="padding:6px 14px;background:#fafafa;font-size:12px;color:#374151">
+          ${r.error_text ? `<div style="color:#b45309;margin-bottom:6px">${r.error_text}</div>` : ''}
+          ${(r.changes && r.changes.length)
+            ? r.changes.map(c => `<div>${c.change}: <span style="color:#6b7280">${c.url}</span></div>`).join('')
+            : '<div style="color:#9ca3af">No changes</div>'}
+        </td></tr>`;
+      }
+      rh += '</tbody></table>';
+    }
+    document.getElementById('kb-runs-wrap').innerHTML = rh;
+
+    // Documents
+    const docs = docsData.documents || [];
+    let dh = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="text-align:left;color:#6b7280;border-bottom:1px solid #e5e7eb">
+        <th style="padding:8px 10px">Document</th><th>Characters</th><th>Updated</th><th>Status</th>
+      </tr></thead><tbody>`;
+    for (const d of docs) {
+      const removed = !!d.removed_at;
+      dh += `<tr style="border-bottom:1px solid #f1f1f4;${removed ? 'opacity:.5' : ''}">
+        <td style="padding:8px 10px"><a href="${d.url}" target="_blank" style="color:#7c3aed;text-decoration:none">${d.title || d.slug}</a></td>
+        <td>${(d.chars || 0).toLocaleString()}</td>
+        <td>${d.updated_at ? new Date(d.updated_at).toLocaleDateString() : '—'}</td>
+        <td>${removed ? '<span style="color:#dc2626">removed</span>' : '<span style="color:#16a34a">active</span>'}</td>
+      </tr>`;
+    }
+    dh += '</tbody></table>';
+    document.getElementById('kb-docs-wrap').innerHTML = dh;
+  } catch (e) {
+    document.getElementById('kb-runs-wrap').innerHTML = `<div class="loading">Error: ${e.message}</div>`;
+  }
+}
+
+function toggleRunChanges(id) {
+  const row = document.getElementById('run-changes-' + id);
+  if (row) row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Keyboard: Escape closes modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeConvModal(); }
+});
+
+// ══════════════════════════════════════════
+//  REAL INBOX TAB
+// ══════════════════════════════════════════
+
+// ── Viewed-state: помним какие обращения уже открывали ──
+let viewedConvs = new Set();
+let lastViewedConv = null;
+try {
+  viewedConvs = new Set(JSON.parse(localStorage.getItem('scoreops_viewed_convs') || '[]'));
+  lastViewedConv = localStorage.getItem('scoreops_last_conv') || null;
+} catch (e) {}
+
+function markConvViewed(id) {
+  viewedConvs.add(id);
+  lastViewedConv = id;
+  try {
+    localStorage.setItem('scoreops_viewed_convs', JSON.stringify([...viewedConvs]));
+    localStorage.setItem('scoreops_last_conv', id);
+  } catch (e) {}
+}
+
+let _lastConvList = [];   // кэш для перерисовки списка без повторного fetch
+
+async function loadInbox() {
+  try {
+    const [list, stats] = await Promise.all([
+      fetch(`${API}/conversations?limit=500`).then(r => r.json()),
+      fetch(`${API}/conversations/stats`).then(r => r.json()),
+      ensureTopics(),
+    ]);
+    renderInboxStats(stats);
+    renderConversations(list);
+  } catch (e) {
+    document.getElementById('inbox-wrap').innerHTML = `<div class="loading">⚠️ Could not load: ${e.message}</div>`;
+  }
+  loadPullRuns();
+}
+
+function togglePullRuns() {
+  const wrap = document.getElementById('pull-runs-wrap');
+  const caret = document.getElementById('pull-runs-caret');
+  const hidden = wrap.style.display === 'none';
+  wrap.style.display = hidden ? 'block' : 'none';
+  if (caret) caret.textContent = hidden ? '▾' : '▸';
+}
+
+async function loadPullRuns() {
+  const wrap = document.getElementById('pull-runs-wrap');
+  if (!wrap) return;
+  try {
+    const data = await fetch(`${API}/admin/pull-runs?limit=30`).then(r => r.json());
+    const runs = data.runs || [];
+    if (!runs.length) {
+      wrap.innerHTML = '<div class="loading">No pulls yet. The job runs nightly at 05:00 (Mexico City).</div>';
+      return;
+    }
+    const badge = { success: '#16a34a', partial: '#d97706', failed: '#dc2626', no_data: '#6b7280' };
+    let h = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="text-align:left;color:#6b7280;border-bottom:1px solid #e5e7eb">
+        <th style="padding:8px 10px">Run at</th><th>Day(s)</th><th>Status</th>
+        <th>Exported</th><th>+ new</th><th>Dups</th><th>Scored</th><th>Pending</th><th>Src</th>
+      </tr></thead><tbody>`;
+    for (const r of runs) {
+      const dt = r.started_at ? new Date(r.started_at).toLocaleString() : '—';
+      const range = r.date_from ? (r.date_to && r.date_to !== r.date_from ? `${r.date_from} → ${r.date_to}` : r.date_from) : '—';
+      const col = badge[r.status] || '#6b7280';
+      h += `<tr style="border-bottom:1px solid #f1f1f4"${r.error_text ? ` title="${(r.error_text+'').replace(/"/g,'&quot;')}"` : ''}>
+        <td style="padding:8px 10px">${dt}</td>
+        <td style="color:#6b7280">${range}</td>
+        <td><span style="color:${col};font-weight:600">${r.status}</span></td>
+        <td>${r.rows_exported ?? 0}</td>
+        <td style="color:#16a34a">${r.imported ?? 0}</td>
+        <td style="color:#9ca3af">${r.skipped_duplicates ?? 0}</td>
+        <td style="color:#2563eb">${r.processed ?? 0}</td>
+        <td style="color:${(r.remaining|0) > 0 ? '#d97706' : '#9ca3af'}">${r.remaining ?? 0}</td>
+        <td style="color:#9ca3af;font-size:11px">${r.source || ''}</td>
+      </tr>`;
+      if (r.error_text) {
+        h += `<tr><td colspan="9" style="padding:4px 14px;background:#fef2f2;color:#b91c1c;font-size:12px">${(r.error_text+'').slice(0,300)}</td></tr>`;
+      }
+    }
+    h += '</tbody></table>';
+    wrap.innerHTML = h;
+  } catch (e) {
+    wrap.innerHTML = `<div class="loading">⚠️ Could not load pull log: ${e.message}</div>`;
+  }
+}
+
+function renderInboxStats(s) {
+  document.getElementById('inbox-total').textContent = s.total ?? '—';
+  document.getElementById('inbox-chats').textContent = s.total_chat ?? '—';
+  document.getElementById('inbox-calls').textContent = s.total_call ?? '—';
+  const sc = document.getElementById('inbox-score');
+  sc.textContent = s.avg_score != null ? s.avg_score.toFixed(1) + '/10' : '—';
+  sc.className = 'kpi-val ' + (s.avg_score != null ? scoreColor(s.avg_score) : '');
+
+  // Day chart — horizontal bars
+  const days = s.by_day || [];
+  if (!days.length) {
+    document.getElementById('inbox-daychart').innerHTML = '<div class="loading" style="padding:16px">No data yet</div>';
+  } else {
+    const max = Math.max(...days.map(d => d.total), 1);
+    let html = '';
+    for (const d of days) {
+      const chatW = (d.chat / max) * 100;
+      const callW = (d.call / max) * 100;
+      html += `
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+          <div style="width:54px;font-size:11px;color:#6b7280;flex-shrink:0">${d.date.slice(5)}</div>
+          <div style="flex:1;display:flex;height:18px;border-radius:4px;overflow:hidden;background:#f3f4f6">
+            <div style="width:${chatW}%;background:#a78bfa" title="${d.chat} chats"></div>
+            <div style="width:${callW}%;background:#60a5fa" title="${d.call} calls"></div>
+          </div>
+          <div style="width:150px;flex-shrink:0;display:flex;justify-content:flex-end;gap:10px;font-size:12px">
+            <span style="color:#7c3aed;font-weight:600">💬 ${d.chat}</span>
+            <span style="color:#2563eb;font-weight:600">📞 ${d.call}</span>
+            <span style="color:#374151;font-weight:700;width:36px;text-align:right">${d.total}</span>
+          </div>
+        </div>`;
+    }
+    html += `<div style="display:flex;gap:14px;margin-top:10px;font-size:11px;color:#9ca3af">
+      <span><span style="display:inline-block;width:9px;height:9px;background:#a78bfa;border-radius:2px"></span> Chats</span>
+      <span><span style="display:inline-block;width:9px;height:9px;background:#60a5fa;border-radius:2px"></span> Calls</span>
+    </div>`;
+    document.getElementById('inbox-daychart').innerHTML = html;
+  }
+
+  // Top topics
+  const topics = s.top_topics || [];
+  if (!topics.length) {
+    document.getElementById('inbox-topics').innerHTML = '<div class="loading" style="padding:16px">No topics yet — process conversations first</div>';
+  } else {
+    const max = Math.max(...topics.map(t => t.count), 1);
+    let html = '';
+    for (const t of topics) {
+      const w = (t.count / max) * 100;
+      html += `
+        <div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px">
+            <span style="color:#374151">${escHtml(t.topic)}</span>
+            <span style="color:#9ca3af;font-weight:600">${t.count}</span>
+          </div>
+          <div style="height:6px;background:#f3f4f6;border-radius:3px">
+            <div style="width:${w}%;height:100%;background:#c4b5fd;border-radius:3px"></div>
+          </div>
+        </div>`;
+    }
+    document.getElementById('inbox-topics').innerHTML = html;
+  }
+}
+
+function convTypeBadge(type) {
+  return type === 'call'
+    ? '<span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">📞 Call</span>'
+    : '<span style="background:#ede9fe;color:#6d28d9;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">💬 Chat</span>';
+}
+
+function renderConversations(list) {
+  if (list) _lastConvList = list;
+  list = _lastConvList;
+  if (!list || !list.length) {
+    document.getElementById('inbox-wrap').innerHTML = '<div class="loading">No conversations imported yet.</div>';
+    return;
+  }
+
+  // Размер групп same-customer-same-day для бейджа
+  const dayOf  = (c) => (c.created_at || '').slice(0, 10);
+  const keyOf  = (c) => `${dayOf(c)}|${c.customer_id || '_'}`;
+  const groupSize = {};
+  for (const c of list) {
+    if (!c.customer_id || !c.created_at) continue;
+    const k = keyOf(c);
+    groupSize[k] = (groupSize[k] || 0) + 1;
+  }
+
+  // Сортировка: дни DESC, внутри дня одинаковые customer_id подряд, внутри клиента — по времени ASC
+  const sortedList = [...list].sort((a, b) => {
+    const dayCmp = dayOf(b).localeCompare(dayOf(a));
+    if (dayCmp !== 0) return dayCmp;
+    // Группы (>=2) идут раньше одиночек, чтобы повторы были на виду
+    const sizeA = groupSize[keyOf(a)] || 1;
+    const sizeB = groupSize[keyOf(b)] || 1;
+    if (sizeA !== sizeB) return sizeB - sizeA;
+    const custCmp = (a.customer_id || '').localeCompare(b.customer_id || '');
+    if (custCmp !== 0) return (b.created_at || '').localeCompare(a.created_at || '');
+    return (a.created_at || '').localeCompare(b.created_at || '');
+  });
+
+  let html = `<table style="width:100%"><thead><tr>
+    <th>Date (MX)</th><th>Type</th><th>Topic</th><th>Agent</th><th>Score</th><th>Status</th><th></th>
+  </tr></thead><tbody>`;
+
+  const seenInGroup = {};
+  for (const c of sortedList) {
+    const isViewed = viewedConvs.has(c.id);
+    const isLast   = lastViewedConv === c.id;
+    const k = keyOf(c);
+    const total = groupSize[k] || 1;
+    const idx = (seenInGroup[k] = (seenInGroup[k] || 0) + 1);
+    const inGroup = total > 1;
+
+    const topicMain = c.topic
+      ? `<span class="conv-topic-main">${escHtml(c.topic)}</span>`
+      : '<span class="empty-cell">—</span>';
+    const topicSub = c.topic_es ? `<br><span style="color:#9ca3af;font-size:11px">${escHtml(c.topic_es)}</span>` : '';
+    const tagBadges = topicTagBadges(c);
+
+    const markers = [];
+    if (inGroup) markers.push(`<span class="group-chip">🔁 ${idx}/${total} same customer today</span>`);
+    if (isLast)        markers.push('<span class="here-chip">← you were here</span>');
+    else if (isViewed) markers.push('<span class="read-chip">✓ read</span>');
+    const markerHtml = markers.length ? ' ' + markers.join(' ') : '';
+
+    const agent = c.agent_name || '<span style="color:#d1d5db">unknown</span>';
+    const statusPill = c.status === 'done'
+      ? '<span style="color:#059669;font-size:12px">✓ done</span>'
+      : c.status === 'failed'
+        ? '<span style="color:#dc2626;font-size:12px">✕ failed</span>'
+        : '<span style="color:#d97706;font-size:12px">⏳ pending</span>';
+
+    let rowCls = 'session-row';
+    if (isViewed) rowCls += ' conv-viewed';
+    if (isLast)   rowCls += ' conv-last';
+    if (inGroup) {
+      rowCls += ' conv-grouped';
+      if (idx === 1)     rowCls += ' conv-group-first';
+      if (idx === total) rowCls += ' conv-group-last';
+    }
+
+    html += `<tr class="${rowCls}" onclick="openConv('${c.id}')">
+      <td class="time-text">${formatPlain(c.created_at)}</td>
+      <td>${convTypeBadge(c.type)}</td>
+      <td>${topicMain}${tagBadges}${markerHtml}${topicSub}</td>
+      <td><span class="agent-name">${agent}</span></td>
+      <td>${scorePill(c.avg_score)}</td>
+      <td>${statusPill}</td>
+      <td><span class="view-link">View →</span></td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('inbox-wrap').innerHTML = html;
+}
+
+/* ── Conversation modal ── */
+
+async function openConv(convId, fromHash) {
+  document.getElementById('conv-modal').classList.add('open');
+  openConvId = convId;
+  if (!fromHash) location.hash = `conv/${convId}`;
+  markConvViewed(convId);
+  renderConversations();              // обновляем подсветку строк в списке за модалкой
+  updateConvNav();                    // стрелки prev/next
+  document.getElementById('conv-chat-body').innerHTML = '<div class="loading">Loading transcript...</div>';
+  document.getElementById('conv-modal-title').textContent = 'Conversation';
+  document.getElementById('conv-modal-meta').innerHTML = '';
+  document.getElementById('conv-modal-summary').innerHTML = '';
+  document.getElementById('conv-topic-editor').innerHTML = '';
+  try {
+    await ensureTopics();
+    const data = await fetch(`${API}/conversations/${convId}`).then(r => r.json());
+    if (data.error) throw new Error(data.error);
+    renderConvModal(data);
+  } catch (e) {
+    document.getElementById('conv-chat-body').innerHTML = `<div class="loading">Error: ${e.message}</div>`;
+  }
+}
+
+function closeConvModal(e) {
+  if (!e || e.target === document.getElementById('conv-modal')) {
+    document.getElementById('conv-modal').classList.remove('open');
+    openConvId = null;
+    if (location.hash.startsWith('#conv/')) history.replaceState(null, '', location.pathname);
+  }
+}
+
+// Навигация по списку обращений: prev / next
+function updateConvNav() {
+  const list = _lastConvList || [];
+  const idx = list.findIndex(c => c.id === openConvId);
+  const prevBtn = document.getElementById('conv-nav-prev');
+  const nextBtn = document.getElementById('conv-nav-next');
+  const counter = document.getElementById('conv-nav-counter');
+  if (idx < 0 || !list.length) {
+    prevBtn.disabled = true; nextBtn.disabled = true;
+    counter.textContent = '';
+    return;
+  }
+  prevBtn.disabled = (idx <= 0);
+  nextBtn.disabled = (idx >= list.length - 1);
+  counter.textContent = `${idx + 1} / ${list.length}`;
+}
+
+function navigateConv(delta) {
+  const list = _lastConvList || [];
+  const idx = list.findIndex(c => c.id === openConvId);
+  if (idx < 0) return;
+  const next = list[idx + delta];
+  if (next) openConv(next.id);
+}
+
+// Keyboard: ← / → for prev/next when conv modal is open
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('conv-modal').classList.contains('open')) return;
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); navigateConv(-1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); navigateConv(1); }
+});
+
+// ── Topic dictionary (cached) + per-conversation topic editor ──
+let TOPICS = null;
+async function ensureTopics(force) {
+  if (TOPICS && !force) return TOPICS;
+  try { TOPICS = await fetch(`${API}/topics`).then(r => r.json()); }
+  catch (e) { TOPICS = []; }
+  return TOPICS;
+}
+
+const SOURCE_BADGE = {
+  human: '<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px">✓ human</span>',
+  llm:   '<span style="background:#ede9fe;color:#6d28d9;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px">AI</span>',
+  seed:  '<span style="background:#e0f2fe;color:#0369a1;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px">seed</span>',
+};
+
+function topicTagBadges(c) {
+  const b = [];
+  if (c.product_line && c.product_line !== 'NA') {
+    const col = c.product_line === 'PM' ? '#0369a1' : '#7c3aed';
+    b.push(`<span style="background:#f3f4f6;color:${col};font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px">${escHtml(c.product_line)}</span>`);
+  }
+  if (c.direction === 'outbound')
+    b.push(`<span style="background:#fef3c7;color:#92400e;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:4px">↗ out</span>`);
+  if (c.topic_source === 'human')
+    b.push(`<span title="set by human" style="color:#16a34a;font-size:10px;margin-left:4px">✓</span>`);
+  return b.join('');
+}
+
+function renderTopicEditor(c) {
+  const el = document.getElementById('conv-topic-editor');
+  if (!el) return;
+  const topics = TOPICS || [];
+  // group by category for optgroups
+  const byCat = {};
+  for (const t of topics) (byCat[t.category || '—'] = byCat[t.category || '—'] || []).push(t);
+  let opts = '<option value="">— select topic —</option>';
+  for (const [cat, list] of Object.entries(byCat)) {
+    opts += `<optgroup label="${escHtml(cat)}">`;
+    for (const t of list) opts += `<option value="${t.slug}" ${t.slug === c.topic_slug ? 'selected' : ''}>${escHtml(t.name_en)}</option>`;
+    opts += '</optgroup>';
+  }
+  const prodSel = ['', 'PFAE', 'PM', 'NA'].map(v => `<option value="${v}" ${v === (c.product_line||'') ? 'selected' : ''}>${v || '—'}</option>`).join('');
+  const dirSel = ['', 'inbound', 'outbound'].map(v => `<option value="${v}" ${v === (c.direction||'') ? 'selected' : ''}>${v || '—'}</option>`).join('');
+  const src = SOURCE_BADGE[c.topic_source] || '';
+  const conf = (c.topic_confidence != null && c.topic_source === 'llm') ? `<span style="font-size:10px;color:#9ca3af">conf ${(c.topic_confidence*100).toFixed(0)}%</span>` : '';
+  const selStyle = 'padding:5px 8px;border:1px solid #d1d5db;border-radius:7px;font-size:12px;background:#fff;cursor:pointer';
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Topic</span>
+      <select id="conv-topic-sel" style="${selStyle};min-width:240px">${opts}</select>
+      <select id="conv-prod-sel" title="Product line" style="${selStyle}">${prodSel}</select>
+      <select id="conv-dir-sel" title="Direction" style="${selStyle}">${dirSel}</select>
+      ${src} ${conf}
+      <span id="conv-topic-saved" style="font-size:11px;color:#16a34a;opacity:0;transition:opacity .2s">saved ✓</span>
+    </div>`;
+  const save = () => saveConvTopic(c.id);
+  document.getElementById('conv-topic-sel').onchange = save;
+  document.getElementById('conv-prod-sel').onchange = save;
+  document.getElementById('conv-dir-sel').onchange = save;
+}
+
+async function saveConvTopic(convId) {
+  const slug = document.getElementById('conv-topic-sel').value;
+  if (!slug) return;
+  const body = {
+    topic_slug: slug,
+    product_line: document.getElementById('conv-prod-sel').value || null,
+    direction: document.getElementById('conv-dir-sel').value || null,
+  };
+  try {
+    const r = await fetch(`${API}/conversations/${convId}/topic`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    }).then(r => r.json());
+    if (r.error) { alert(r.error); return; }
+    const saved = document.getElementById('conv-topic-saved');
+    if (saved) { saved.style.opacity = '1'; setTimeout(() => { saved.style.opacity = '0'; }, 1500); }
+    // освежим список инбокса, чтобы строка показала новый топик + human-источник
+    if (typeof _lastConvList !== 'undefined' && _lastConvList) {
+      const row = _lastConvList.find(x => x.id === convId);
+      if (row) { row.topic_slug = slug; row.topic_source = 'human';
+        const t = (TOPICS||[]).find(t => t.slug === slug); if (t) { row.topic = t.name_en; row.topic_es = t.name_es; }
+        row.product_line = body.product_line; row.direction = body.direction; }
+      renderConversations();
+    }
+  } catch (e) { alert('Save failed: ' + e.message); }
+}
+
+// ══════════ Topics tab: bank + trends + emerging suggestions ══════════
+let topicPeriod = 'week';
+
+async function loadTopicsTab() {
+  await ensureTopics(true);
+  renderTopicBank();
+  setTrendMode(trendMode);
+  setTopicPeriod(topicPeriod);
+  loadSuggestions();
+}
+
+async function renderTopicBank() {
+  const wrap = document.getElementById('topic-bank');
+  let topics;
+  try { topics = await fetch(`${API}/topics?include_archived=true`).then(r => r.json()); }
+  catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
+  const byCat = {};
+  for (const t of topics) (byCat[t.category || '—'] = byCat[t.category || '—'] || []).push(t);
+  let html = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="text-align:left;color:#6b7280;border-bottom:1px solid #e5e7eb">
+      <th style="padding:8px 10px">Topic (EN)</th><th>ES</th><th>Conversations</th><th>Status</th><th></th>
+    </tr></thead><tbody>`;
+  for (const [cat, list] of Object.entries(byCat)) {
+    html += `<tr><td colspan="5" style="padding:10px 10px 4px;font-weight:700;color:#7c3aed;font-size:12px;text-transform:uppercase;letter-spacing:.04em">${escHtml(cat)}</td></tr>`;
+    for (const t of list) {
+      const archived = t.status === 'archived';
+      html += `<tr style="border-bottom:1px solid #f1f1f4;${archived ? 'opacity:.45' : ''}">
+        <td style="padding:7px 10px"><span style="font-weight:600">${escHtml(t.name_en || t.slug)}</span><br><code style="font-size:10px;color:#9ca3af">${escHtml(t.slug)}</code></td>
+        <td style="color:#6b7280">${escHtml(t.name_es || '')}</td>
+        <td style="font-weight:600">${t.count || 0}</td>
+        <td>${archived ? '<span style="color:#9ca3af">archived</span>' : '<span style="color:#16a34a">active</span>'}</td>
+        <td style="text-align:right;white-space:nowrap">
+          <a onclick="editTopic(${t.id})" style="cursor:pointer;color:#7c3aed;font-size:12px;margin-right:8px">edit</a>
+          <a onclick="mergeTopic(${t.id},'${escHtml(t.name_en||t.slug)}')" style="cursor:pointer;color:#6b7280;font-size:12px;margin-right:8px">merge</a>
+          <a onclick="toggleArchiveTopic(${t.id},'${archived ? 'active' : 'archived'}')" style="cursor:pointer;color:${archived ? '#16a34a' : '#dc2626'};font-size:12px">${archived ? 'restore' : 'archive'}</a>
+        </td>
+      </tr>`;
+    }
+  }
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+async function topicApi(body) {
+  const r = await fetch(`${API}/admin/topics`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  }).then(r => r.json());
+  if (r.error) { alert(r.error); return null; }
+  await ensureTopics(true); renderTopicBank();
+  return r;
+}
+
+function addTopic() {
+  const name_en = prompt('Topic name (EN):'); if (!name_en) return;
+  const name_es = prompt('Topic name (ES):') || '';
+  const category = prompt('Category:', 'Process / no intent') || '';
+  const description = prompt('Description (boundary for the classifier):') || '';
+  topicApi({ name_en, name_es, category, description, status: 'active' });
+}
+
+function editTopic(id) {
+  const t = (TOPICS || []).find(x => x.id === id) || {};
+  const name_en = prompt('Topic name (EN):', t.name_en || ''); if (name_en === null) return;
+  const name_es = prompt('Topic name (ES):', t.name_es || '');
+  const category = prompt('Category:', t.category || '');
+  const description = prompt('Description:', t.description || '');
+  topicApi({ id, name_en, name_es, category, description });
+}
+
+function toggleArchiveTopic(id, status) {
+  if (status === 'archived' && !confirm('Archive this topic? Existing conversations keep their label but it leaves the active list.')) return;
+  topicApi({ id, status });
+}
+
+async function mergeTopic(id, label) {
+  const into = prompt(`Merge "${label}" INTO which topic? Enter target slug:`); if (!into) return;
+  const r = await fetch(`${API}/admin/topics/${id}/merge`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ into_slug: into.trim() }),
+  }).then(r => r.json());
+  if (r.error) { alert(r.error); return; }
+  alert(`Moved ${r.moved} conversations → ${r.into}`);
+  await ensureTopics(true); renderTopicBank();
+}
+
+function setTopicPeriod(p) {
+  topicPeriod = p;
+  document.querySelectorAll('.tp-period').forEach(b => {
+    const on = b.dataset.p === p;
+    b.style.background = on ? '#7c3aed' : '#fff';
+    b.style.color = on ? '#fff' : '#374151';
+    b.style.borderColor = on ? '#7c3aed' : '#d1d5db';
+  });
+  loadTopicTrends();
+}
+
+let trendMode = 'topic';
+let lastTrend = null;
+
+function setTrendMode(m) {
+  trendMode = m;
+  document.querySelectorAll('.tp-mode').forEach(b => {
+    const on = b.dataset.m === m;
+    b.style.background = on ? '#7c3aed' : '#fff';
+    b.style.color = on ? '#fff' : '#374151';
+    b.style.borderColor = on ? '#7c3aed' : '#d1d5db';
+  });
+  renderTrends();
+}
+
+async function loadTopicTrends() {
+  const wrap = document.getElementById('topic-trends');
+  const exOut = document.getElementById('topic-exclude-out').checked ? 1 : 0;
+  try { lastTrend = await fetch(`${API}/conversations/topic-stats?period=${topicPeriod}&exclude_outbound=${exOut}`).then(r => r.json()); }
+  catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
+  renderTrends();
+}
+
+function deltaHtml(d) {
+  return d > 0 ? `<span style="color:#dc2626">▲ ${d}</span>`
+       : d < 0 ? `<span style="color:#16a34a">▼ ${-d}</span>`
+               : '<span style="color:#9ca3af">– 0</span>';
+}
+
+function trendBarRow(type, key, label, sub, current, delta, max) {
+  const w = (current / max) * 100;
+  return `<div style="margin-bottom:9px">
+    <div class="trend-head" data-type="${type}" data-key="${escHtml(key)}" style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px;cursor:pointer">
+      <span style="color:#374151"><span class="trend-caret" style="color:#9ca3af;font-size:10px;margin-right:5px">▸</span>${escHtml(label)}${sub ? ` <span style="color:#cbd5e1">·</span> <span style="color:#9ca3af;font-size:10px">${escHtml(sub)}</span>` : ''}</span>
+      <span style="font-weight:600;color:#374151">${current} <span style="font-size:11px;font-weight:500;margin-left:6px">${deltaHtml(delta)}</span></span>
+    </div>
+    <div style="height:6px;background:#f3f4f6;border-radius:3px"><div style="width:${w}%;height:100%;background:#c4b5fd;border-radius:3px"></div></div>
+    <div class="trend-drill" style="display:none;margin:8px 0 6px 16px"></div>
+  </div>`;
+}
+
+function renderTrends() {
+  const wrap = document.getElementById('topic-trends');
+  const data = lastTrend;
+  if (!data) return;
+  const items = (data.topics || []).filter(t => t.current > 0 || t.previous > 0);
+  if (!items.length) { wrap.innerHTML = '<div class="loading" style="padding:16px">No data in this window yet.</div>'; return; }
+  const spanLbl = { day: 'vs prev day', week: 'vs prev 7 days', month: 'vs prev 30 days' }[topicPeriod] || '';
+  let html = `<div style="font-size:11px;color:#9ca3af;margin-bottom:10px">Last ${data.span_days} day(s) ${spanLbl} · click a row to drill down</div>`;
+  if (trendMode === 'group') {
+    const cats = {};
+    for (const t of items) { const c = t.category || '—'; (cats[c] = cats[c] || { current: 0, previous: 0 }); cats[c].current += t.current; cats[c].previous += t.previous; }
+    const arr = Object.entries(cats).map(([k, v]) => ({ key: k, current: v.current, delta: v.current - v.previous })).sort((a, b) => b.current - a.current);
+    const max = Math.max(...arr.map(x => x.current), 1);
+    for (const c of arr) html += trendBarRow('group', c.key, c.key, '', c.current, c.delta, max);
+  } else {
+    const max = Math.max(...items.map(t => t.current), 1);
+    for (const t of items) html += trendBarRow('topic', t.slug, t.topic, t.category || '', t.current, t.delta, max);
+  }
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('.trend-head').forEach(h => { h.onclick = () => onTrendClick(h); });
+}
+
+async function onTrendClick(h) {
+  const row = h.parentElement;
+  const drill = row.querySelector('.trend-drill');
+  const caret = h.querySelector('.trend-caret');
+  if (drill.style.display !== 'none') { drill.style.display = 'none'; if (caret) caret.textContent = '▸'; return; }
+  drill.style.display = 'block'; if (caret) caret.textContent = '▾';
+  const type = h.dataset.type, key = h.dataset.key;
+  if (type === 'group') {
+    const items = (lastTrend.topics || []).filter(t => (t.category || '—') === key && (t.current > 0 || t.previous > 0));
+    const max = Math.max(...items.map(t => t.current), 1);
+    drill.innerHTML = items.map(t => trendBarRow('topic', t.slug, t.topic, '', t.current, t.delta, max)).join('');
+    drill.querySelectorAll('.trend-head').forEach(hh => { hh.onclick = () => onTrendClick(hh); });
+  } else {
+    drill.innerHTML = '<div class="loading" style="padding:6px">Loading…</div>';
+    const exOut = document.getElementById('topic-exclude-out').checked ? 1 : 0;
+    const span = lastTrend.span_days || 7;
+    let list;
+    try { list = await fetch(`${API}/conversations?topic_slug=${encodeURIComponent(key)}&days=${span}&exclude_outbound=${exOut}&limit=200`).then(r => r.json()); }
+    catch (e) { drill.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
+    drill.innerHTML = renderConvMiniList(list);
+  }
+}
+
+function renderConvMiniList(list) {
+  if (!Array.isArray(list) || !list.length) return '<div style="color:#9ca3af;font-size:12px;padding:4px">No conversations in this window.</div>';
+  let h = '<table style="width:100%;border-collapse:collapse;font-size:12px">';
+  for (const c of list) {
+    const tag = (c.product_line && c.product_line !== 'NA' ? c.product_line : '') + (c.direction === 'outbound' ? ' ↗' : '');
+    h += `<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer" onclick="openConv('${c.id}')">
+      <td style="padding:4px 8px;color:#6b7280;white-space:nowrap">${formatPlain(c.created_at)}</td>
+      <td style="padding:4px 8px">${convTypeBadge(c.type)}</td>
+      <td style="padding:4px 8px;color:#9ca3af;font-size:10px;font-weight:700">${escHtml(tag)}</td>
+      <td style="padding:4px 8px;color:#374151">${escHtml(c.agent_name || '')}</td>
+      <td style="padding:4px 8px;text-align:right">${scorePill(c.avg_score)}</td>
+      <td style="padding:4px 8px;color:#7c3aed;white-space:nowrap">view →</td>
+    </tr>`;
+  }
+  return h + '</table>';
+}
+
+async function loadSuggestions() {
+  const wrap = document.getElementById('topic-suggestions');
+  let list;
+  try { list = await fetch(`${API}/admin/topic-suggestions`).then(r => r.json()); }
+  catch (e) { wrap.innerHTML = '<div class="loading" style="padding:8px">—</div>'; return; }
+  if (!Array.isArray(list) || !list.length) {
+    wrap.innerHTML = '<div style="color:#9ca3af;font-size:12px;padding:6px">No pending suggestions. Click “Detect now” to scan recent unclassified contacts.</div>';
+    return;
+  }
+  let html = '';
+  for (const s of list) {
+    html += `<div style="border-bottom:1px solid #f1f1f4;padding:10px 0;display:flex;justify-content:space-between;gap:12px">
+      <div>
+        <div style="font-weight:600">${escHtml(s.proposed_name || '')} <span style="color:#9ca3af;font-weight:500;font-size:11px">${escHtml(s.proposed_category || '')} · ${s.count} contacts · ${escHtml(s.period || '')}</span></div>
+        <div style="font-size:12px;color:#6b7280;margin-top:3px">${escHtml(s.rationale || '')}</div>
+      </div>
+      <div style="white-space:nowrap">
+        <a onclick="acceptSuggestion(${s.id})" style="cursor:pointer;color:#16a34a;font-size:12px;margin-right:8px">accept</a>
+        <a onclick="rejectSuggestion(${s.id})" style="cursor:pointer;color:#dc2626;font-size:12px">reject</a>
+      </div>
+    </div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+async function detectEmerging() {
+  const wrap = document.getElementById('topic-suggestions');
+  wrap.innerHTML = '<div class="loading" style="padding:8px">Scanning recent contacts…</div>';
+  try {
+    await fetch(`${API}/admin/detect-emerging-topics?days=7`, { method: 'POST' }).then(r => r.json());
+  } catch (e) { alert('Detect failed: ' + e.message); }
+  loadSuggestions();
+}
+
+async function acceptSuggestion(id) {
+  const r = await fetch(`${API}/admin/topic-suggestions/${id}/accept`, { method: 'POST' }).then(r => r.json());
+  if (r && r.error) { alert(r.error); return; }
+  await ensureTopics(true); renderTopicBank(); loadSuggestions();
+}
+async function rejectSuggestion(id) {
+  await fetch(`${API}/admin/topic-suggestions/${id}/reject`, { method: 'POST' }).then(r => r.json());
+  loadSuggestions();
+}
+
+function renderConvModal(c) {
+  document.getElementById('conv-modal-title').textContent =
+    `${convTypeBadge(c.type).replace(/<[^>]+>/g, '').trim()} ${c.topic || 'Conversation'}`;
+
+  // Duration
+  let dur = '';
+  if (c.created_at && c.closed_at) {
+    const sec = Math.round((toUTC(c.closed_at) - toUTC(c.created_at)) / 1000);
+    dur = sec < 60 ? `${sec}s` : `${Math.floor(sec/60)}m ${sec%60}s`;
+  }
+  document.getElementById('conv-modal-meta').innerHTML = [
+    c.agent_name ? `<span>🎧 ${escHtml(c.agent_name)}</span>` : '',
+    c.topic_es   ? `<span>🏷 ${escHtml(c.topic_es)}</span>` : '',
+    dur          ? `<span>⏱ ${dur}</span>` : '',
+    c.created_at ? `<span>🕐 ${formatPlain(c.created_at)}</span>` : '',
+    c.closed_at  ? `<span>🏁 ${formatPlain(c.closed_at)}</span>` : '',
+    c.customer_id ? `<span>🆔 Customer: <code style="font-size:11px">${escHtml(c.customer_id)}</code></span>` : '',
+    `<span style="color:#9ca3af">Task ID: <code style="font-size:11px">${escHtml(c.id)}</code></span>`,
+  ].filter(Boolean).join('');
+
+  const ev = c.evaluation || {};
+  const avgColor = c.avg_score != null ? scoreColor(c.avg_score) : '';
+  const resolved = ev.resolved ? '✅ Resolved' : (ev.resolved === false ? '❌ Not resolved' : '—');
+  document.getElementById('conv-modal-summary').innerHTML = `
+    <div class="modal-stat">
+      <div class="modal-stat-val ${avgColor}">${c.avg_score != null ? c.avg_score.toFixed(1)+'/10' : '—'}</div>
+      <div class="modal-stat-lbl">Score</div>
+    </div>
+    <div class="modal-stat">
+      <div class="modal-stat-val">${resolved}</div>
+      <div class="modal-stat-lbl">Outcome</div>
+    </div>
+    <div class="modal-stat">
+      <div class="modal-stat-val c-blue">${(c.transcript||[]).length}</div>
+      <div class="modal-stat-lbl">Turns</div>
+    </div>
+    ${c.summary ? `<div class="modal-stat" style="flex:1;text-align:left;min-width:200px">
+      <div style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">AI Summary</div>
+      <div style="font-size:12px;color:#374151;line-height:1.5">${escHtml(c.summary)}</div>
+    </div>` : ''}
+  `;
+
+  renderTopicEditor(c);
+
+  const transcript = c.transcript || [];
+  let html = '';
+
+  // Customer history (other contacts from same customer)
+  const hist = c.customer_history || [];
+  if (hist.length) {
+    const sameDay = (d1, d2) => (d1||'').slice(0,10) === (d2||'').slice(0,10);
+    html += `<div class="cust-history" style="margin:0 24px 14px">
+      <div class="cust-history-header">
+        🔁 ${hist.length} other contact${hist.length>1?'s':''} from this customer
+      </div>
+      <div class="cust-history-list">`;
+    for (const h of hist.slice(0, 15)) {
+      const dateStr = h.created_at ? formatPlain(h.created_at) : '—';
+      const today = sameDay(h.created_at, c.created_at) ? '<span style="color:#dc2626;font-weight:600;font-size:10px;margin-left:4px">SAME DAY</span>' : '';
+      const topic = h.topic ? escHtml(h.topic) : '(no topic)';
+      const score = h.avg_score != null ? `<span style="color:${h.avg_score>=7?'#059669':h.avg_score>=4?'#d97706':'#dc2626'};font-weight:700">${h.avg_score.toFixed(1)}</span>` : '—';
+      const typeIcon = h.type === 'call' ? '📞' : '💬';
+      html += `<div class="cust-hist-item" onclick="event.stopPropagation();openConv('${h.id}')">
+        <span style="font-size:13px">${typeIcon}</span>
+        <span style="color:#6b7280;font-size:11px;width:115px;flex-shrink:0">${dateStr}${today}</span>
+        <span style="flex:1;color:#1f2937;font-size:12px">${topic}</span>
+        <span style="font-size:11px;color:#9ca3af">${escHtml(h.agent_name || '')}</span>
+        <span style="font-size:12px;width:30px;text-align:right">${score}</span>
+      </div>`;
+    }
+    if (hist.length > 15) {
+      html += `<div style="text-align:center;font-size:11px;color:#9ca3af;padding:6px">+ ${hist.length - 15} more</div>`;
+    }
+    html += `</div></div>`;
+  }
+
+  // Evaluation breakdown
+  if (ev.breakdown && Object.keys(ev.breakdown).length) {
+    html += `<div class="eval-card" style="margin:0 24px 12px">
+      <div class="eval-score-big">${ev.critical_error ? '🚨' : c.avg_score >= 7 ? '✅' : c.avg_score >= 4 ? '⚠️' : '❌'} ${scorePill(c.avg_score)}</div>
+      <div class="eval-explanation">
+        ${escHtml(c.summary || '')}
+        <div class="eval-breakdown">
+          ${Object.entries(ev.breakdown).map(([k,v]) => `<span class="eval-tag">${escHtml(k)}: ${v}</span>`).join('')}
+          ${ev.critical_error ? '<span class="eval-tag crit">⚠️ critical error</span>' : ''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (!transcript.length) {
+    html += '<div class="loading">No transcript.</div>';
+  } else {
+    for (const turn of transcript) {
+      const isCust = turn.role === 'customer';
+      const side   = isCust ? 'customer' : 'agent';
+      const label  = isCust ? '👤 Cliente' : `🎧 ${c.agent_name || 'Agente'}`;
+      const initial = isCust ? 'C' : 'A';
+      const textEn = turn.text_en || '';
+      html += `
+        <div class="bubble-row ${side}" style="margin-bottom:4px">
+          <div class="avatar ${side}">${initial}</div>
+          <div>
+            <div style="font-size:10px;color:#9ca3af;font-weight:600;margin-bottom:3px">${label}</div>
+            <div class="bubble ${side}">${escHtml(turn.text || '')}</div>
+          </div>
+        </div>
+        <div class="bubble-en-wrap ${side}" style="margin-bottom:10px">
+          <div class="bubble-en ${textEn ? '' : 'empty'}">${textEn ? escHtml(textEn) : '…not translated'}</div>
+        </div>`;
+    }
+  }
+  document.getElementById('conv-chat-body').innerHTML = html;
+}
+
+// switchTab('inbox') + openFromHash() wired up via bootApp() after auth.
+</script>
+</body>
+</html>

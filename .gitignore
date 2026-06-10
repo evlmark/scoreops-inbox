@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+*.env
+
+# DB
+scoreops.db
+*.db
+
+# Logs & sessions
+logs/
+*.json
+
+# Chrome extension build artifacts
+extension/*.crx
+extension/*.pem
+
+# API keys / secrets
+api/
+PyME\ Agents\ Keys.txt
+*.keys.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Playwright
+.playwright/
+*.zip

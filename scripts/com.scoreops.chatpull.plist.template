@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Шаблон LaunchAgent для ночной выгрузки чатов.
+  ВАЖНО (macOS TCC): исполняемый pull_chats.py должен лежать ВНЕ защищённых папок
+  (~/Downloads, ~/Documents, ~/Desktop) — иначе launchd получит "Operation not permitted".
+  Поэтому скрипт копируется в ~/.scoreops/pull_chats.py, и плист указывает туда.
+
+  Установка:
+    mkdir -p ~/.scoreops ~/.plata-mcp/scoreops-pull
+    cp scripts/pull_chats.py ~/.scoreops/pull_chats.py
+    cp scripts/com.scoreops.chatpull.plist.template ~/Library/LaunchAgents/com.scoreops.chatpull.plist
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.scoreops.chatpull.plist
+    launchctl enable  gui/$(id -u)/com.scoreops.chatpull
+
+  Проверить разово:    launchctl kickstart gui/$(id -u)/com.scoreops.chatpull
+  Снять с автозапуска:  launchctl bootout  gui/$(id -u) ~/Library/LaunchAgents/com.scoreops.chatpull.plist
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.scoreops.chatpull</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>/Users/markevlampiev/.scoreops/pull_chats.py</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/markevlampiev/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key><integer>5</integer>
+        <key>Minute</key><integer>0</integer>
+    </dict>
+    <key>RunAtLoad</key>
+    <false/>
+    <key>StandardOutPath</key>
+    <string>/Users/markevlampiev/.plata-mcp/scoreops-pull/launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/markevlampiev/.plata-mcp/scoreops-pull/launchd.err.log</string>
+</dict>
+</plist>

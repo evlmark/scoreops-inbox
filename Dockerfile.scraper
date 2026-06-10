@@ -1,0 +1,15 @@
+# Образ сервиса-скрапера для Railway.
+# Базовый образ Playwright уже содержит Chromium и системные зависимости.
+FROM mcr.microsoft.com/playwright/python:v1.44.0-jammy
+
+WORKDIR /app
+
+COPY requirements-scraper.txt .
+RUN pip install --no-cache-dir -r requirements-scraper.txt
+
+# Нужны только модули, задействованные краулом (не тащим весь web).
+COPY db.py kb_import.py crawl.py ./
+COPY scraper ./scraper
+
+# Запускается по расписанию (Railway Cron). DATABASE_URL и GSITES_COOKIES — из переменных сервиса.
+CMD ["python", "crawl.py"]

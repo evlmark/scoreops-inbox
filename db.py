@@ -113,6 +113,7 @@ class Conversation(Base):
     product_line = Column(String, index=True, nullable=True) # 'PFAE' / 'PM' / 'NA'
     direction = Column(String, index=True, nullable=True)    # 'inbound' / 'outbound'
     account_type = Column(String, index=True, nullable=True) # 'PFAE External'/'PFAE Golden'/'No Empresa account' (из funnel по customer_id)
+    tariff = Column(String, nullable=True)                   # имя тарифа из funnel (только при открытом счёте): Emprendedor/Independiente/Empresario…
 
 
 class Document(Base):
@@ -225,6 +226,7 @@ def _run_migrations():
                 "ALTER TABLE conversations ADD COLUMN product_line VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN direction VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN account_type VARCHAR",
+                "ALTER TABLE conversations ADD COLUMN tariff VARCHAR",
                 "ALTER TABLE documents ADD COLUMN internal INTEGER DEFAULT 0",
             ]:
                 try:
@@ -256,6 +258,7 @@ def _run_migrations():
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS product_line VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS direction VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS account_type VARCHAR",
+                "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS tariff VARCHAR",
                 "ALTER TABLE documents ADD COLUMN IF NOT EXISTS internal INTEGER DEFAULT 0",
             ]:
                 try:

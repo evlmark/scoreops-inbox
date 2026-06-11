@@ -1017,7 +1017,8 @@ async def set_user_accounts(request: Request):
             if not cid or not label:
                 continue
             n = db.query(DBConversation).filter(DBConversation.customer_id == cid).update(
-                {DBConversation.account_type: label}, synchronize_session=False)
+                {DBConversation.account_type: label, DBConversation.tariff: a.get("tariff")},
+                synchronize_session=False)
             updated += n
             users += 1
         db.commit()
@@ -1063,6 +1064,7 @@ def list_conversations(limit: int = 500, cohort: Optional[str] = None,
             "product_line": c.product_line,
             "direction":   c.direction,
             "account_type": c.account_type,
+            "tariff":      c.tariff,
             "avg_score":   c.avg_score,
             "status":      c.status,
             "cohort":      c.cohort,
@@ -1196,6 +1198,7 @@ def get_conversation(conv_id: str):
             "product_line": c.product_line,
             "direction":   c.direction,
             "account_type": c.account_type,
+            "tariff":      c.tariff,
             "avg_score":   c.avg_score,
             "evaluation":  c.evaluation,
             "summary":     c.summary,
@@ -1225,10 +1228,12 @@ def list_customers(q: Optional[str] = None, limit: int = 300):
             if not cid:
                 continue
             a = agg.setdefault(cid, {"customer_id": cid, "count": 0, "first": None,
-                                     "last": None, "topics": {}, "scores": [], "account_type": None})
+                                     "last": None, "topics": {}, "scores": [], "account_type": None, "tariff": None})
             a["count"] += 1
             if c.account_type:
                 a["account_type"] = c.account_type
+            if c.tariff:
+                a["tariff"] = c.tariff
             if c.created_at:
                 iso = c.created_at.isoformat()
                 if a["first"] is None or iso < a["first"]:
@@ -1246,7 +1251,7 @@ def list_customers(q: Optional[str] = None, limit: int = 300):
                 "customer_id": a["customer_id"], "count": a["count"],
                 "first_at": a["first"], "last_at": a["last"], "top_topic": top,
                 "avg_score": round(sum(a["scores"]) / len(a["scores"]), 1) if a["scores"] else None,
-                "account_type": a["account_type"],
+                "account_type": a["account_type"], "tariff": a["tariff"],
             })
         out.sort(key=lambda x: (-x["count"], x["last_at"] or ""))
         return {"total": len(out), "customers": out[:limit]}
@@ -1279,9 +1284,10 @@ def get_customer(customer_id: str):
             if c.topic_slug:
                 topics[c.topic_slug] = topics.get(c.topic_slug, 0) + 1
         account_type = next((c.account_type for c in rows if c.account_type), None)
+        tariff = next((c.tariff for c in rows if c.tariff), None)
         return {
             "customer_id": customer_id, "count": len(rows),
-            "account_type": account_type,
+            "account_type": account_type, "tariff": tariff,
             "first_at": convs[-1]["created_at"] if convs else None,
             "last_at": convs[0]["created_at"] if convs else None,
             "avg_score": round(sum(scores) / len(scores), 1) if scores else None,

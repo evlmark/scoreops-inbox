@@ -233,15 +233,17 @@ def _table_rows(text: str):
 
 
 def fetch_account_labels(mcp: MCP, customer_ids, chunk: int = 80) -> dict:
-    """funnel_pfae по user_id → метка. ACCOUNT_CREATED + PFAEGolden→'PFAE Golden',
-    + PFAE→'PFAE External', иначе 'No Empresa account'. При сбое Snowflake — поднимает исключение."""
-    labels = {cid: "No Empresa account" for cid in customer_ids}
+    """funnel_pfae по user_id → {customer_id: {'account_type':..., 'tariff':...}}.
+    ACCOUNT_CREATED + PFAEGolden→'PFAE Golden', + PFAE→'PFAE External', иначе 'No Empresa account'.
+    tariff = имя тарифа открытого счёта (None, если счёта нет). При сбое Snowflake — поднимает исключение."""
+    info = {cid: {"account_type": "No Empresa account", "tariff": None} for cid in customer_ids}
     for i in range(0, len(customer_ids), chunk):
         part = customer_ids[i:i + chunk]
         inl = ",".join("'" + c.replace("'", "") + "'" for c in part)
         sql = ("select user_id, "
                "max(case when product_type='PFAEGolden' and current_status='ACCOUNT_CREATED' then 1 else 0 end) golden, "
-               "max(case when product_type='PFAE' and current_status='ACCOUNT_CREATED' then 1 else 0 end) ext "
+               "max(case when product_type='PFAE' and current_status='ACCOUNT_CREATED' then 1 else 0 end) ext, "
+               "max(case when current_status='ACCOUNT_CREATED' then tariff_name::string end) tariff "
                "from DWH_PYME_MAIN_PROD.ORIGINATION.FUNNEL_PFAE where user_id in (" + inl + ") group by user_id")
         js = ("var r = await Snowflake.query({sql:%s, role:'MARK_EVLAMPIEV'});"
               "console.log(JSON.stringify(r));" % json.dumps(sql))
@@ -267,11 +269,14 @@ def fetch_account_labels(mcp: MCP, customer_ids, chunk: int = 80) -> dict:
             cid = r.get("USER_ID")
             if not cid:
                 continue
+            tar = (r.get("TARIFF") or "").strip().strip('"') or None
+            if tar and tar.upper() == "NULL":
+                tar = None
             if str(r.get("GOLDEN")) == "1":
-                labels[cid] = "PFAE Golden"
+                info[cid] = {"account_type": "PFAE Golden", "tariff": tar}
             elif str(r.get("EXT")) == "1":
-                labels[cid] = "PFAE External"
-    return labels
+                info[cid] = {"account_type": "PFAE External", "tariff": tar}
+    return info
 
 
 # ─────────────────────────── HTTP к Railway ───────────────────────────
@@ -422,10 +427,11 @@ def main():
             m2 = MCP(PLATA_BIN)
             m2.initialize()
             try:
-                labels = fetch_account_labels(m2, cids)
+                info = fetch_account_labels(m2, cids)
             finally:
                 m2.close()
-            accounts = [{"customer_id": c, "account_type": l} for c, l in labels.items()]
+            accounts = [{"customer_id": c, "account_type": v["account_type"], "tariff": v.get("tariff")}
+                        for c, v in info.items()]
             r = http("POST", "/admin/user-accounts",
                      data=json.dumps({"accounts": accounts}).encode("utf-8"),
                      ctype="application/json", timeout=120)

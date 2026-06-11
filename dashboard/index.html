@@ -832,7 +832,7 @@ async function loadUsers(q) {
   for (const u of list) {
     h += `<tr style="border-bottom:1px solid #f1f1f4;cursor:pointer" onclick="openCustomer('${u.customer_id}')">
       <td style="padding:7px 10px"><code style="font-size:11px">${escHtml(u.customer_id)}</code></td>
-      <td>${u.account_type ? accountBadge(u.account_type, 0) : '<span style="color:#d1d5db">—</span>'}</td>
+      <td>${u.account_type ? accountBadge(u.account_type, 0) + (u.tariff ? ' ' + tariffChip(u.tariff) : '') : '<span style="color:#d1d5db">—</span>'}</td>
       <td style="font-weight:600">${u.count}</td>
       <td style="color:#6b7280">${u.first_at ? formatPlain(u.first_at).split(',')[0] : '—'}</td>
       <td style="color:#6b7280">${u.last_at ? formatPlain(u.last_at).split(',')[0] : '—'}</td>
@@ -882,7 +882,7 @@ function renderCustomerModal(d) {
   const range = (d.first_at && d.last_at)
     ? `${formatPlain(d.first_at).split(',')[0]} → ${formatPlain(d.last_at).split(',')[0]}` : '—';
   document.getElementById('cust-modal-meta').innerHTML =
-    (d.account_type ? `<span>🏦 ${accountBadge(d.account_type, 0)}</span>` : '')
+    (d.account_type ? `<span>🏦 ${accountBadge(d.account_type, 0)}${d.tariff ? ' ' + tariffChip(d.tariff) : ''}</span>` : '')
     + `<span>📨 ${d.count} contact${d.count === 1 ? '' : 's'}</span><span>🗓 ${range}</span>`
     + (d.avg_score != null ? `<span>⭐ avg ${d.avg_score}</span>` : '');
   // topic chips
@@ -1326,9 +1326,15 @@ function accountBadge(at, ml) {
   return `<span style="background:${c[0]};color:${c[1]};font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:${ml || 6}px;white-space:nowrap">${escHtml(at)}</span>`;
 }
 
+function tariffChip(t, ml) {
+  if (!t) return '';
+  return `<span title="Tariff" style="background:#eef2ff;color:#4338ca;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:${ml == null ? 4 : ml}px;white-space:nowrap">${escHtml(t)}</span>`;
+}
+
 function topicTagBadges(c) {
   const b = [];
   if (c.account_type) b.push(accountBadge(c.account_type));
+  if (c.tariff) b.push(tariffChip(c.tariff));
   if (c.product_line && c.product_line !== 'NA') {
     const col = c.product_line === 'PM' ? '#0369a1' : '#7c3aed';
     b.push(`<span style="background:#f3f4f6;color:${col};font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px">${escHtml(c.product_line)}</span>`);
@@ -1664,7 +1670,7 @@ function renderConvModal(c) {
     dur = sec < 60 ? `${sec}s` : `${Math.floor(sec/60)}m ${sec%60}s`;
   }
   document.getElementById('conv-modal-meta').innerHTML = [
-    c.account_type ? `<span>🏦 ${accountBadge(c.account_type, 0)}</span>` : '',
+    c.account_type ? `<span>🏦 ${accountBadge(c.account_type, 0)}${c.tariff ? ' ' + tariffChip(c.tariff) : ''}</span>` : '',
     c.agent_name ? `<span>🎧 ${escHtml(c.agent_name)}</span>` : '',
     c.topic_es   ? `<span>🏷 ${escHtml(c.topic_es)}</span>` : '',
     dur          ? `<span>⏱ ${dur}</span>` : '',

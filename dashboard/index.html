@@ -348,13 +348,24 @@
   <span class="sub">QA Dashboard · Plata Bank PFAE</span>
   <div class="header-right">
     <span class="badge-live" id="live-badge">● Live</span>
-    <button class="refresh-btn" onclick="switchTab('inbox')">↻ Refresh</button>
+    <button class="refresh-btn" onclick="loadWeeklyMetrics();switchTab('inbox')">↻ Refresh</button>
     <span class="user-chip" id="user-chip" style="display:none"></span>
     <button class="signout-btn" id="signout-btn" onclick="signOut()" style="display:none">Sign out</button>
   </div>
 </header>
 
 <div class="container">
+
+  <!-- Weekly KPIs -->
+  <div id="weekly-kpis" style="margin-bottom:20px">
+    <div style="font-size:12px;color:#6b7280;font-weight:600;margin-bottom:10px">📅 This week <span id="wk-range" style="color:#7c3aed">—</span> <span style="color:#9ca3af;font-weight:500">(vs previous week)</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+      <div class="kpi-card"><div class="kpi-val c-purple" id="wk-chats">—</div><div class="kpi-lbl">Chats this week</div><div id="wk-chats-d" style="font-size:11px;font-weight:600;margin-top:4px">&nbsp;</div></div>
+      <div class="kpi-card"><div class="kpi-val c-blue" id="wk-users">—</div><div class="kpi-lbl">Users this week</div><div id="wk-users-d" style="font-size:11px;font-weight:600;margin-top:4px">&nbsp;</div></div>
+      <div class="kpi-card"><div class="kpi-val c-purple" id="wk-pfae-chats">—</div><div class="kpi-lbl">PFAE chats this week</div><div id="wk-pfae-chats-d" style="font-size:11px;font-weight:600;margin-top:4px">&nbsp;</div></div>
+      <div class="kpi-card"><div class="kpi-val c-blue" id="wk-pfae-users">—</div><div class="kpi-lbl">PFAE users this week</div><div id="wk-pfae-users-d" style="font-size:11px;font-weight:600;margin-top:4px">&nbsp;</div></div>
+    </div>
+  </div>
 
   <!-- Tabs -->
   <div class="tabs">
@@ -627,9 +638,34 @@ let _appBooted = false;
 function bootApp() {
   if (_appBooted) return;
   _appBooted = true;
+  loadWeeklyMetrics();
   switchTab('inbox');
   openFromHash();
   window.addEventListener('hashchange', () => { if (location.hash) openFromHash(); });
+}
+
+async function loadWeeklyMetrics() {
+  let d;
+  try { d = await fetch(`${API}/metrics/weekly`).then(r => r.json()); }
+  catch (e) { return; }
+  if (!d || d.error) return;
+  const dm = s => { const p = (s || '').split('-'); return p.length === 3 ? `${p[2]}.${p[1]}` : s; };
+  const rangeEl = document.getElementById('wk-range');
+  if (rangeEl) rangeEl.textContent = `${dm(d.week_start)} – ${dm(d.week_end)}`;
+  const set = (idv, idd, m) => {
+    if (!m) return;
+    const ev = document.getElementById(idv); if (ev) ev.textContent = m.value;
+    const ed = document.getElementById(idd); if (!ed) return;
+    const delta = m.delta;
+    ed.innerHTML = (delta > 0 ? `<span style="color:#16a34a">▲ +${delta}</span>`
+                  : delta < 0 ? `<span style="color:#dc2626">▼ ${delta}</span>`
+                  : `<span style="color:#9ca3af">– 0</span>`)
+                  + ` <span style="color:#9ca3af;font-weight:500">vs last wk (${m.prev})</span>`;
+  };
+  set('wk-chats', 'wk-chats-d', d.chats);
+  set('wk-users', 'wk-users-d', d.users);
+  set('wk-pfae-chats', 'wk-pfae-chats-d', d.pfae_chats);
+  set('wk-pfae-users', 'wk-pfae-users-d', d.pfae_users);
 }
 
 (async function init() {

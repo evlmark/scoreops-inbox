@@ -951,6 +951,56 @@ def reject_topic_suggestion(sug_id: int):
         db.close()
 
 
+@app.get("/metrics/weekly")
+def weekly_metrics(cohort: Optional[str] = None):
+    """KPI текущей недели (Пн–Вс) vs прошлой: чаты/пользователи — всего и по PFAE."""
+    now = datetime.utcnow()
+    today = now.date()
+    ws_d = today - timedelta(days=today.weekday())                # понедельник текущей недели
+    week_start = datetime(ws_d.year, ws_d.month, ws_d.day)
+    week_end = week_start + timedelta(days=7)
+    prev_start = week_start - timedelta(days=7)
+    PFAE = ("PFAE External", "PFAE Golden")
+    db = SessionLocal()
+    try:
+        q = db.query(DBConversation).filter(
+            DBConversation.created_at.isnot(None),
+            DBConversation.created_at >= prev_start,
+            DBConversation.created_at < week_end)
+        if cohort:
+            q = q.filter(DBConversation.cohort == cohort)
+        else:
+            q = q.filter(DBConversation.cohort.is_(None))
+        cur = {"chats": 0, "users": set(), "pfae_chats": 0, "pfae_users": set()}
+        prev = {"chats": 0, "users": set(), "pfae_chats": 0, "pfae_users": set()}
+        for c in q.all():
+            b = cur if c.created_at >= week_start else prev
+            b["chats"] += 1
+            cid = clean_customer_id(c.customer_id)
+            if cid:
+                b["users"].add(cid)
+            if c.account_type in PFAE:
+                b["pfae_chats"] += 1
+                if cid:
+                    b["pfae_users"].add(cid)
+
+        def metric(key, is_set=False):
+            cv = len(cur[key]) if is_set else cur[key]
+            pv = len(prev[key]) if is_set else prev[key]
+            return {"value": cv, "prev": pv, "delta": cv - pv}
+
+        return {
+            "week_start": week_start.date().isoformat(),
+            "week_end": (week_end - timedelta(days=1)).date().isoformat(),
+            "chats": metric("chats"),
+            "users": metric("users", True),
+            "pfae_chats": metric("pfae_chats"),
+            "pfae_users": metric("pfae_users", True),
+        }
+    finally:
+        db.close()
+
+
 @app.post("/admin/user-accounts")
 async def set_user_accounts(request: Request):
     """Bulk-апдейт account_type по customer_id (из ночного funnel-запроса).

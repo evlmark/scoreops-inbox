@@ -386,16 +386,13 @@
       <div class="kpi-card"><div class="kpi-val"          id="inbox-score">—</div><div class="kpi-lbl">Avg score</div></div>
     </div>
 
-    <!-- Daily activity + top topics -->
-    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:20px;margin-bottom:24px">
-      <div class="card" style="padding:16px 20px">
-        <div class="section-title" style="margin-bottom:14px">Conversations per day</div>
-        <div id="inbox-daychart"><div class="loading">Loading...</div></div>
+    <!-- Daily activity -->
+    <div class="card" style="padding:16px 20px;margin-bottom:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="section-title" style="margin:0">Conversations per day</div>
+        <div style="font-size:11px;color:#9ca3af"><span style="color:#a78bfa">●</span> chats &nbsp;<span style="color:#60a5fa">●</span> calls</div>
       </div>
-      <div class="card" style="padding:16px 20px">
-        <div class="section-title" style="margin-bottom:14px">Top topics</div>
-        <div id="inbox-topics"><div class="loading">Loading...</div></div>
-      </div>
+      <div id="inbox-daychart"><div class="loading">Loading...</div></div>
     </div>
 
     <!-- Nightly pull log -->
@@ -1120,58 +1117,30 @@ function renderInboxStats(s) {
   sc.textContent = s.avg_score != null ? s.avg_score.toFixed(1) + '/10' : '—';
   sc.className = 'kpi-val ' + (s.avg_score != null ? scoreColor(s.avg_score) : '');
 
-  // Day chart — horizontal bars
+  // Day chart — compact vertical columns (chats + calls stacked), days left→right
   const days = s.by_day || [];
+  const el = document.getElementById('inbox-daychart');
   if (!days.length) {
-    document.getElementById('inbox-daychart').innerHTML = '<div class="loading" style="padding:16px">No data yet</div>';
+    el.innerHTML = '<div class="loading" style="padding:16px">No data yet</div>';
   } else {
     const max = Math.max(...days.map(d => d.total), 1);
-    let html = '';
-    for (const d of days) {
-      const chatW = (d.chat / max) * 100;
-      const callW = (d.call / max) * 100;
-      html += `
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
-          <div style="width:54px;font-size:11px;color:#6b7280;flex-shrink:0">${d.date.slice(5)}</div>
-          <div style="flex:1;display:flex;height:18px;border-radius:4px;overflow:hidden;background:#f3f4f6">
-            <div style="width:${chatW}%;background:#a78bfa" title="${d.chat} chats"></div>
-            <div style="width:${callW}%;background:#60a5fa" title="${d.call} calls"></div>
+    const H = 104;
+    const cols = days.map(d => {
+      const totalH = Math.max(2, Math.round((d.total / max) * H));
+      const chatH = d.total ? Math.round((d.chat / d.total) * totalH) : 0;
+      const callH = totalH - chatH;
+      return `<div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div title="${d.date.slice(5)} · ${d.chat} chats, ${d.call} calls (${d.total})" style="height:${H}px;width:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center">
+          <div style="width:70%;max-width:16px;display:flex;flex-direction:column;justify-content:flex-end;height:${totalH}px">
+            <div style="height:${callH}px;background:#60a5fa;border-radius:3px 3px 0 0"></div>
+            <div style="height:${chatH}px;background:#a78bfa;border-radius:${callH ? '0' : '3px 3px'} 0 0"></div>
           </div>
-          <div style="width:150px;flex-shrink:0;display:flex;justify-content:flex-end;gap:10px;font-size:12px">
-            <span style="color:#7c3aed;font-weight:600">💬 ${d.chat}</span>
-            <span style="color:#2563eb;font-weight:600">📞 ${d.call}</span>
-            <span style="color:#374151;font-weight:700;width:36px;text-align:right">${d.total}</span>
-          </div>
-        </div>`;
-    }
-    html += `<div style="display:flex;gap:14px;margin-top:10px;font-size:11px;color:#9ca3af">
-      <span><span style="display:inline-block;width:9px;height:9px;background:#a78bfa;border-radius:2px"></span> Chats</span>
-      <span><span style="display:inline-block;width:9px;height:9px;background:#60a5fa;border-radius:2px"></span> Calls</span>
-    </div>`;
-    document.getElementById('inbox-daychart').innerHTML = html;
-  }
-
-  // Top topics
-  const topics = s.top_topics || [];
-  if (!topics.length) {
-    document.getElementById('inbox-topics').innerHTML = '<div class="loading" style="padding:16px">No topics yet — process conversations first</div>';
-  } else {
-    const max = Math.max(...topics.map(t => t.count), 1);
-    let html = '';
-    for (const t of topics) {
-      const w = (t.count / max) * 100;
-      html += `
-        <div style="margin-bottom:8px">
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px">
-            <span style="color:#374151">${escHtml(t.topic)}</span>
-            <span style="color:#9ca3af;font-weight:600">${t.count}</span>
-          </div>
-          <div style="height:6px;background:#f3f4f6;border-radius:3px">
-            <div style="width:${w}%;height:100%;background:#c4b5fd;border-radius:3px"></div>
-          </div>
-        </div>`;
-    }
-    document.getElementById('inbox-topics').innerHTML = html;
+        </div>
+        <div style="font-size:9px;color:#9ca3af;line-height:1">${d.date.slice(8)}</div>
+        <div style="font-size:10px;color:#6b7280;font-weight:600;line-height:1">${d.total}</div>
+      </div>`;
+    }).join('');
+    el.innerHTML = `<div style="display:flex;align-items:flex-end;gap:3px;overflow-x:auto;padding-top:4px">${cols}</div>`;
   }
 }
 

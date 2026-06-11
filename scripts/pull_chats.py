@@ -200,6 +200,80 @@ def export_chats_csv(mcp: MCP, sql: str) -> dict:
     return manifest
 
 
+# ─────────────────── Funnel: тип Empresa-аккаунта по customer_id ───────────────────
+_BAD_IDS = {"", "<nil>", "nil", "null", "none", "n/a", "na", "-"}
+
+
+def csv_customer_ids(path: str):
+    """Уникальные непустые CUSTOMERID из CSV."""
+    import csv as _csv
+    ids = set()
+    with open(path, newline="", encoding="utf-8", errors="replace") as f:
+        for row in _csv.DictReader(f):
+            v = (row.get("CUSTOMERID") or "").strip()
+            if v and v.lower() not in _BAD_IDS:
+                ids.add(v)
+    return sorted(ids)
+
+
+def _table_rows(text: str):
+    """ASCII-таблица Snowflake.query (строка) → список dict по заголовку."""
+    lines = [l for l in (text or "").splitlines() if l.strip()]
+    if len(lines) < 2 or "|" not in lines[0]:
+        return None  # не таблица (вероятно ошибка)
+    header = [h.strip() for h in lines[0].split("|")]
+    out = []
+    for ln in lines[2:]:
+        if ln.lstrip().startswith("(") and ln.rstrip().endswith("rows)"):
+            break
+        parts = [p.strip() for p in ln.split("|")]
+        if len(parts) == len(header):
+            out.append(dict(zip(header, parts)))
+    return out
+
+
+def fetch_account_labels(mcp: MCP, customer_ids, chunk: int = 80) -> dict:
+    """funnel_pfae по user_id → метка. ACCOUNT_CREATED + PFAEGolden→'PFAE Golden',
+    + PFAE→'PFAE External', иначе 'No Empresa account'. При сбое Snowflake — поднимает исключение."""
+    labels = {cid: "No Empresa account" for cid in customer_ids}
+    for i in range(0, len(customer_ids), chunk):
+        part = customer_ids[i:i + chunk]
+        inl = ",".join("'" + c.replace("'", "") + "'" for c in part)
+        sql = ("select user_id, "
+               "max(case when product_type='PFAEGolden' and current_status='ACCOUNT_CREATED' then 1 else 0 end) golden, "
+               "max(case when product_type='PFAE' and current_status='ACCOUNT_CREATED' then 1 else 0 end) ext "
+               "from DWH_PYME_MAIN_PROD.ORIGINATION.FUNNEL_PFAE where user_id in (" + inl + ") group by user_id")
+        js = ("var r = await Snowflake.query({sql:%s, role:'MARK_EVLAMPIEV'});"
+              "console.log(JSON.stringify(r));" % json.dumps(sql))
+        raw = mcp.code_execute(js, timeout_seconds=110)
+        try:
+            out = json.loads(raw).get("output", raw)
+        except Exception:
+            out = raw
+        out = (out or "").strip()
+        try:
+            obj = json.loads(out)
+        except Exception:
+            obj = out
+        rows = None
+        if isinstance(obj, dict) and obj.get("rows") is not None:
+            cols = obj.get("columns") or []
+            rows = [dict(zip(cols, r)) for r in obj["rows"]]
+        elif isinstance(obj, str):
+            rows = _table_rows(obj)
+        if rows is None:
+            raise RuntimeError(f"funnel-запрос не вернул таблицу: {str(out)[:200]}")
+        for r in rows:
+            cid = r.get("USER_ID")
+            if not cid:
+                continue
+            if str(r.get("GOLDEN")) == "1":
+                labels[cid] = "PFAE Golden"
+            elif str(r.get("EXT")) == "1":
+                labels[cid] = "PFAE External"
+    return labels
+
+
 # ─────────────────────────── HTTP к Railway ───────────────────────────
 def http(method: str, path: str, data: bytes = None, ctype: str = None, timeout: int = 120):
     url = WEB_BASE.rstrip("/") + path
@@ -339,6 +413,28 @@ def main():
         log(f"ОШИБКА импорта в Railway: {e}")
         notify("ScoreOPS: импорт чатов не удался", str(e))
         return finish(3)
+
+    # 2.5) Обогащение типом Empresa-аккаунта по funnel (best-effort; требует Snowflake/SSO)
+    try:
+        cids = csv_customer_ids(csv_path)
+        if cids:
+            log(f"Funnel: тяну account_type для {len(cids)} пользователей…")
+            m2 = MCP(PLATA_BIN)
+            m2.initialize()
+            try:
+                labels = fetch_account_labels(m2, cids)
+            finally:
+                m2.close()
+            accounts = [{"customer_id": c, "account_type": l} for c, l in labels.items()]
+            r = http("POST", "/admin/user-accounts",
+                     data=json.dumps({"accounts": accounts}).encode("utf-8"),
+                     ctype="application/json", timeout=120)
+            summary["accounts_updated"] = r.get("users")
+            log(f"Funnel: account_type обновлён — {json.dumps(r, ensure_ascii=False)}")
+    except Exception as e:
+        log(f"Funnel: пропускаю обогащение account_type ({e})")
+        notify("ScoreOPS: funnel-обогащение account_type не удалось",
+               f"{e}. Возможно, истекла Snowflake-SSO (plata-mcp login) или нет доступа к funnel.")
 
     if args.no_process:
         summary["status"] = "success"

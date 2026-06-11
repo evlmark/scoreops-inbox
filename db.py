@@ -112,6 +112,7 @@ class Conversation(Base):
     topic_confidence = Column(Float, nullable=True)          # уверенность классификатора 0..1
     product_line = Column(String, index=True, nullable=True) # 'PFAE' / 'PM' / 'NA'
     direction = Column(String, index=True, nullable=True)    # 'inbound' / 'outbound'
+    account_type = Column(String, index=True, nullable=True) # 'PFAE External'/'PFAE Golden'/'No Empresa account' (из funnel по customer_id)
 
 
 class Document(Base):
@@ -223,6 +224,7 @@ def _run_migrations():
                 "ALTER TABLE conversations ADD COLUMN topic_confidence FLOAT",
                 "ALTER TABLE conversations ADD COLUMN product_line VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN direction VARCHAR",
+                "ALTER TABLE conversations ADD COLUMN account_type VARCHAR",
                 "ALTER TABLE documents ADD COLUMN internal INTEGER DEFAULT 0",
             ]:
                 try:
@@ -253,6 +255,7 @@ def _run_migrations():
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS topic_confidence DOUBLE PRECISION",
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS product_line VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS direction VARCHAR",
+                "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS account_type VARCHAR",
                 "ALTER TABLE documents ADD COLUMN IF NOT EXISTS internal INTEGER DEFAULT 0",
             ]:
                 try:

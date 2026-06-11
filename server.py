@@ -784,8 +784,10 @@ async def set_conversation_topic(conv_id: str, request: Request):
 
 
 @app.get("/conversations/topic-stats")
-def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outbound: int = 0):
-    """Тренды по топикам: текущее окно vs предыдущее (day=1д / week=7д / month=30д) + дельта."""
+def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outbound: int = 0,
+                segment: str = "all"):
+    """Тренды по топикам: текущее окно vs предыдущее (day=1д / week=7д / month=30д) + дельта.
+    segment=pfae — только чаты пользователей с PFAE/Golden аккаунтом (account_type)."""
     span = {"day": 1, "week": 7, "month": 30}.get(period, 7)
     now = datetime.utcnow()
     cur_start = now - timedelta(days=span)
@@ -803,6 +805,8 @@ def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outb
                      DBConversation.created_at >= prev_start)
         if exclude_outbound:
             q = q.filter((DBConversation.direction != "outbound") | (DBConversation.direction.is_(None)))
+        if segment == "pfae":
+            q = q.filter(DBConversation.account_type.in_(["PFAE External", "PFAE Golden"]))
         cur, prev = {}, {}
         for c in q.all():
             bucket = cur if c.created_at >= cur_start else prev
@@ -947,6 +951,31 @@ def reject_topic_suggestion(sug_id: int):
         db.close()
 
 
+@app.post("/admin/user-accounts")
+async def set_user_accounts(request: Request):
+    """Bulk-апдейт account_type по customer_id (из ночного funnel-запроса).
+    Тело JSON: {"accounts": [{"customer_id": "...", "account_type": "PFAE External|PFAE Golden|No Empresa account"}]}.
+    Проставляет conversations.account_type всем обращениям пользователя."""
+    body = await request.json()
+    accounts = body.get("accounts") or []
+    db = SessionLocal()
+    updated = users = 0
+    try:
+        for a in accounts:
+            cid = (a.get("customer_id") or "").strip()
+            label = a.get("account_type")
+            if not cid or not label:
+                continue
+            n = db.query(DBConversation).filter(DBConversation.customer_id == cid).update(
+                {DBConversation.account_type: label}, synchronize_session=False)
+            updated += n
+            users += 1
+        db.commit()
+        return {"ok": True, "users": users, "rows_updated": updated}
+    finally:
+        db.close()
+
+
 @app.get("/conversations")
 def list_conversations(limit: int = 500, cohort: Optional[str] = None,
                        topic_slug: Optional[str] = None, days: Optional[int] = None,
@@ -983,6 +1012,7 @@ def list_conversations(limit: int = 500, cohort: Optional[str] = None,
             "topic_confidence": c.topic_confidence,
             "product_line": c.product_line,
             "direction":   c.direction,
+            "account_type": c.account_type,
             "avg_score":   c.avg_score,
             "status":      c.status,
             "cohort":      c.cohort,
@@ -1115,6 +1145,7 @@ def get_conversation(conv_id: str):
             "topic_confidence": c.topic_confidence,
             "product_line": c.product_line,
             "direction":   c.direction,
+            "account_type": c.account_type,
             "avg_score":   c.avg_score,
             "evaluation":  c.evaluation,
             "summary":     c.summary,
@@ -1144,8 +1175,10 @@ def list_customers(q: Optional[str] = None, limit: int = 300):
             if not cid:
                 continue
             a = agg.setdefault(cid, {"customer_id": cid, "count": 0, "first": None,
-                                     "last": None, "topics": {}, "scores": []})
+                                     "last": None, "topics": {}, "scores": [], "account_type": None})
             a["count"] += 1
+            if c.account_type:
+                a["account_type"] = c.account_type
             if c.created_at:
                 iso = c.created_at.isoformat()
                 if a["first"] is None or iso < a["first"]:
@@ -1163,6 +1196,7 @@ def list_customers(q: Optional[str] = None, limit: int = 300):
                 "customer_id": a["customer_id"], "count": a["count"],
                 "first_at": a["first"], "last_at": a["last"], "top_topic": top,
                 "avg_score": round(sum(a["scores"]) / len(a["scores"]), 1) if a["scores"] else None,
+                "account_type": a["account_type"],
             })
         out.sort(key=lambda x: (-x["count"], x["last_at"] or ""))
         return {"total": len(out), "customers": out[:limit]}
@@ -1194,8 +1228,10 @@ def get_customer(customer_id: str):
         for c in rows:
             if c.topic_slug:
                 topics[c.topic_slug] = topics.get(c.topic_slug, 0) + 1
+        account_type = next((c.account_type for c in rows if c.account_type), None)
         return {
             "customer_id": customer_id, "count": len(rows),
+            "account_type": account_type,
             "first_at": convs[-1]["created_at"] if convs else None,
             "last_at": convs[0]["created_at"] if convs else None,
             "avg_score": round(sum(scores) / len(scores), 1) if scores else None,

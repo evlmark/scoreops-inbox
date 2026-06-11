@@ -425,6 +425,10 @@
       <div class="section-title" style="margin:0">Topic trends</div>
       <div style="display:flex;gap:6px;align-items:center">
         <div style="display:flex;gap:6px;margin-right:10px">
+          <button class="tp-seg" data-s="all"  onclick="setTopicSegment('all')"  style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">All</button>
+          <button class="tp-seg" data-s="pfae" onclick="setTopicSegment('pfae')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">PFAE</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-right:10px">
           <button class="tp-mode" data-m="topic" onclick="setTrendMode('topic')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Topics</button>
           <button class="tp-mode" data-m="group" onclick="setTrendMode('group')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Groups</button>
         </div>
@@ -790,11 +794,12 @@ async function loadUsers(q) {
   if (!list.length) { wrap.innerHTML = '<div class="loading" style="padding:16px">No users found.</div>'; return; }
   let h = `<table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead><tr style="text-align:left;color:#6b7280;border-bottom:1px solid #e5e7eb">
-      <th style="padding:8px 10px">Customer ID</th><th>Contacts</th><th>First</th><th>Last</th><th>Top topic</th><th>Avg</th><th></th>
+      <th style="padding:8px 10px">Customer ID</th><th>Account</th><th>Contacts</th><th>First</th><th>Last</th><th>Top topic</th><th>Avg</th><th></th>
     </tr></thead><tbody>`;
   for (const u of list) {
     h += `<tr style="border-bottom:1px solid #f1f1f4;cursor:pointer" onclick="openCustomer('${u.customer_id}')">
       <td style="padding:7px 10px"><code style="font-size:11px">${escHtml(u.customer_id)}</code></td>
+      <td>${u.account_type ? accountBadge(u.account_type, 0) : '<span style="color:#d1d5db">—</span>'}</td>
       <td style="font-weight:600">${u.count}</td>
       <td style="color:#6b7280">${u.first_at ? formatPlain(u.first_at).split(',')[0] : '—'}</td>
       <td style="color:#6b7280">${u.last_at ? formatPlain(u.last_at).split(',')[0] : '—'}</td>
@@ -844,7 +849,8 @@ function renderCustomerModal(d) {
   const range = (d.first_at && d.last_at)
     ? `${formatPlain(d.first_at).split(',')[0]} → ${formatPlain(d.last_at).split(',')[0]}` : '—';
   document.getElementById('cust-modal-meta').innerHTML =
-    `<span>📨 ${d.count} contact${d.count === 1 ? '' : 's'}</span><span>🗓 ${range}</span>`
+    (d.account_type ? `<span>🏦 ${accountBadge(d.account_type, 0)}</span>` : '')
+    + `<span>📨 ${d.count} contact${d.count === 1 ? '' : 's'}</span><span>🗓 ${range}</span>`
     + (d.avg_score != null ? `<span>⭐ avg ${d.avg_score}</span>` : '');
   // topic chips
   const chips = (d.topics || []).map(t =>
@@ -1304,8 +1310,20 @@ const SOURCE_BADGE = {
   seed:  '<span style="background:#e0f2fe;color:#0369a1;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px">seed</span>',
 };
 
+const ACCT_COLORS = {
+  'PFAE Golden':   ['#fef9c3', '#854d0e'],
+  'PFAE External': ['#ede9fe', '#6d28d9'],
+  'No Empresa account': ['#f3f4f6', '#9ca3af'],
+};
+function accountBadge(at, ml) {
+  if (!at) return '';
+  const c = ACCT_COLORS[at] || ['#f3f4f6', '#6b7280'];
+  return `<span style="background:${c[0]};color:${c[1]};font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:${ml || 6}px;white-space:nowrap">${escHtml(at)}</span>`;
+}
+
 function topicTagBadges(c) {
   const b = [];
+  if (c.account_type) b.push(accountBadge(c.account_type));
   if (c.product_line && c.product_line !== 'NA') {
     const col = c.product_line === 'PM' ? '#0369a1' : '#7c3aed';
     b.push(`<span style="background:#f3f4f6;color:${col};font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px">${escHtml(c.product_line)}</span>`);
@@ -1378,10 +1396,23 @@ async function saveConvTopic(convId) {
 
 // ══════════ Topics tab: bank + trends + emerging suggestions ══════════
 let topicPeriod = 'week';
+let topicSegment = 'all';
+
+function setTopicSegment(s) {
+  topicSegment = s;
+  document.querySelectorAll('.tp-seg').forEach(b => {
+    const on = b.dataset.s === s;
+    b.style.background = on ? '#7c3aed' : '#fff';
+    b.style.color = on ? '#fff' : '#374151';
+    b.style.borderColor = on ? '#7c3aed' : '#d1d5db';
+  });
+  loadTopicTrends();
+}
 
 async function loadTopicsTab() {
   await ensureTopics(true);
   renderTopicBank();
+  setTopicSegment(topicSegment);
   setTrendMode(trendMode);
   setTopicPeriod(topicPeriod);
   loadSuggestions();
@@ -1488,7 +1519,7 @@ function setTrendMode(m) {
 async function loadTopicTrends() {
   const wrap = document.getElementById('topic-trends');
   const exOut = document.getElementById('topic-exclude-out').checked ? 1 : 0;
-  try { lastTrend = await fetch(`${API}/conversations/topic-stats?period=${topicPeriod}&exclude_outbound=${exOut}`).then(r => r.json()); }
+  try { lastTrend = await fetch(`${API}/conversations/topic-stats?period=${topicPeriod}&exclude_outbound=${exOut}&segment=${topicSegment}`).then(r => r.json()); }
   catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
   renderTrends();
 }
@@ -1628,6 +1659,7 @@ function renderConvModal(c) {
     dur = sec < 60 ? `${sec}s` : `${Math.floor(sec/60)}m ${sec%60}s`;
   }
   document.getElementById('conv-modal-meta').innerHTML = [
+    c.account_type ? `<span>🏦 ${accountBadge(c.account_type, 0)}</span>` : '',
     c.agent_name ? `<span>🎧 ${escHtml(c.agent_name)}</span>` : '',
     c.topic_es   ? `<span>🏷 ${escHtml(c.topic_es)}</span>` : '',
     dur          ? `<span>⏱ ${dur}</span>` : '',

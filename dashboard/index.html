@@ -931,7 +931,10 @@ function renderCustomerModal(d) {
         </div>`;
     }
   }
-  document.getElementById('cust-modal-body').innerHTML = body || '<div class="loading">No conversations.</div>';
+  const cbody = document.getElementById('cust-modal-body');
+  cbody.innerHTML = body || '<div class="loading">No conversations.</div>';
+  // как мессенджер: открываем на самом свежем сообщении (низ)
+  requestAnimationFrame(() => { cbody.scrollTop = cbody.scrollHeight; });
 }
 
 async function loadKnowledge() {

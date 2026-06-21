@@ -890,8 +890,8 @@ function renderCustomerModal(d) {
     `<span style="background:#f3f4f6;color:#374151;font-size:11px;padding:2px 8px;border-radius:10px;margin:0 4px 4px 0;display:inline-block">${escHtml(t.name)} <b>${t.count}</b></span>`).join('');
   document.getElementById('cust-modal-summary').innerHTML =
     `<div style="padding:4px 0"><div style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Topics</div>${chips || '<span style="color:#9ca3af;font-size:12px">—</span>'}</div>`;
-  // история по датам: на каждый диалог — заголовок + сами реплики (клиент ↔ оператор)
-  const convs = d.conversations || [];
+  // история по датам: старые сверху → новые снизу (как обычный чат). Бэкенд отдаёт DESC — разворачиваем.
+  const convs = [...(d.conversations || [])].reverse();
   let body = '';
   let lastDay = null;
   for (const c of convs) {

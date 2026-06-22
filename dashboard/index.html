@@ -633,12 +633,17 @@ window.fetch = function(url, opts) {
 
 let _appBooted = false;
 function bootApp() {
-  if (_appBooted) return;
-  _appBooted = true;
+  // одноразовая проводка слушателей
+  if (!_appBooted) {
+    _appBooted = true;
+    window.addEventListener('hashchange', () => { if (location.hash) openFromHash(); });
+  }
+  // загрузку данных делаем при КАЖДОМ заходе/логине (после повторного логина
+  // данные должны появиться без перезагрузки страницы) — сбрасываем ленивые флаги вкладок
+  inboxTabInited = knowledgeTabInited = topicsTabInited = usersTabInited = false;
   loadWeeklyMetrics();
   switchTab('inbox');
   openFromHash();
-  window.addEventListener('hashchange', () => { if (location.hash) openFromHash(); });
 }
 
 async function loadWeeklyMetrics() {

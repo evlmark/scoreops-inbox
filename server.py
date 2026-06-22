@@ -785,13 +785,30 @@ async def set_conversation_topic(conv_id: str, request: Request):
 
 @app.get("/conversations/topic-stats")
 def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outbound: int = 0,
-                segment: str = "all"):
-    """Тренды по топикам: текущее окно vs предыдущее (day=1д / week=7д / month=30д) + дельта.
+                segment: str = "all", from_date: Optional[str] = None, to_date: Optional[str] = None):
+    """Тренды по топикам: текущее окно vs предыдущее равной длины + дельта.
+    Пресеты period=day(1д)/week(7д)/month(30д) ИЛИ кастомный диапазон from_date..to_date (вкл.),
+    тогда предыдущее окно — такой же длины непосредственно перед текущим.
+    По каждому топику отдаём 2 метрики: число чатов и число уникальных пользователей.
     segment=pfae — только чаты пользователей с PFAE/Golden аккаунтом (account_type)."""
-    span = {"day": 1, "week": 7, "month": 30}.get(period, 7)
     now = datetime.utcnow()
-    cur_start = now - timedelta(days=span)
-    prev_start = now - timedelta(days=2 * span)
+    custom = False
+    if from_date and to_date:
+        try:
+            fd = datetime.fromisoformat(from_date)
+            td = datetime.fromisoformat(to_date)
+            cur_start = datetime(fd.year, fd.month, fd.day)
+            cur_end = datetime(td.year, td.month, td.day) + timedelta(days=1)  # to_date включительно
+            span = max(1, (cur_end - cur_start).days)
+            prev_start = cur_start - timedelta(days=span)
+            custom = True
+        except ValueError:
+            custom = False
+    if not custom:
+        span = {"day": 1, "week": 7, "month": 30}.get(period, 7)
+        cur_end = now
+        cur_start = now - timedelta(days=span)
+        prev_start = now - timedelta(days=2 * span)
     db = SessionLocal()
     try:
         tmap = {t["slug"]: t for t in load_topics()}
@@ -802,27 +819,44 @@ def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outb
             q = q.filter(DBConversation.cohort.is_(None))
         q = q.filter(DBConversation.topic_slug.isnot(None),
                      DBConversation.created_at.isnot(None),
-                     DBConversation.created_at >= prev_start)
+                     DBConversation.created_at >= prev_start,
+                     DBConversation.created_at < cur_end)
         if exclude_outbound:
             q = q.filter((DBConversation.direction != "outbound") | (DBConversation.direction.is_(None)))
         if segment == "pfae":
             q = q.filter(DBConversation.account_type.in_(["PFAE External", "PFAE Golden"]))
+
+        def slot(d, s):
+            e = d.get(s)
+            if not e:
+                e = d[s] = {"chats": 0, "users": set()}
+            return e
+
         cur, prev = {}, {}
         for c in q.all():
-            bucket = cur if c.created_at >= cur_start else prev
-            bucket[c.topic_slug] = bucket.get(c.topic_slug, 0) + 1
+            e = slot(cur if c.created_at >= cur_start else prev, c.topic_slug)
+            e["chats"] += 1
+            cid = clean_customer_id(c.customer_id)
+            if cid:
+                e["users"].add(cid)
         items = []
         for s in (set(cur) | set(prev)):
-            cc, pc = cur.get(s, 0), prev.get(s, 0)
+            ce, pe = cur.get(s), prev.get(s)
+            cc = ce["chats"] if ce else 0
+            pc = pe["chats"] if pe else 0
+            cu = len(ce["users"]) if ce else 0
+            pu = len(pe["users"]) if pe else 0
             items.append({
                 "slug": s, "topic": (tmap.get(s) or {}).get("name_en") or s,
                 "category": (tmap.get(s) or {}).get("category"),
                 "current": cc, "previous": pc, "delta": cc - pc,
+                "users": cu, "users_prev": pu, "users_delta": cu - pu,
             })
         items.sort(key=lambda x: -x["current"])
         return {
-            "period": period, "span_days": span,
+            "period": "custom" if custom else period, "span_days": span,
             "current_from": cur_start.date().isoformat(),
+            "current_to": (cur_end - timedelta(days=1)).date().isoformat(),
             "previous_from": prev_start.date().isoformat(),
             "topics": items,
         }
@@ -952,14 +986,30 @@ def reject_topic_suggestion(sug_id: int):
 
 
 @app.get("/metrics/weekly")
-def weekly_metrics(cohort: Optional[str] = None):
-    """KPI текущей недели (Пн–Вс) vs прошлой: чаты/пользователи — всего и по PFAE."""
+def weekly_metrics(cohort: Optional[str] = None, week_offset: int = 0,
+                   from_date: Optional[str] = None, to_date: Optional[str] = None):
+    """KPI за период vs предыдущий равной длины: чаты/пользователи (всего и PFAE)
+    + среднее число тасок на пользователя.
+    По умолчанию — текущая неделя (Пн–Вс). week_offset=N сдвигает окно на N недель назад.
+    from_date..to_date (вкл.) — кастомный период, дельта к такому же предыдущему."""
     now = datetime.utcnow()
-    today = now.date()
-    ws_d = today - timedelta(days=today.weekday())                # понедельник текущей недели
-    week_start = datetime(ws_d.year, ws_d.month, ws_d.day)
-    week_end = week_start + timedelta(days=7)
-    prev_start = week_start - timedelta(days=7)
+    custom = False
+    if from_date and to_date:
+        try:
+            fd = datetime.fromisoformat(from_date)
+            td = datetime.fromisoformat(to_date)
+            week_start = datetime(fd.year, fd.month, fd.day)
+            week_end = datetime(td.year, td.month, td.day) + timedelta(days=1)  # to_date включительно
+            custom = True
+        except ValueError:
+            custom = False
+    if not custom:
+        today = now.date()
+        ws_d = today - timedelta(days=today.weekday()) - timedelta(weeks=max(0, week_offset))
+        week_start = datetime(ws_d.year, ws_d.month, ws_d.day)
+        week_end = week_start + timedelta(days=7)
+    span = week_end - week_start
+    prev_start = week_start - span
     PFAE = ("PFAE External", "PFAE Golden")
     db = SessionLocal()
     try:
@@ -989,13 +1039,22 @@ def weekly_metrics(cohort: Optional[str] = None):
             pv = len(prev[key]) if is_set else prev[key]
             return {"value": cv, "prev": pv, "delta": cv - pv}
 
+        def avg_metric():
+            cu, pu = len(cur["users"]), len(prev["users"])
+            cv = round(cur["chats"] / cu, 1) if cu else 0
+            pv = round(prev["chats"] / pu, 1) if pu else 0
+            return {"value": cv, "prev": pv, "delta": round(cv - pv, 1)}
+
         return {
             "week_start": week_start.date().isoformat(),
             "week_end": (week_end - timedelta(days=1)).date().isoformat(),
+            "period": "custom" if custom else "week",
+            "week_offset": 0 if custom else max(0, week_offset),
             "chats": metric("chats"),
             "users": metric("users", True),
             "pfae_chats": metric("pfae_chats"),
             "pfae_users": metric("pfae_users", True),
+            "avg_per_user": avg_metric(),
         }
     finally:
         db.close()
@@ -1030,10 +1089,11 @@ async def set_user_accounts(request: Request):
 @app.get("/conversations")
 def list_conversations(limit: int = 500, cohort: Optional[str] = None,
                        topic_slug: Optional[str] = None, days: Optional[int] = None,
-                       exclude_outbound: int = 0, customer_id: Optional[str] = None):
+                       exclude_outbound: int = 0, customer_id: Optional[str] = None,
+                       from_date: Optional[str] = None, to_date: Optional[str] = None):
     """Список реальных обращений (последние первые).
     cohort=<метка> — только эта выборка; без параметра — обычный Real Inbox (без когорт).
-    topic_slug/days/exclude_outbound/customer_id — фильтры (drill-down по топику / по пользователю)."""
+    topic_slug/days/from_date/to_date/exclude_outbound/customer_id — фильтры (drill-down)."""
     db = SessionLocal()
     try:
         q = db.query(DBConversation)
@@ -1046,7 +1106,14 @@ def list_conversations(limit: int = 500, cohort: Optional[str] = None,
             q = q.filter(DBConversation.cohort.is_(None))
         if topic_slug:
             q = q.filter(DBConversation.topic_slug == topic_slug)
-        if days:
+        if from_date and to_date:
+            try:
+                fd = datetime.fromisoformat(from_date); td = datetime.fromisoformat(to_date)
+                q = q.filter(DBConversation.created_at >= datetime(fd.year, fd.month, fd.day),
+                             DBConversation.created_at < datetime(td.year, td.month, td.day) + timedelta(days=1))
+            except ValueError:
+                pass
+        elif days:
             q = q.filter(DBConversation.created_at >= datetime.utcnow() - timedelta(days=days))
         if exclude_outbound:
             q = q.filter((DBConversation.direction != "outbound") | (DBConversation.direction.is_(None)))

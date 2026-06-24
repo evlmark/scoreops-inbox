@@ -818,6 +818,7 @@ def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outb
         else:
             q = q.filter(DBConversation.cohort.is_(None))
         q = q.filter(DBConversation.topic_slug.isnot(None),
+                     DBConversation.merged_into.is_(None),   # фрагменты-продолжения не считаем
                      DBConversation.created_at.isnot(None),
                      DBConversation.created_at >= prev_start,
                      DBConversation.created_at < cur_end)
@@ -1019,6 +1020,7 @@ def weekly_metrics(cohort: Optional[str] = None, week_offset: int = 0,
     try:
         q = db.query(DBConversation).filter(
             DBConversation.created_at.isnot(None),
+            DBConversation.merged_into.is_(None),   # фрагменты-продолжения не считаем
             DBConversation.created_at >= prev_start,
             DBConversation.created_at < week_end)
         if cohort:
@@ -1090,11 +1092,78 @@ async def set_user_accounts(request: Request):
         db.close()
 
 
+def _cust_msgs(c):
+    """Число содержательных реплик КЛИЕНТА в чате."""
+    return sum(1 for t in (c.transcript or [])
+               if t.get("role") == "customer" and (t.get("text") or "").strip())
+
+
+def _link_fragments(db, gap_minutes: int = 10, thin_cust_msgs: int = 2):
+    """Склейка коротких чатов-продолжений в основной диалог.
+    Когда саппорт долго не отвечает, разговор рвётся на несколько чатов. Логика:
+    чаты ОДНОГО клиента за ОДИН день, идущие подряд с разрывом ≤ gap_minutes, образуют
+    кластер; «основной» = чат с макс. числом реплик; остальные ТОНКИЕ (≤ thin_cust_msgs
+    реплик клиента) помечаются merged_into = id основного. Пересчёт целиком (идемпотентно)."""
+    from collections import defaultdict
+    rows = (db.query(DBConversation)
+              .filter(DBConversation.type == "chat",
+                      DBConversation.customer_id.isnot(None),
+                      DBConversation.created_at.isnot(None))
+              .all())
+    by_cust = defaultdict(list)
+    for c in rows:
+        by_cust[c.customer_id].append(c)
+    gap = timedelta(minutes=gap_minutes)
+    assign = {}  # fragment_id -> main_id
+
+    def flush(cluster):
+        if len(cluster) < 2:
+            return
+        # основной — с наибольшим числом реплик (при равенстве — более ранний)
+        main = sorted(cluster, key=lambda c: (-len(c.transcript or []), c.created_at))[0]
+        for c in cluster:
+            if c.id != main.id and _cust_msgs(c) <= thin_cust_msgs:
+                assign[c.id] = main.id
+
+    for cust, lst in by_cust.items():
+        lst.sort(key=lambda c: c.created_at)
+        cluster, prev = [], None
+        for c in lst:
+            if prev is not None and (c.created_at - (prev.closed_at or prev.created_at)) <= gap \
+               and c.created_at.date() == prev.created_at.date():
+                cluster.append(c)
+            else:
+                flush(cluster); cluster = [c]
+            prev = c
+        flush(cluster)
+
+    # полный пересчёт: сбрасываем старые метки, ставим новые
+    db.query(DBConversation).filter(DBConversation.merged_into.isnot(None)).update(
+        {DBConversation.merged_into: None}, synchronize_session=False)
+    for fid, pid in assign.items():
+        db.query(DBConversation).filter(DBConversation.id == fid).update(
+            {DBConversation.merged_into: pid}, synchronize_session=False)
+    db.commit()
+    return len(assign)
+
+
+@app.post("/admin/link-fragments")
+def admin_link_fragments(gap_minutes: int = 10, thin_cust_msgs: int = 2):
+    """Пересчитать склейку фрагментов-продолжений. Вызывается пуллером после обработки."""
+    db = SessionLocal()
+    try:
+        n = _link_fragments(db, gap_minutes, thin_cust_msgs)
+        return {"ok": True, "merged": n}
+    finally:
+        db.close()
+
+
 @app.get("/conversations")
 def list_conversations(limit: int = 500, cohort: Optional[str] = None,
                        topic_slug: Optional[str] = None, days: Optional[int] = None,
                        exclude_outbound: int = 0, customer_id: Optional[str] = None,
-                       from_date: Optional[str] = None, to_date: Optional[str] = None):
+                       from_date: Optional[str] = None, to_date: Optional[str] = None,
+                       include_merged: int = 0):
     """Список реальных обращений (последние первые).
     cohort=<метка> — только эта выборка; без параметра — обычный Real Inbox (без когорт).
     topic_slug/days/from_date/to_date/exclude_outbound/customer_id — фильтры (drill-down)."""
@@ -1102,12 +1171,16 @@ def list_conversations(limit: int = 500, cohort: Optional[str] = None,
     try:
         q = db.query(DBConversation)
         if customer_id:
-            # по конкретному пользователю — игнорируем фильтр когорт
+            # по конкретному пользователю — игнорируем фильтр когорт; фрагменты показываем (помечены в UI)
             q = q.filter(DBConversation.customer_id == customer_id)
-        elif cohort:
-            q = q.filter(DBConversation.cohort == cohort)
         else:
-            q = q.filter(DBConversation.cohort.is_(None))
+            if cohort:
+                q = q.filter(DBConversation.cohort == cohort)
+            else:
+                q = q.filter(DBConversation.cohort.is_(None))
+            if not include_merged:
+                # в общих списках/drill-down фрагменты-продолжения скрываем (свёрнуты в основной)
+                q = q.filter(DBConversation.merged_into.is_(None))
         if topic_slug:
             q = q.filter(DBConversation.topic_slug == topic_slug)
         if from_date and to_date:
@@ -1122,6 +1195,13 @@ def list_conversations(limit: int = 500, cohort: Optional[str] = None,
         if exclude_outbound:
             q = q.filter((DBConversation.direction != "outbound") | (DBConversation.direction.is_(None)))
         rows = q.order_by(desc(DBConversation.created_at)).limit(limit).all()
+        ids = [c.id for c in rows]
+        child_counts = {}
+        if ids:
+            for pid, cnt in (db.query(DBConversation.merged_into, func.count())
+                               .filter(DBConversation.merged_into.in_(ids))
+                               .group_by(DBConversation.merged_into).all()):
+                child_counts[pid] = cnt
         return [{
             "id":          c.id,
             "type":        c.type,
@@ -1142,6 +1222,8 @@ def list_conversations(limit: int = 500, cohort: Optional[str] = None,
             "created_at":  c.created_at.isoformat() if c.created_at else None,
             "closed_at":   c.closed_at.isoformat() if c.closed_at else None,
             "turns":       len(c.transcript or []),
+            "merged_into": c.merged_into,
+            "child_count": child_counts.get(c.id, 0),
         } for c in rows]
     finally:
         db.close()
@@ -1153,7 +1235,7 @@ def conversations_stats(cohort: Optional[str] = None):
     cohort=<метка> — только эта выборка; без параметра — обычный Real Inbox (без когорт)."""
     db = SessionLocal()
     try:
-        q = db.query(DBConversation)
+        q = db.query(DBConversation).filter(DBConversation.merged_into.is_(None))  # фрагменты не считаем
         if cohort:
             q = q.filter(DBConversation.cohort == cohort)
         else:
@@ -1255,6 +1337,13 @@ def get_conversation(conv_id: str):
                 "created_at": o.created_at.isoformat() if o.created_at else None,
             } for o in others]
 
+        # фрагменты-продолжения, приклеенные к этому диалогу
+        children = [{
+            "id": ch.id, "created_at": ch.created_at.isoformat() if ch.created_at else None,
+            "turns": len(ch.transcript or []), "topic": ch.topic,
+        } for ch in db.query(DBConversation).filter(DBConversation.merged_into == c.id)
+                       .order_by(DBConversation.created_at).all()]
+
         return {
             "id":          c.id,
             "type":        c.type,
@@ -1279,6 +1368,8 @@ def get_conversation(conv_id: str):
             "in_progress_at": c.in_progress_at.isoformat() if c.in_progress_at else None,
             "closed_at":   c.closed_at.isoformat() if c.closed_at else None,
             "customer_history": customer_history,
+            "merged_into": c.merged_into,
+            "children":    children,
         }
     finally:
         db.close()
@@ -1348,16 +1439,19 @@ def get_customer(customer_id: str):
             "transcript": c.transcript or [],
             "created_at": c.created_at.isoformat() if c.created_at else None,
             "closed_at": c.closed_at.isoformat() if c.closed_at else None,
+            "merged_into": c.merged_into,
         } for c in rows]
-        scores = [c.avg_score for c in rows if c.avg_score is not None]
+        # агрегаты (count/topics/avg) считаем без фрагментов-продолжений; сами фрагменты в треде показываем
+        main_rows = [c for c in rows if not c.merged_into]
+        scores = [c.avg_score for c in main_rows if c.avg_score is not None]
         topics = {}
-        for c in rows:
+        for c in main_rows:
             if c.topic_slug:
                 topics[c.topic_slug] = topics.get(c.topic_slug, 0) + 1
         account_type = next((c.account_type for c in rows if c.account_type), None)
         tariff = next((c.tariff for c in rows if c.tariff), None)
         return {
-            "customer_id": customer_id, "count": len(rows),
+            "customer_id": customer_id, "count": len(main_rows),
             "account_type": account_type, "tariff": tariff,
             "first_at": convs[-1]["created_at"] if convs else None,
             "last_at": convs[0]["created_at"] if convs else None,

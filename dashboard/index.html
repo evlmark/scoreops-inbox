@@ -954,13 +954,15 @@ function renderCustomerModal(d) {
     const tag = (c.product_line && c.product_line !== 'NA' ? c.product_line : '') + (c.direction === 'outbound' ? ' ↗' : '');
     const time = c.created_at ? (formatPlain(c.created_at).split(',')[1] || '').trim() : '';
     // заголовок диалога
-    body += `<div style="display:flex;align-items:center;gap:8px;margin:8px 0 10px;font-size:12px">
+    const fragTag = c.merged_into ? `<span title="Continuation fragment — folded into the main dialogue, not scored separately" style="background:#fef3c7;color:#92400e;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px">↳ continuation</span>` : '';
+    body += `<div style="display:flex;align-items:center;gap:8px;margin:8px 0 10px;font-size:12px${c.merged_into ? ';opacity:.7' : ''}">
       <span style="color:#9ca3af">${time}</span>
       ${convTypeBadge(c.type)}
       <span style="font-weight:600;color:#374151">${escHtml(c.topic_name || c.topic || '—')}</span>
+      ${fragTag}
       <span style="color:#9ca3af;font-size:10px;font-weight:700">${escHtml(tag)}</span>
       ${c.agent_name ? `<span style="color:#9ca3af">· ${escHtml(c.agent_name)}</span>` : ''}
-      <span style="margin-left:auto">${scorePill(c.avg_score)}</span>
+      <span style="margin-left:auto">${c.merged_into ? '' : scorePill(c.avg_score)}</span>
       <a onclick="closeCustModal();openConv('${c.id}')" style="cursor:pointer;color:#7c3aed">open ↗</a>
     </div>`;
     // сами реплики
@@ -1275,10 +1277,11 @@ function renderConversations(list) {
       if (idx === total) rowCls += ' conv-group-last';
     }
 
+    const contBadge = c.child_count ? ` <span title="${c.child_count} continuation fragment(s) merged in" style="background:#eef2ff;color:#6366f1;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap">↳ ${c.child_count}</span>` : '';
     html += `<tr class="${rowCls}" onclick="openConv('${c.id}')">
       <td class="time-text">${formatPlain(c.created_at)}</td>
       <td>${convTypeBadge(c.type)}</td>
-      <td>${topicMain}${tagBadges}${markerHtml}${topicSub}</td>
+      <td>${topicMain}${tagBadges}${markerHtml}${contBadge}${topicSub}</td>
       <td><span class="agent-name">${agent}</span></td>
       <td>${scorePill(c.avg_score)}</td>
       <td>${statusPill}</td>
@@ -1753,6 +1756,8 @@ function renderConvModal(c) {
     dur = sec < 60 ? `${sec}s` : `${Math.floor(sec/60)}m ${sec%60}s`;
   }
   document.getElementById('conv-modal-meta').innerHTML = [
+    c.merged_into ? `<span style="background:#fef3c7;color:#92400e;font-weight:700;padding:2px 8px;border-radius:5px">↳ Continuation fragment — not scored separately · <a onclick="openConv('${c.merged_into}')" style="cursor:pointer;color:#7c3aed">open main dialogue →</a></span>` : '',
+    (c.children && c.children.length) ? `<span style="background:#eef2ff;color:#4338ca;font-weight:700;padding:2px 8px;border-radius:5px">↳ ${c.children.length} continuation fragment(s) merged in: ${c.children.map(ch => `<a onclick="openConv('${ch.id}')" style="cursor:pointer;color:#7c3aed">${formatPlain(ch.created_at)}</a>`).join(' · ')}</span>` : '',
     c.account_type ? `<span>🏦 ${accountBadge(c.account_type, 0)}${c.tariff ? ' ' + tariffChip(c.tariff) : ''}</span>` : '',
     c.agent_name ? `<span>🎧 ${escHtml(c.agent_name)}</span>` : '',
     c.topic_es   ? `<span>🏷 ${escHtml(c.topic_es)}</span>` : '',

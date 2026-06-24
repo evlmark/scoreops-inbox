@@ -112,8 +112,9 @@ class Conversation(Base):
     topic_confidence = Column(Float, nullable=True)          # уверенность классификатора 0..1
     product_line = Column(String, index=True, nullable=True) # 'PFAE' / 'PM' / 'NA'
     direction = Column(String, index=True, nullable=True)    # 'inbound' / 'outbound'
-    account_type = Column(String, index=True, nullable=True) # 'PFAE External'/'PFAE Golden'/'No Empresa account' (из funnel по customer_id)
+    account_type = Column(String, index=True, nullable=True) # 'PFAE External'/'PFAE Golden'/'Persona Moral'/'No Empresa account' (из funnel по customer_id)
     tariff = Column(String, nullable=True)                   # имя тарифа из funnel (только при открытом счёте): Emprendedor/Independiente/Empresario…
+    merged_into = Column(String, index=True, nullable=True)  # id «основного» диалога, если этот чат — короткий фрагмент-продолжение (склейка)
 
 
 class Document(Base):
@@ -227,6 +228,7 @@ def _run_migrations():
                 "ALTER TABLE conversations ADD COLUMN direction VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN account_type VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN tariff VARCHAR",
+                "ALTER TABLE conversations ADD COLUMN merged_into VARCHAR",
                 "ALTER TABLE documents ADD COLUMN internal INTEGER DEFAULT 0",
             ]:
                 try:
@@ -259,6 +261,7 @@ def _run_migrations():
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS direction VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS account_type VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS tariff VARCHAR",
+                "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS merged_into VARCHAR",
                 "ALTER TABLE documents ADD COLUMN IF NOT EXISTS internal INTEGER DEFAULT 0",
             ]:
                 try:

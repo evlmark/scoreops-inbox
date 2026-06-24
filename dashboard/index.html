@@ -447,7 +447,9 @@
       <div style="display:flex;gap:6px;align-items:center">
         <div style="display:flex;gap:6px;margin-right:10px">
           <button class="tp-seg" data-s="all"  onclick="setTopicSegment('all')"  style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">All</button>
+          <button class="tp-seg" data-s="none" onclick="setTopicSegment('none')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">None Empresa</button>
           <button class="tp-seg" data-s="pfae" onclick="setTopicSegment('pfae')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">PFAE</button>
+          <button class="tp-seg" data-s="pm"   onclick="setTopicSegment('pm')"   style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">PM</button>
         </div>
         <div style="display:flex;gap:6px;margin-right:10px">
           <button class="tp-mode" data-m="topic" onclick="setTrendMode('topic')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Topics</button>
@@ -1369,6 +1371,7 @@ const SOURCE_BADGE = {
 const ACCT_COLORS = {
   'PFAE Golden':   ['#fef9c3', '#854d0e'],
   'PFAE External': ['#ede9fe', '#6d28d9'],
+  'Persona Moral': ['#dcfce7', '#15803d'],
   'No Empresa account': ['#f3f4f6', '#9ca3af'],
 };
 function accountBadge(at, ml) {

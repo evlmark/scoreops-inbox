@@ -279,6 +279,54 @@ def fetch_account_labels(mcp: MCP, customer_ids, chunk: int = 80) -> dict:
     return info
 
 
+def fetch_pm_labels(mcp: MCP, customer_ids, chunk: int = 80) -> dict:
+    """funnel_pm (Persona Moral) → {customer_id: {'account_type':'Persona Moral','tariff':...}}.
+    У funnel_pm нет user_id; контактирующее физлицо — законный представитель.
+    Матчим наш customer_id по legal_representative_identity_id ИЛИ stakeholder_id
+    (оба — person-id) среди процессов с current_status='ACCOUNT_CREATED'.
+    Возвращает ТОЛЬКО найденные PM-метки (наложение поверх PFAE). При сбое — исключение."""
+    found = {}
+    idset = set(customer_ids)
+    for i in range(0, len(customer_ids), chunk):
+        part = customer_ids[i:i + chunk]
+        inl = ",".join("'" + c.replace("'", "") + "'" for c in part)
+        sql = ("select legal_representative_identity_id lr, stakeholder_id sh, "
+               "max(tariff_name::string) tar "
+               "from DWH_PYME_MAIN_PROD.ORIGINATION.FUNNEL_PM "
+               "where current_status='ACCOUNT_CREATED' "
+               "and (legal_representative_identity_id in (" + inl + ") "
+               "or stakeholder_id in (" + inl + ")) "
+               "group by 1,2")
+        js = ("var r = await Snowflake.query({sql:%s, role:'MARK_EVLAMPIEV'});"
+              "console.log(JSON.stringify(r));" % json.dumps(sql))
+        raw = mcp.code_execute(js, timeout_seconds=110)
+        try:
+            out = json.loads(raw).get("output", raw)
+        except Exception:
+            out = raw
+        out = (out or "").strip()
+        try:
+            obj = json.loads(out)
+        except Exception:
+            obj = out
+        rows = None
+        if isinstance(obj, dict) and obj.get("rows") is not None:
+            cols = obj.get("columns") or []
+            rows = [dict(zip(cols, r)) for r in obj["rows"]]
+        elif isinstance(obj, str):
+            rows = _table_rows(obj)
+        if rows is None:
+            raise RuntimeError(f"funnel_pm-запрос не вернул таблицу: {str(out)[:200]}")
+        for r in rows:
+            tar = (r.get("TAR") or "").strip().strip('"') or None
+            if tar and tar.upper() == "NULL":
+                tar = None
+            for cid in (r.get("LR"), r.get("SH")):
+                if cid and cid in idset:
+                    found[cid] = {"account_type": "Persona Moral", "tariff": tar}
+    return found
+
+
 # ─────────────────────────── HTTP к Railway ───────────────────────────
 def http(method: str, path: str, data: bytes = None, ctype: str = None, timeout: int = 120):
     url = WEB_BASE.rstrip("/") + path
@@ -428,6 +476,11 @@ def main():
             m2.initialize()
             try:
                 info = fetch_account_labels(m2, cids)
+                # Persona Moral: наложение поверх PFAE (PM имеет приоритет — это компанейский счёт)
+                pm = fetch_pm_labels(m2, cids)
+                if pm:
+                    info.update(pm)
+                    log(f"Funnel: найдено PM (Persona Moral) пользователей: {len(pm)}")
             finally:
                 m2.close()
             accounts = [{"customer_id": c, "account_type": v["account_type"], "tariff": v.get("tariff")}

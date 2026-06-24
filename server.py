@@ -790,7 +790,7 @@ def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outb
     Пресеты period=day(1д)/week(7д)/month(30д) ИЛИ кастомный диапазон from_date..to_date (вкл.),
     тогда предыдущее окно — такой же длины непосредственно перед текущим.
     По каждому топику отдаём 2 метрики: число чатов и число уникальных пользователей.
-    segment=pfae — только чаты пользователей с PFAE/Golden аккаунтом (account_type)."""
+    segment: all (все) | none (No Empresa account) | pfae (PFAE External/Golden) | pm (Persona Moral)."""
     now = datetime.utcnow()
     custom = False
     if from_date and to_date:
@@ -825,6 +825,10 @@ def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outb
             q = q.filter((DBConversation.direction != "outbound") | (DBConversation.direction.is_(None)))
         if segment == "pfae":
             q = q.filter(DBConversation.account_type.in_(["PFAE External", "PFAE Golden"]))
+        elif segment == "pm":
+            q = q.filter(DBConversation.account_type == "Persona Moral")
+        elif segment == "none":
+            q = q.filter(DBConversation.account_type == "No Empresa account")
 
         def slot(d, s):
             e = d.get(s)
@@ -1063,8 +1067,8 @@ def weekly_metrics(cohort: Optional[str] = None, week_offset: int = 0,
 @app.post("/admin/user-accounts")
 async def set_user_accounts(request: Request):
     """Bulk-апдейт account_type по customer_id (из ночного funnel-запроса).
-    Тело JSON: {"accounts": [{"customer_id": "...", "account_type": "PFAE External|PFAE Golden|No Empresa account"}]}.
-    Проставляет conversations.account_type всем обращениям пользователя."""
+    Тело JSON: {"accounts": [{"customer_id": "...", "account_type": "PFAE External|PFAE Golden|Persona Moral|No Empresa account", "tariff": "..."}]}.
+    Проставляет conversations.account_type/tariff всем обращениям пользователя."""
     body = await request.json()
     accounts = body.get("accounts") or []
     db = SessionLocal()

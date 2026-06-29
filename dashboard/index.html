@@ -1184,8 +1184,8 @@ function renderInboxStats(s) {
       const totalH = Math.max(2, Math.round((d.total / max) * H));
       const chatH = d.total ? Math.round((d.chat / d.total) * totalH) : 0;
       const callH = totalH - chatH;
-      return `<div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px">
-        <div title="${d.date.slice(5)} · ${d.chat} chats, ${d.call} calls (${d.total})" style="height:${H}px;width:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center">
+      return `<div class="day-col" data-date="${d.date}" data-chat="${d.chat}" data-call="${d.call}" data-total="${d.total}" style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:default">
+        <div style="height:${H}px;width:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center">
           <div style="width:70%;max-width:16px;display:flex;flex-direction:column;justify-content:flex-end;height:${totalH}px">
             <div style="height:${callH}px;background:#60a5fa;border-radius:3px 3px 0 0"></div>
             <div style="height:${chatH}px;background:#a78bfa;border-radius:${callH ? '0' : '3px 3px'} 0 0"></div>
@@ -1196,8 +1196,43 @@ function renderInboxStats(s) {
       </div>`;
     }).join('');
     el.innerHTML = `<div style="display:flex;align-items:flex-end;gap:3px;overflow-x:auto;padding-top:4px">${cols}</div>`;
+    el.querySelectorAll('.day-col').forEach(col => {
+      col.addEventListener('mouseenter', showDayTip);
+      col.addEventListener('mousemove', moveDayTip);
+      col.addEventListener('mouseleave', hideDayTip);
+    });
   }
 }
+
+let _dayTip = null;
+function ensureDayTip() {
+  if (_dayTip) return _dayTip;
+  _dayTip = document.createElement('div');
+  _dayTip.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;display:none;background:#1f2937;color:#fff;font-size:12px;line-height:1.5;padding:8px 11px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.22);white-space:nowrap';
+  document.body.appendChild(_dayTip);
+  return _dayTip;
+}
+function showDayTip(e) {
+  const c = e.currentTarget, tip = ensureDayTip();
+  const dmy = (c.dataset.date || '').split('-');
+  const dateLbl = dmy.length === 3 ? `${dmy[2]}.${dmy[1]}.${dmy[0]}` : c.dataset.date;
+  tip.innerHTML = `<div style="font-weight:700;margin-bottom:4px">📅 ${dateLbl}</div>`
+    + `<div><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#a78bfa;margin-right:6px"></span>Chats: <b>${c.dataset.chat}</b></div>`
+    + `<div><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#60a5fa;margin-right:6px"></span>Calls: <b>${c.dataset.call}</b></div>`
+    + `<div style="border-top:1px solid #374151;margin-top:4px;padding-top:4px">Total: <b>${c.dataset.total}</b></div>`;
+  tip.style.display = 'block';
+  moveDayTip(e);
+}
+function moveDayTip(e) {
+  if (!_dayTip) return;
+  const pad = 14, w = _dayTip.offsetWidth, h = _dayTip.offsetHeight;
+  let x = e.clientX + pad, y = e.clientY + pad;
+  if (x + w > window.innerWidth - 8)  x = e.clientX - w - pad;
+  if (y + h > window.innerHeight - 8) y = e.clientY - h - pad;
+  _dayTip.style.left = x + 'px';
+  _dayTip.style.top = y + 'px';
+}
+function hideDayTip() { if (_dayTip) _dayTip.style.display = 'none'; }
 
 function convTypeBadge(type) {
   return type === 'call'

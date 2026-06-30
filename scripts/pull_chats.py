@@ -516,12 +516,13 @@ def main():
         notify("ScoreOPS: оценка чатов не завершилась", str(e))
         return finish(4)
 
-    # 4) Склейка коротких фрагментов-продолжений в основной диалог (best-effort)
+    # 4) Семантическая группировка чатов клиента в объединённые диалоги + переоценка (best-effort)
     try:
-        r = http("POST", "/admin/link-fragments", data=b"", timeout=120)
-        log(f"Склейка фрагментов: {json.dumps(r, ensure_ascii=False)}")
+        qs = f"?from_date={d_from}&to_date={d_to}"
+        r = http("POST", "/admin/group-conversations" + qs, data=b"", timeout=600)
+        log(f"Группировка диалогов: {json.dumps(r, ensure_ascii=False)}")
     except Exception as e:
-        log(f"Склейка фрагментов: пропускаю ({e})")
+        log(f"Группировка диалогов: пропускаю ({e})")
 
     return finish(0)
 

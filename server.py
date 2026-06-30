@@ -1158,6 +1158,141 @@ def admin_link_fragments(gap_minutes: int = 10, thin_cust_msgs: int = 2):
         db.close()
 
 
+# ─────────── Семантическая группировка диалогов одного клиента ───────────
+
+def cluster_customer_chats(convs: list) -> list:
+    """LLM читает все чаты одного клиента за день и группирует их по СМЫСЛУ:
+    несколько чатов одного обращения (саппорт не ответил >15 мин / клиент пропал и открыл
+    новый чат) → один кластер; разные темы → разные кластеры.
+    Возвращает list[list[conv]]. Фолбэк при сбое LLM — группировка по совпадению topic_slug."""
+    if len(convs) < 2:
+        return [[c] for c in convs]
+    lines = []
+    for i, c in enumerate(convs):
+        cmsgs = [t.get("text", "") for t in (c.transcript or [])
+                 if t.get("role") == "customer" and (t.get("text") or "").strip()]
+        snippet = " | ".join(cmsgs[:4])[:300] or "(sin mensajes del cliente)"
+        tm = c.created_at.strftime("%H:%M") if c.created_at else "--:--"
+        lines.append(f"[{i}] {tm} (tema: {c.topic_slug or '-'}): {snippet}")
+    body = "\n".join(lines)
+    prompt = f"""Eres analista de soporte de Banco Plata. Un mismo cliente abrió VARIOS chats el mismo día.
+Con frecuencia es la MISMA conversación partida en varios chats (el agente tardó más de 15 min o el cliente dejó de responder y se abrió un chat nuevo). Pero a veces son asuntos DISTINTOS.
+
+Agrupa los índices de los chats que pertenecen al MISMO asunto/conversación. Chats de asuntos diferentes van en grupos separados. Cada índice debe aparecer EXACTAMENTE una vez.
+
+CHATS DEL CLIENTE (índice, hora, tema actual, primeros mensajes del cliente):
+{body}
+
+Responde SOLO con JSON, sin markdown: {{"groups": [[0,2],[1],...]}}"""
+    try:
+        resp = EVALUATOR_CLIENT.chat.completions.create(
+            model="deepseek-chat", messages=[{"role": "user", "content": prompt}],
+            max_tokens=300, temperature=0.1)
+        content = (resp.choices[0].message.content or "").strip()
+        content = re.sub(r"^```json\s*", "", content)
+        content = re.sub(r"\s*```$", "", content)
+        groups = json.loads(content).get("groups", [])
+        seen, out = set(), []
+        for g in groups:
+            cl = [convs[i] for i in g if isinstance(i, int) and 0 <= i < len(convs) and i not in seen]
+            for i in g:
+                if isinstance(i, int):
+                    seen.add(i)
+            if cl:
+                out.append(cl)
+        for i, c in enumerate(convs):     # пропущенные индексы → standalone
+            if i not in seen:
+                out.append([c])
+        return out or [[c] for c in convs]
+    except Exception as e:
+        print(f"[cluster] {e} — фолбэк по topic_slug")
+        from collections import defaultdict
+        byt = defaultdict(list)
+        for c in convs:
+            byt[c.topic_slug or "_"].append(c)
+        return list(byt.values())
+
+
+def _group_conversations(db, from_date: Optional[str] = None, to_date: Optional[str] = None,
+                         min_group: int = 2):
+    """Группирует чаты одного клиента за один день по смыслу (LLM), объединённые треды
+    помечает merged_into = id «основного» (самого раннего) и ПЕРЕОЦЕНИВАЕТ объединённый
+    транскрипт целиком. Пересчёт в пределах окна дат (по умолчанию — вся база)."""
+    from collections import defaultdict
+    from sqlalchemy.orm.attributes import flag_modified
+    q = db.query(DBConversation).filter(
+        DBConversation.type == "chat",
+        DBConversation.customer_id.isnot(None),
+        DBConversation.created_at.isnot(None))
+    if from_date and to_date:
+        try:
+            fd = datetime.fromisoformat(from_date); td = datetime.fromisoformat(to_date)
+            lo = datetime(fd.year, fd.month, fd.day)
+            hi = datetime(td.year, td.month, td.day) + timedelta(days=1)
+            q = q.filter(DBConversation.created_at >= lo, DBConversation.created_at < hi)
+        except ValueError:
+            pass
+    rows = q.all()
+    # сброс прежних меток в пределах окна
+    for c in rows:
+        c.merged_into = None
+    by_cd = defaultdict(list)
+    for c in rows:
+        by_cd[(c.customer_id, c.created_at.date())].append(c)
+
+    merged = groups_formed = reevaluated = 0
+    for (cust, day), lst in by_cd.items():
+        if len(lst) < 2:
+            continue
+        lst.sort(key=lambda c: c.created_at)
+        for cl in cluster_customer_chats(lst):
+            if len(cl) < min_group:
+                continue
+            cl.sort(key=lambda c: c.created_at)
+            primary = cl[0]
+            for c in cl[1:]:
+                c.merged_into = primary.id
+                merged += 1
+            groups_formed += 1
+            # объединённый транскрипт всех тасок треда → переоценка целиком
+            combined = []
+            for c in cl:
+                for t in (c.transcript or []):
+                    if t.get("text"):
+                        combined.append({"role": t["role"], "text": t["text"],
+                                         "text_en": t.get("text_en")})
+            res = classify_and_evaluate_conversation(combined)
+            if res:
+                slug = res.get("topic_slug")
+                if slug and primary.topic_source != "human":
+                    primary.topic_slug = slug
+                    primary.topic_source = "llm"
+                    primary.topic_confidence = res.get("topic_confidence")
+                    primary.product_line = res.get("product_line")
+                    primary.direction = res.get("direction")
+                    ne, ns = topic_names(slug)
+                    primary.topic = ne or primary.topic
+                    primary.topic_es = ns or primary.topic_es
+                primary.avg_score = res.get("score")
+                primary.summary = res.get("explanation")
+                primary.evaluation = res
+                reevaluated += 1
+        db.commit()
+    db.commit()
+    return {"merged": merged, "groups": groups_formed, "reevaluated": reevaluated}
+
+
+@app.post("/admin/group-conversations")
+def admin_group_conversations(from_date: Optional[str] = None, to_date: Optional[str] = None):
+    """Семантическая группировка чатов клиента в объединённые диалоги + переоценка.
+    Вызывается пуллером после обработки (с окном выгрузки). Без дат — по всей базе."""
+    db = SessionLocal()
+    try:
+        return {"ok": True, **_group_conversations(db, from_date, to_date)}
+    finally:
+        db.close()
+
+
 @app.get("/conversations")
 def list_conversations(limit: int = 500, cohort: Optional[str] = None,
                        topic_slug: Optional[str] = None, days: Optional[int] = None,
@@ -1337,12 +1472,29 @@ def get_conversation(conv_id: str):
                 "created_at": o.created_at.isoformat() if o.created_at else None,
             } for o in others]
 
-        # фрагменты-продолжения, приклеенные к этому диалогу
+        # таски, объединённые в этот диалог (merged_into = c.id)
+        child_objs = (db.query(DBConversation).filter(DBConversation.merged_into == c.id)
+                        .order_by(DBConversation.created_at).all())
         children = [{
             "id": ch.id, "created_at": ch.created_at.isoformat() if ch.created_at else None,
             "turns": len(ch.transcript or []), "topic": ch.topic,
-        } for ch in db.query(DBConversation).filter(DBConversation.merged_into == c.id)
-                       .order_by(DBConversation.created_at).all()]
+        } for ch in child_objs]
+
+        # объединённый транскрипт всего треда (основной + приклеенные), по времени;
+        # перед каждой таской — маркер-разделитель с её временем
+        members = sorted([c] + child_objs, key=lambda m: m.created_at or datetime.min)
+        combined_transcript = []
+        for idx, m in enumerate(members):
+            combined_transcript.append({
+                "boundary": True, "task_id": m.id,
+                "created_at": m.created_at.isoformat() if m.created_at else None,
+                "part": idx + 1,
+            })
+            for t in (m.transcript or []):
+                if t.get("text"):
+                    combined_transcript.append({"role": t.get("role"), "text": t.get("text"),
+                                                "text_en": t.get("text_en")})
+        task_count = len(members)
 
         return {
             "id":          c.id,
@@ -1370,6 +1522,8 @@ def get_conversation(conv_id: str):
             "customer_history": customer_history,
             "merged_into": c.merged_into,
             "children":    children,
+            "task_count":  task_count,
+            "combined_transcript": combined_transcript,
         }
     finally:
         db.close()

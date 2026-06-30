@@ -1791,8 +1791,8 @@ function renderConvModal(c) {
     dur = sec < 60 ? `${sec}s` : `${Math.floor(sec/60)}m ${sec%60}s`;
   }
   document.getElementById('conv-modal-meta').innerHTML = [
-    c.merged_into ? `<span style="background:#fef3c7;color:#92400e;font-weight:700;padding:2px 8px;border-radius:5px">↳ Continuation fragment — not scored separately · <a onclick="openConv('${c.merged_into}')" style="cursor:pointer;color:#7c3aed">open main dialogue →</a></span>` : '',
-    (c.children && c.children.length) ? `<span style="background:#eef2ff;color:#4338ca;font-weight:700;padding:2px 8px;border-radius:5px">↳ ${c.children.length} continuation fragment(s) merged in: ${c.children.map(ch => `<a onclick="openConv('${ch.id}')" style="cursor:pointer;color:#7c3aed">${formatPlain(ch.created_at)}</a>`).join(' · ')}</span>` : '',
+    c.merged_into ? `<span style="background:#fef3c7;color:#92400e;font-weight:700;padding:2px 8px;border-radius:5px">↳ Часть объединённого диалога — не оценивается отдельно · <a onclick="openConv('${c.merged_into}')" style="cursor:pointer;color:#7c3aed">открыть весь диалог →</a></span>` : '',
+    (c.task_count > 1) ? `<span style="background:#eef2ff;color:#4338ca;font-weight:700;padding:2px 8px;border-radius:5px">🧩 Объединённый диалог из ${c.task_count} тасок</span>` : '',
     c.account_type ? `<span>🏦 ${accountBadge(c.account_type, 0)}${c.tariff ? ' ' + tariffChip(c.tariff) : ''}</span>` : '',
     c.agent_name ? `<span>🎧 ${escHtml(c.agent_name)}</span>` : '',
     c.topic_es   ? `<span>🏷 ${escHtml(c.topic_es)}</span>` : '',
@@ -1816,8 +1816,8 @@ function renderConvModal(c) {
       <div class="modal-stat-lbl">Outcome</div>
     </div>
     <div class="modal-stat">
-      <div class="modal-stat-val c-blue">${(c.transcript||[]).length}</div>
-      <div class="modal-stat-lbl">Turns</div>
+      <div class="modal-stat-val c-blue">${(c.task_count > 1 && c.combined_transcript) ? c.combined_transcript.filter(t => !t.boundary).length : (c.transcript||[]).length}</div>
+      <div class="modal-stat-lbl">${c.task_count > 1 ? 'Turns (' + c.task_count + ' tasks)' : 'Turns'}</div>
     </div>
     ${c.summary ? `<div class="modal-stat" style="flex:1;text-align:left;min-width:200px">
       <div style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">AI Summary</div>
@@ -1873,10 +1873,24 @@ function renderConvModal(c) {
     </div>`;
   }
 
-  if (!transcript.length) {
+  // если диалог объединён из нескольких тасок — показываем весь тред целиком
+  const useCombined = (c.task_count > 1) && Array.isArray(c.combined_transcript) && c.combined_transcript.length;
+  const rows = useCombined ? c.combined_transcript : transcript;
+  if (useCombined) {
+    html += `<div style="margin:0 24px 12px;padding:8px 12px;background:#eef2ff;border-radius:8px;font-size:12px;color:#4338ca;font-weight:600">🧩 Объединённый диалог из ${c.task_count} тасок (оценён как одно целое)</div>`;
+  }
+  if (!rows.length) {
     html += '<div class="loading">No transcript.</div>';
   } else {
-    for (const turn of transcript) {
+    for (const turn of rows) {
+      if (turn.boundary) {   // разделитель между тасками в объединённом треде
+        html += `<div style="display:flex;align-items:center;gap:8px;margin:14px 24px 8px;color:#9ca3af;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">
+          <span style="flex:1;height:1px;background:#e5e7eb"></span>
+          <span>Task ${turn.part} · ${formatPlain(turn.created_at)}</span>
+          <span style="flex:1;height:1px;background:#e5e7eb"></span>
+        </div>`;
+        continue;
+      }
       const isCust = turn.role === 'customer';
       const side   = isCust ? 'customer' : 'agent';
       const label  = isCust ? '👤 Cliente' : `🎧 ${c.agent_name || 'Agente'}`;

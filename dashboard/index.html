@@ -948,15 +948,15 @@ function renderCustomerModal(d) {
     const day = (c.created_at || '').slice(0, 10);
     if (day !== lastDay) {
       lastDay = day;
-      const dayLbl = c.created_at ? formatPlain(c.created_at).split(',')[0] : 'No date';
+      const dayLbl = c.created_at ? formatPlain(c.created_at).replace(/ at .*/, '') : 'No date';
       body += `<div style="font-size:11px;font-weight:700;color:#7c3aed;margin:18px 0 4px;text-transform:uppercase;letter-spacing:.04em;border-top:1px solid #eef0f4;padding-top:14px">${dayLbl}</div>`;
     }
     const tag = (c.product_line && c.product_line !== 'NA' ? c.product_line : '') + (c.direction === 'outbound' ? ' ↗' : '');
-    const time = c.created_at ? (formatPlain(c.created_at).split(',')[1] || '').trim() : '';
+    const when = c.created_at ? formatPlain(c.created_at) : '—';
     // заголовок диалога
     const fragTag = c.merged_into ? `<span title="Continuation fragment — folded into the main dialogue, not scored separately" style="background:#fef3c7;color:#92400e;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px">↳ continuation</span>` : '';
     body += `<div style="display:flex;align-items:center;gap:8px;margin:8px 0 10px;font-size:12px${c.merged_into ? ';opacity:.7' : ''}">
-      <span style="color:#9ca3af">${time}</span>
+      <span style="color:#6b7280;font-weight:600;white-space:nowrap">${when}</span>
       ${convTypeBadge(c.type)}
       <span style="font-weight:600;color:#374151">${escHtml(c.topic_name || c.topic || '—')}</span>
       ${fragTag}

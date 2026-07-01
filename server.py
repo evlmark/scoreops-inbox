@@ -2,6 +2,8 @@ import os
 import re
 import json
 import uuid
+import time
+import threading
 import warnings
 from datetime import datetime, timedelta
 from typing import Optional
@@ -1291,6 +1293,64 @@ def admin_group_conversations(from_date: Optional[str] = None, to_date: Optional
         return {"ok": True, **_group_conversations(db, from_date, to_date)}
     finally:
         db.close()
+
+
+# ─────────── Серверный self-heal: сам добивает pending независимо от пуллера ───────────
+# Локальный пуллер иногда обрывается на середине обработки (сеть/сон Mac) и оставляет
+# необработанные обращения. Этот фоновой воркер на web дообрабатывает их сам, а после
+# полного дренажа запускает семантическую группировку по затронутым дням. Так обработка
+# перестаёт зависеть от локальной машины. Отключается env PENDING_WORKER=0.
+
+_worker_started = False
+
+
+def _pending_worker_loop():
+    dirty_days = set()
+    while True:
+        try:
+            db = SessionLocal()
+            ids = [c.id for c in db.query(DBConversation.id.label("id"))
+                     .filter(DBConversation.status == "pending")
+                     .order_by(DBConversation.created_at).limit(5).all()]
+            db.close()
+            if not ids:
+                # нечего обрабатывать: если что-то доделали — группируем затронутые дни один раз
+                if dirty_days:
+                    gdb = SessionLocal()
+                    try:
+                        for d in sorted(dirty_days):
+                            try:
+                                _group_conversations(gdb, d, d)
+                            except Exception as ge:
+                                print(f"[pending-worker] group {d}: {ge}")
+                    finally:
+                        gdb.close()
+                    dirty_days.clear()
+                    print("[pending-worker] дренаж завершён, группировка выполнена")
+                time.sleep(60)
+                continue
+            # обработать батч
+            gdb = SessionLocal()
+            for c in gdb.query(DBConversation).filter(DBConversation.id.in_(ids)).all():
+                if c.created_at:
+                    dirty_days.add(c.created_at.date().isoformat())
+            gdb.close()
+            for cid in ids:
+                _process_one_conversation(cid)
+            time.sleep(1)
+        except Exception as e:
+            print(f"[pending-worker] {e}")
+            time.sleep(60)
+
+
+@app.on_event("startup")
+def _start_pending_worker():
+    global _worker_started
+    if _worker_started or os.getenv("PENDING_WORKER", "1") != "1":
+        return
+    _worker_started = True
+    threading.Thread(target=_pending_worker_loop, daemon=True).start()
+    print("[pending-worker] запущен (self-heal обработки)")
 
 
 @app.get("/conversations")

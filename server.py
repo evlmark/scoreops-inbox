@@ -1314,19 +1314,22 @@ def _pending_worker_loop():
                      .order_by(DBConversation.created_at).limit(5).all()]
             db.close()
             if not ids:
-                # нечего обрабатывать: если что-то доделали — группируем затронутые дни один раз
+                # нечего обрабатывать: если что-то доделали — группируем ОКНО последних 4 дней
+                # (не только дни, чьи pending дренажили сами) — чтобы дни, обработанные
+                # пуллером но пропустившие группировку (напр. при сбое), тоже сгруппировались.
                 if dirty_days:
                     gdb = SessionLocal()
                     try:
-                        for d in sorted(dirty_days):
-                            try:
-                                _group_conversations(gdb, d, d)
-                            except Exception as ge:
-                                print(f"[pending-worker] group {d}: {ge}")
+                        d_to = datetime.fromisoformat(max(dirty_days)).date()
+                        d_from = (d_to - timedelta(days=3)).isoformat()
+                        r = _group_conversations(gdb, d_from, d_to.isoformat())
+                        print(f"[pending-worker] дренаж завершён, группировка окна "
+                              f"{d_from}..{d_to}: {r}")
+                    except Exception as ge:
+                        print(f"[pending-worker] group window: {ge}")
                     finally:
                         gdb.close()
                     dirty_days.clear()
-                    print("[pending-worker] дренаж завершён, группировка выполнена")
                 time.sleep(60)
                 continue
             # обработать батч

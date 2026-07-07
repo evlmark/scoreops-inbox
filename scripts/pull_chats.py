@@ -115,9 +115,16 @@ inner join chats_texts chat on chat.task_id = t1.task_id"""
 # ─────────────────────────── MCP stdio клиент ───────────────────────────
 class MCP:
     def __init__(self, binary: str):
+        # Прямой доступ к Snowflake (funnel_pfae/funnel_pm) включается только этими env —
+        # без них новый plata-mcp отвечает "tool not enabled (not in rollout audience)"
+        # и funnel-обогащение молча пропускается. Задаём явно, чтобы не зависеть от launcher.
+        env = dict(os.environ)
+        env.setdefault("SNOWFLAKE_ENABLED", "true")
+        env.setdefault("SNOWFLAKE_ACCOUNT", os.getenv("SCOREOPS_SNOWFLAKE_ACCOUNT", "SXYGICK-BVB02915"))
+        env.setdefault("PLATA_MCP_AUTO_UPDATE", "0")
         self.p = subprocess.Popen(
             [binary], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, text=True, bufsize=1,
+            stderr=subprocess.PIPE, text=True, bufsize=1, env=env,
         )
         self._id = 0
 
@@ -245,7 +252,7 @@ def fetch_account_labels(mcp: MCP, customer_ids, chunk: int = 80) -> dict:
                "max(case when product_type='PFAE' and current_status='ACCOUNT_CREATED' then 1 else 0 end) ext, "
                "max(case when current_status='ACCOUNT_CREATED' then tariff_name::string end) tariff "
                "from DWH_PYME_MAIN_PROD.ORIGINATION.FUNNEL_PFAE where user_id in (" + inl + ") group by user_id")
-        js = ("var r = await Snowflake.query({sql:%s, role:'MARK_EVLAMPIEV'});"
+        js = ("var r = await Snowflake.query({sql:%s});"
               "console.log(JSON.stringify(r));" % json.dumps(sql))
         raw = mcp.code_execute(js, timeout_seconds=110)
         try:
@@ -297,7 +304,7 @@ def fetch_pm_labels(mcp: MCP, customer_ids, chunk: int = 80) -> dict:
                "and (legal_representative_identity_id in (" + inl + ") "
                "or stakeholder_id in (" + inl + ")) "
                "group by 1,2")
-        js = ("var r = await Snowflake.query({sql:%s, role:'MARK_EVLAMPIEV'});"
+        js = ("var r = await Snowflake.query({sql:%s});"
               "console.log(JSON.stringify(r));" % json.dumps(sql))
         raw = mcp.code_execute(js, timeout_seconds=110)
         try:

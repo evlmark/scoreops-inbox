@@ -1721,12 +1721,17 @@ def admin_individuals_translate(batch: int = 5):
     """Переводит пачку непереведённых диалогов физиков. Гоняется циклом до конца."""
     db = SessionLocal()
     try:
-        pend = db.query(DBIndividual).filter(DBIndividual.status != "translated").limit(batch).all()
+        # claim distinct rows so несколько параллельных воркеров не берут одни и те же
+        q = db.query(DBIndividual).filter(DBIndividual.status != "translated").limit(batch)
+        try:
+            pend = q.with_for_update(skip_locked=True).all()
+        except Exception:
+            pend = q.all()   # sqlite / нет поддержки — fallback
         done = 0
         for d in pend:
             if _translate_individual(d):
                 done += 1
-            db.commit()
+        db.commit()
         remaining = db.query(func.count(DBIndividual.id)).filter(DBIndividual.status != "translated").scalar() or 0
         return {"translated_this_batch": done, "remaining": remaining, "done": remaining == 0}
     finally:
@@ -1783,9 +1788,8 @@ def individuals_conversation(dlg_id: str):
         c = db.query(DBIndividual).filter_by(id=dlg_id).first()
         if not c:
             return {"error": "not found"}
-        if c.status != "translated":
-            if _translate_individual(c):
-                db.commit()
+        # перевод НЕ блокирует открытие: EN проставляет фоновый бэкфилл
+        # (/admin/individuals/translate). Не переведённые реплики UI покажет как ES.
         history = []
         if c.customer_id:
             others = (db.query(DBIndividual)
@@ -1849,13 +1853,7 @@ def individuals_customer(customer_id: str):
     try:
         rows = (db.query(DBIndividual).filter(DBIndividual.customer_id == customer_id)
                   .order_by(desc(DBIndividual.created_at)).all())
-        # ленивый перевод всех диалогов клиента (обычно их немного)
-        changed = False
-        for c in rows:
-            if c.status != "translated" and _translate_individual(c):
-                changed = True
-        if changed:
-            db.commit()
+        # перевод НЕ блокирует открытие профиля — его делает фоновый бэкфилл
         convs = [{
             "id": c.id, "type": c.type, "tags": c.tags, "record_url": c.record_url,
             "products": _ind_products(c.products), "turns": len(c.transcript or []),

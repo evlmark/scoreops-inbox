@@ -198,6 +198,26 @@ class PullRun(Base):
     error_text = Column(Text, nullable=True)
 
 
+class IndividualDialogue(Base):
+    """Диалог клиента-физика (Individuals) — отдельная линия от PyME.
+    Только отображение: чат ES+EN, ссылка, продуктовые флаги; без топиков/оценки."""
+    __tablename__ = "individual_dialogues"
+    id = Column(String, primary_key=True)                 # DIALOGUE_ID
+    type = Column(String, index=True)                     # 'chat' / 'call' (из CHANNEL)
+    customer_id = Column(String, index=True, nullable=True)  # CUSTOMER_ENTITY_ID
+    created_at = Column(DateTime, index=True, nullable=True)  # COMM_START_DTTM
+    tags = Column(Text, nullable=True)                    # TAGS (pipe-separated)
+    transcript = Column(JSON, nullable=True)              # [{role,text,text_en}]
+    record_url = Column(String, nullable=True)            # RECORD_URL (у звонков)
+    len_sec = Column(Integer, nullable=True)              # DIALOGUE_LEN_SEC
+    n_tasks = Column(Integer, nullable=True)
+    n_client_msgs = Column(Integer, nullable=True)
+    n_agent_msgs = Column(Integer, nullable=True)
+    products = Column(JSON, nullable=True)                # {cc,dc,garantizada,plata_plus,inv,pyme,cl}
+    status = Column(String, default="pending", index=True)  # pending / translated
+    imported_at = Column(DateTime, default=datetime.utcnow)
+
+
 def init_db():
     Base.metadata.create_all(engine)
     # Migration: add columns that may not exist in already-created tables

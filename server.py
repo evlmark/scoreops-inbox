@@ -24,6 +24,7 @@ from db import (
     Conversation as DBConversation, detect_agent_name,
     Document as DBDocument, CrawlRun as DBCrawlRun, PullRun as DBPullRun,
     Topic as DBTopic, TopicSuggestion as DBTopicSuggestion,
+    IndividualDialogue as DBIndividual,
 )
 
 warnings.filterwarnings("ignore")
@@ -1675,6 +1676,198 @@ def get_customer(customer_id: str):
             "avg_score": round(sum(scores) / len(scores), 1) if scores else None,
             "topics": [{"slug": s, "name": (tmap.get(s) or {}).get("name_en") or s, "count": n}
                        for s, n in sorted(topics.items(), key=lambda x: -x[1])],
+            "conversations": convs,
+        }
+    finally:
+        db.close()
+
+
+# ═══════════════════ INDIVIDUALS (клиенты-физики) — отдельная линия ═══════════════════
+# Только отображение: чат ES+EN, ссылка, продуктовые флаги. Без топиков/оценки.
+
+def _translate_individual(dlg) -> bool:
+    """Переводит транскрипт одного диалога физика (ES→EN) одним вызовом DeepSeek,
+    выравнивая по номерам строк. Пишет text_en в реплики. Возвращает True при успехе."""
+    from sqlalchemy.orm.attributes import flag_modified
+    turns = list(dlg.transcript or [])
+    idxs = [i for i, t in enumerate(turns) if (t.get("text") or "").strip() and not t.get("text_en")]
+    if not idxs:
+        dlg.status = "translated"
+        return True
+    numbered = "\n".join(f"{j}. {turns[i]['text']}" for j, i in enumerate(idxs))
+    prompt = ("Translate each numbered Spanish line to natural English. "
+              "Return ONLY a JSON array of strings, same length and order, no numbering.\n\n" + numbered)
+    try:
+        resp = EVALUATOR_CLIENT.chat.completions.create(
+            model="deepseek-chat", messages=[{"role": "user", "content": prompt}],
+            max_tokens=4000, temperature=0.1)
+        content = (resp.choices[0].message.content or "").strip()
+        content = re.sub(r"^```json\s*", "", content); content = re.sub(r"\s*```$", "", content)
+        arr = json.loads(content)
+        if isinstance(arr, list) and len(arr) == len(idxs):
+            for j, i in enumerate(idxs):
+                turns[i]["text_en"] = str(arr[j])
+            dlg.transcript = turns
+            flag_modified(dlg, "transcript")
+            dlg.status = "translated"
+            return True
+    except Exception as e:
+        print(f"[ind-translate] {dlg.id}: {e}")
+    return False
+
+
+@app.post("/admin/individuals/translate")
+def admin_individuals_translate(batch: int = 5):
+    """Переводит пачку непереведённых диалогов физиков. Гоняется циклом до конца."""
+    db = SessionLocal()
+    try:
+        pend = db.query(DBIndividual).filter(DBIndividual.status != "translated").limit(batch).all()
+        done = 0
+        for d in pend:
+            if _translate_individual(d):
+                done += 1
+            db.commit()
+        remaining = db.query(func.count(DBIndividual.id)).filter(DBIndividual.status != "translated").scalar() or 0
+        return {"translated_this_batch": done, "remaining": remaining, "done": remaining == 0}
+    finally:
+        db.close()
+
+
+def _ind_products(p):
+    """Список активных продуктовых флагов физика для бейджей."""
+    if not p:
+        return []
+    names = {"cc": "Credit card", "dc": "Debit", "garantizada": "Garantizada",
+             "plata_plus": "Plata+", "inv": "Investments", "cl": "Loan", "pyme": "PyME"}
+    return [names[k] for k in names if p.get(k) is True]
+
+
+@app.get("/individuals/conversations")
+def individuals_conversations(limit: int = 500, customer_id: Optional[str] = None,
+                              days: Optional[int] = None, from_date: Optional[str] = None,
+                              to_date: Optional[str] = None):
+    """Лента диалогов физиков (последние первые)."""
+    db = SessionLocal()
+    try:
+        q = db.query(DBIndividual)
+        if customer_id:
+            q = q.filter(DBIndividual.customer_id == customer_id)
+        if from_date and to_date:
+            try:
+                fd = datetime.fromisoformat(from_date); td = datetime.fromisoformat(to_date)
+                q = q.filter(DBIndividual.created_at >= datetime(fd.year, fd.month, fd.day),
+                             DBIndividual.created_at < datetime(td.year, td.month, td.day) + timedelta(days=1))
+            except ValueError:
+                pass
+        elif days:
+            q = q.filter(DBIndividual.created_at >= datetime.utcnow() - timedelta(days=days))
+        rows = q.order_by(desc(DBIndividual.created_at)).limit(limit).all()
+        return [{
+            "id": c.id, "type": c.type, "customer_id": c.customer_id,
+            "tags": c.tags, "record_url": c.record_url,
+            "products": _ind_products(c.products),
+            "turns": len(c.transcript or []),
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "len_sec": c.len_sec,
+        } for c in rows]
+    finally:
+        db.close()
+
+
+@app.get("/individuals/conversations/{dlg_id}")
+def individuals_conversation(dlg_id: str):
+    """Полный диалог физика (ES+EN, ссылка, продукты) + история этого клиента.
+    Переводит лениво, если ещё не переведён."""
+    db = SessionLocal()
+    try:
+        c = db.query(DBIndividual).filter_by(id=dlg_id).first()
+        if not c:
+            return {"error": "not found"}
+        if c.status != "translated":
+            if _translate_individual(c):
+                db.commit()
+        history = []
+        if c.customer_id:
+            others = (db.query(DBIndividual)
+                        .filter(DBIndividual.customer_id == c.customer_id, DBIndividual.id != c.id)
+                        .order_by(desc(DBIndividual.created_at)).all())
+            history = [{"id": o.id, "type": o.type, "tags": o.tags,
+                        "created_at": o.created_at.isoformat() if o.created_at else None}
+                       for o in others]
+        return {
+            "id": c.id, "type": c.type, "customer_id": c.customer_id,
+            "tags": c.tags, "record_url": c.record_url,
+            "products": _ind_products(c.products),
+            "transcript": c.transcript or [],
+            "len_sec": c.len_sec, "n_tasks": c.n_tasks,
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "customer_history": history,
+        }
+    finally:
+        db.close()
+
+
+@app.get("/individuals/customers")
+def individuals_customers(limit: int = 300):
+    """Список клиентов-физиков с агрегатами (по customer_id)."""
+    db = SessionLocal()
+    try:
+        rows = (db.query(DBIndividual).filter(DBIndividual.customer_id.isnot(None)).all())
+        from collections import defaultdict
+        agg = defaultdict(lambda: {"count": 0, "first": None, "last": None, "products": set(), "tags": defaultdict(int)})
+        for c in rows:
+            a = agg[c.customer_id]
+            a["count"] += 1
+            if c.created_at:
+                a["first"] = min(a["first"], c.created_at) if a["first"] else c.created_at
+                a["last"] = max(a["last"], c.created_at) if a["last"] else c.created_at
+            for p in _ind_products(c.products):
+                a["products"].add(p)
+            for t in (c.tags or "").split("|"):
+                t = t.strip()
+                if t:
+                    a["tags"][t] += 1
+        out = []
+        for cid, a in agg.items():
+            out.append({
+                "customer_id": cid, "count": a["count"],
+                "first_at": a["first"].isoformat() if a["first"] else None,
+                "last_at": a["last"].isoformat() if a["last"] else None,
+                "products": sorted(a["products"]),
+                "top_tags": [t for t, _ in sorted(a["tags"].items(), key=lambda x: -x[1])[:6]],
+            })
+        out.sort(key=lambda x: -x["count"])
+        return out[:limit]
+    finally:
+        db.close()
+
+
+@app.get("/individuals/customers/{customer_id}")
+def individuals_customer(customer_id: str):
+    """Профиль клиента-физика: все его диалоги с транскриптами (для инлайн-просмотра)."""
+    db = SessionLocal()
+    try:
+        rows = (db.query(DBIndividual).filter(DBIndividual.customer_id == customer_id)
+                  .order_by(desc(DBIndividual.created_at)).all())
+        # ленивый перевод всех диалогов клиента (обычно их немного)
+        changed = False
+        for c in rows:
+            if c.status != "translated" and _translate_individual(c):
+                changed = True
+        if changed:
+            db.commit()
+        convs = [{
+            "id": c.id, "type": c.type, "tags": c.tags, "record_url": c.record_url,
+            "products": _ind_products(c.products), "turns": len(c.transcript or []),
+            "transcript": c.transcript or [],
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+        } for c in rows]
+        products = sorted({p for c in rows for p in _ind_products(c.products)})
+        return {
+            "customer_id": customer_id, "count": len(rows),
+            "first_at": convs[-1]["created_at"] if convs else None,
+            "last_at": convs[0]["created_at"] if convs else None,
+            "products": products,
             "conversations": convs,
         }
     finally:

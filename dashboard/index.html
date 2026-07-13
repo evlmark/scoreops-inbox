@@ -345,7 +345,11 @@
 <header>
   <span style="font-size:22px">🔍</span>
   <h1>ScoreOPS</h1>
-  <span class="sub">QA Dashboard · Plata Bank PFAE</span>
+  <span class="sub">QA Dashboard · Plata Bank</span>
+  <div style="display:flex;gap:0;margin-left:16px;border:1px solid #d1d5db;border-radius:9px;overflow:hidden">
+    <button id="line-pyme" onclick="setLine('pyme')" style="cursor:pointer;border:none;background:#7c3aed;color:#fff;padding:6px 16px;font-size:13px;font-weight:700">PyME</button>
+    <button id="line-individuals" onclick="setLine('individuals')" style="cursor:pointer;border:none;background:#fff;color:#374151;padding:6px 16px;font-size:13px;font-weight:700">Individuals</button>
+  </div>
   <div class="header-right">
     <span class="badge-live" id="live-badge">● Live</span>
     <button class="refresh-btn" onclick="loadWeeklyMetrics();switchTab('inbox')">↻ Refresh</button>
@@ -356,6 +360,7 @@
 
 <div class="container">
 
+ <div id="pyme-view">
   <!-- Weekly KPIs -->
   <div id="weekly-kpis" style="margin-bottom:20px">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
@@ -494,7 +499,43 @@
     </div>
     <div class="card" id="users-wrap"><div class="loading">Loading...</div></div>
   </div>
+ </div><!-- /pyme-view -->
 
+ <div id="individuals-view" style="display:none">
+  <div class="tabs">
+    <div class="tab active" data-itab="inbox" onclick="switchITab('inbox')">📥 Real Inbox</div>
+    <div class="tab"        data-itab="users" onclick="switchITab('users')">👥 Users</div>
+  </div>
+  <div class="tab-panel active" id="itab-inbox">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="section-title" style="margin:0">Real conversations <span id="ind-inbox-count" style="color:#9ca3af;font-weight:500;font-size:13px"></span></div>
+    </div>
+    <div class="card" id="ind-inbox-wrap"><div class="loading">Loading…</div></div>
+  </div>
+  <div class="tab-panel" id="itab-users">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:16px">
+      <div class="section-title" style="margin:0">Users <span id="ind-users-count" style="color:#9ca3af;font-weight:500;font-size:13px"></span></div>
+      <input id="ind-users-search" type="text" placeholder="Search by customer ID…" oninput="onIndUsersSearch()"
+             style="flex:0 0 320px;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+    </div>
+    <div class="card" id="ind-users-wrap"><div class="loading">Loading…</div></div>
+  </div>
+ </div><!-- /individuals-view -->
+
+</div>
+
+<!-- ══════════ Individuals dialogue modal ══════════ -->
+<div class="modal-overlay" id="ind-modal" onclick="closeIndModal(event)">
+  <div class="modal" onclick="event.stopPropagation()" style="width:760px;position:relative">
+    <div class="modal-header">
+      <div class="modal-header-info">
+        <div class="modal-title" id="ind-modal-title">Dialogue</div>
+        <div class="modal-meta" id="ind-modal-meta"></div>
+      </div>
+      <button class="modal-close" onclick="closeIndModal()">✕</button>
+    </div>
+    <div class="chat-body" id="ind-modal-body"><div class="loading">Loading…</div></div>
+  </div>
 </div>
 
 <!-- ══════════ Customer profile modal ══════════ -->
@@ -858,6 +899,168 @@ let knowledgeTabInited = false;
 let topicsTabInited = false;
 let usersTabInited = false;
 
+/* ══════════ Individuals line (клиенты-физики) ══════════ */
+let LINE = 'pyme';
+let indInboxInited = false, indUsersInited = false;
+
+function setLine(line) {
+  LINE = line;
+  const bp = document.getElementById('line-pyme'), bi = document.getElementById('line-individuals');
+  bp.style.background = line === 'pyme' ? '#7c3aed' : '#fff'; bp.style.color = line === 'pyme' ? '#fff' : '#374151';
+  bi.style.background = line === 'individuals' ? '#7c3aed' : '#fff'; bi.style.color = line === 'individuals' ? '#fff' : '#374151';
+  document.getElementById('pyme-view').style.display = line === 'pyme' ? '' : 'none';
+  document.getElementById('individuals-view').style.display = line === 'individuals' ? '' : 'none';
+  if (line === 'individuals') switchITab('inbox');
+}
+
+function switchITab(name) {
+  const root = document.getElementById('individuals-view');
+  root.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.itab === name));
+  root.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'itab-' + name));
+  if (name === 'inbox' && !indInboxInited) { indInboxInited = true; loadIndInbox(); }
+  if (name === 'users' && !indUsersInited) { indUsersInited = true; loadIndUsers(); }
+}
+
+function indProductBadges(list) {
+  if (!list || !list.length) return '';
+  return list.map(p => `<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:4px;white-space:nowrap">${escHtml(p)}</span>`).join('');
+}
+function indTag(tags) { return ((tags || '').split('|')[0] || '').trim() || '—'; }
+
+let _indList = [];
+async function loadIndInbox() {
+  const wrap = document.getElementById('ind-inbox-wrap');
+  wrap.innerHTML = '<div class="loading">Loading…</div>';
+  let list;
+  try { list = await fetch(`${API}/individuals/conversations?limit=500`).then(r => r.json()); }
+  catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
+  _indList = Array.isArray(list) ? list : [];
+  document.getElementById('ind-inbox-count').textContent = _indList.length ? `(${_indList.length})` : '';
+  renderIndInbox();
+}
+function renderIndInbox() {
+  const wrap = document.getElementById('ind-inbox-wrap');
+  if (!_indList.length) { wrap.innerHTML = '<div class="loading">No dialogues.</div>'; return; }
+  let h = '<table class="sessions-table"><thead><tr><th>DATE</th><th>TYPE</th><th>TOPIC / TAGS</th><th>PRODUCTS</th><th>LINK</th><th></th></tr></thead><tbody>';
+  for (const c of _indList) {
+    const link = c.record_url ? `<a href="${escHtml(c.record_url)}" target="_blank" onclick="event.stopPropagation()" style="color:#7c3aed">🔗 rec</a>` : '<span style="color:#d1d5db">—</span>';
+    h += `<tr class="session-row" onclick="openIndConv('${c.id}')">
+      <td class="time-text">${formatPlain(c.created_at)}</td>
+      <td>${convTypeBadge(c.type)}</td>
+      <td style="color:#374151">${escHtml(indTag(c.tags))}</td>
+      <td>${indProductBadges(c.products)}</td>
+      <td>${link}</td>
+      <td><span class="view-link">View →</span></td>
+    </tr>`;
+  }
+  wrap.innerHTML = h + '</tbody></table>';
+}
+
+async function openIndConv(id) {
+  document.getElementById('ind-modal').classList.add('open');
+  document.getElementById('ind-modal-body').innerHTML = '<div class="loading">Loading transcript…</div>';
+  document.getElementById('ind-modal-title').textContent = 'Dialogue';
+  document.getElementById('ind-modal-meta').innerHTML = '';
+  let d;
+  try { d = await fetch(`${API}/individuals/conversations/${id}`).then(r => r.json()); }
+  catch (e) { document.getElementById('ind-modal-body').innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
+  if (d.error) { document.getElementById('ind-modal-body').innerHTML = `<div class="loading">${escHtml(d.error)}</div>`; return; }
+  renderIndModal(d);
+}
+function closeIndModal(e) { if (!e || e.target === document.getElementById('ind-modal')) document.getElementById('ind-modal').classList.remove('open'); }
+
+function renderIndModal(c) {
+  document.getElementById('ind-modal-title').textContent = `${c.type === 'call' ? '📞 Call' : '💬 Chat'} · ${indTag(c.tags)}`;
+  const dur = c.len_sec ? (c.len_sec < 60 ? `${c.len_sec}s` : `${Math.floor(c.len_sec / 60)}m ${c.len_sec % 60}s`) : '';
+  document.getElementById('ind-modal-meta').innerHTML = [
+    (c.products && c.products.length) ? `<span>🏦 ${indProductBadges(c.products)}</span>` : '',
+    c.created_at ? `<span>🕐 ${formatPlain(c.created_at)}</span>` : '',
+    dur ? `<span>⏱ ${dur}</span>` : '',
+    c.record_url ? `<span><a href="${escHtml(c.record_url)}" target="_blank" style="color:#7c3aed;font-weight:600">🔗 Recording</a></span>` : '',
+    c.customer_id ? `<span>🆔 <code style="font-size:11px">${escHtml(c.customer_id)}</code> <a onclick="closeIndModal();openIndCustomer('${c.customer_id}','${c.id}')" style="cursor:pointer;color:#7c3aed;font-weight:600;margin-left:4px">👥 all chats →</a></span>` : '',
+    c.tags ? `<span style="color:#9ca3af">🏷 ${escHtml(c.tags)}</span>` : '',
+  ].filter(Boolean).join('');
+  let html = '';
+  const hist = c.customer_history || [];
+  if (hist.length) {
+    html += `<div class="cust-history" style="margin:0 24px 14px"><div class="cust-history-header">🔁 ${hist.length} other contact${hist.length > 1 ? 's' : ''} from this customer</div><div class="cust-history-list">`;
+    for (const h of hist.slice(0, 15))
+      html += `<div class="cust-hist-item" onclick="event.stopPropagation();openIndConv('${h.id}')"><span style="font-size:13px">${h.type === 'call' ? '📞' : '💬'}</span><span style="color:#6b7280;font-size:11px;width:115px;flex-shrink:0">${h.created_at ? formatPlain(h.created_at) : '—'}</span><span style="flex:1;color:#1f2937;font-size:12px">${escHtml(indTag(h.tags))}</span></div>`;
+    html += `</div></div>`;
+  }
+  const tr = c.transcript || [];
+  if (!tr.length) html += '<div class="loading">No transcript.</div>';
+  else for (const turn of tr) {
+    const isC = turn.role === 'customer', side = isC ? 'customer' : 'agent', label = isC ? '👤 Cliente' : '🎧 Agente', initial = isC ? 'C' : 'A', en = turn.text_en || '';
+    html += `<div class="bubble-row ${side}" style="margin-bottom:4px"><div class="avatar ${side}">${initial}</div><div><div style="font-size:10px;color:#9ca3af;font-weight:600;margin-bottom:3px">${label}</div><div class="bubble ${side}">${escHtml(turn.text || '')}</div></div></div><div class="bubble-en-wrap ${side}" style="margin-bottom:10px"><div class="bubble-en ${en ? '' : 'empty'}">${en ? escHtml(en) : '…not translated'}</div></div>`;
+  }
+  document.getElementById('ind-modal-body').innerHTML = html;
+}
+
+let _indUsers = [];
+async function loadIndUsers() {
+  const wrap = document.getElementById('ind-users-wrap'); wrap.innerHTML = '<div class="loading">Loading…</div>';
+  let list;
+  try { list = await fetch(`${API}/individuals/customers?limit=300`).then(r => r.json()); }
+  catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
+  _indUsers = Array.isArray(list) ? list : []; renderIndUsers();
+}
+function renderIndUsers() {
+  const wrap = document.getElementById('ind-users-wrap');
+  const q = (document.getElementById('ind-users-search').value || '').toLowerCase().trim();
+  const list = q ? _indUsers.filter(u => (u.customer_id || '').toLowerCase().includes(q)) : _indUsers;
+  document.getElementById('ind-users-count').textContent = `(${list.length})`;
+  if (!list.length) { wrap.innerHTML = '<div class="loading">No users.</div>'; return; }
+  let h = '<table class="sessions-table"><thead><tr><th>CUSTOMER</th><th>CONTACTS</th><th>PRODUCTS</th><th>TOP TAGS</th><th>RANGE</th><th></th></tr></thead><tbody>';
+  for (const u of list) {
+    const range = (u.first_at && u.last_at) ? `${formatPlain(u.first_at).replace(/ at .*/, '')} → ${formatPlain(u.last_at).replace(/ at .*/, '')}` : '—';
+    h += `<tr class="session-row" onclick="openIndCustomer('${u.customer_id}')"><td><code style="font-size:11px">${escHtml(u.customer_id)}</code></td><td>${u.count}</td><td>${indProductBadges(u.products)}</td><td style="font-size:11px;color:#6b7280">${escHtml((u.top_tags || []).slice(0, 3).join(', '))}</td><td class="time-text">${range}</td><td><span class="view-link">View →</span></td></tr>`;
+  }
+  wrap.innerHTML = h + '</tbody></table>';
+}
+let indUsersTimer = null;
+function onIndUsersSearch() { clearTimeout(indUsersTimer); indUsersTimer = setTimeout(renderIndUsers, 200); }
+
+let _indCustBackDlg = null;
+async function openIndCustomer(cid, fromDlg) {
+  _indCustBackDlg = fromDlg || null;
+  document.getElementById('cust-modal').classList.add('open');
+  const back = document.getElementById('cust-back');
+  back.style.display = fromDlg ? 'inline-block' : 'none';
+  back.onclick = () => { closeCustModal(); openIndConv(_indCustBackDlg); };
+  document.getElementById('cust-modal-body').innerHTML = '<div class="loading">Loading…</div>';
+  let d;
+  try { d = await fetch(`${API}/individuals/customers/${cid}`).then(r => r.json()); }
+  catch (e) { document.getElementById('cust-modal-body').innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
+  renderIndCustomerModal(d);
+}
+function renderIndCustomerModal(d) {
+  document.getElementById('cust-modal-title').innerHTML = `👥 Customer <code style="font-size:13px">${escHtml(d.customer_id)}</code>`;
+  const range = (d.first_at && d.last_at) ? `${formatPlain(d.first_at).replace(/ at .*/, '')} → ${formatPlain(d.last_at).replace(/ at .*/, '')}` : '—';
+  document.getElementById('cust-modal-meta').innerHTML =
+    ((d.products && d.products.length) ? `<span>🏦 ${indProductBadges(d.products)}</span>` : '')
+    + `<span>📨 ${d.count} contact${d.count === 1 ? '' : 's'}</span><span>🗓 ${range}</span>`;
+  document.getElementById('cust-modal-summary').innerHTML = '';
+  const convs = [...(d.conversations || [])].reverse();
+  let body = '', lastDay = null;
+  for (const c of convs) {
+    const day = (c.created_at || '').slice(0, 10);
+    if (day !== lastDay) { lastDay = day; body += `<div style="font-size:11px;font-weight:700;color:#7c3aed;margin:18px 0 4px;text-transform:uppercase;letter-spacing:.04em;border-top:1px solid #eef0f4;padding-top:14px">${c.created_at ? formatPlain(c.created_at).replace(/ at .*/, '') : 'No date'}</div>`; }
+    const when = c.created_at ? formatPlain(c.created_at) : '—';
+    const link = c.record_url ? `<a href="${escHtml(c.record_url)}" target="_blank" onclick="event.stopPropagation()" style="color:#7c3aed">🔗 rec</a>` : '';
+    body += `<div style="display:flex;align-items:center;gap:8px;margin:8px 0 10px;font-size:12px"><span style="color:#6b7280;font-weight:600;white-space:nowrap">${when}</span>${convTypeBadge(c.type)}<span style="font-weight:600;color:#374151">${escHtml(indTag(c.tags))}</span>${indProductBadges(c.products)}<span style="margin-left:auto">${link}</span><a onclick="closeCustModal();openIndConv('${c.id}')" style="cursor:pointer;color:#7c3aed">open ↗</a></div>`;
+    const tr = c.transcript || [];
+    if (!tr.length) body += `<div style="color:#9ca3af;font-size:12px;padding:2px 0 8px">(no transcript)</div>`;
+    for (const turn of tr) {
+      const isC = turn.role === 'customer', side = isC ? 'customer' : 'agent', initial = isC ? 'C' : 'A', en = turn.text_en || '';
+      body += `<div class="bubble-row ${side}" style="margin-bottom:3px"><div class="avatar ${side}">${initial}</div><div><div class="bubble ${side}">${escHtml(turn.text || '')}</div></div></div><div class="bubble-en-wrap ${side}" style="margin-bottom:8px"><div class="bubble-en ${en ? '' : 'empty'}">${en ? escHtml(en) : '…not translated'}</div></div>`;
+    }
+  }
+  const cb = document.getElementById('cust-modal-body');
+  cb.innerHTML = body || '<div class="loading">No conversations.</div>';
+  requestAnimationFrame(() => { cb.scrollTop = cb.scrollHeight; });
+}
+
 /* ── Users tab ── */
 let usersSearchTimer = null;
 
@@ -905,7 +1108,7 @@ function backToChat() {
 async function openCustomer(customerId, backConvId) {
   custBackConvId = backConvId || null;
   const backBtn = document.getElementById('cust-back');
-  if (backBtn) backBtn.style.display = custBackConvId ? 'inline-block' : 'none';
+  if (backBtn) { backBtn.onclick = backToChat; backBtn.style.display = custBackConvId ? 'inline-block' : 'none'; }
   document.getElementById('cust-modal').classList.add('open');
   document.getElementById('cust-modal-title').textContent = 'Customer';
   document.getElementById('cust-modal-meta').innerHTML = '';

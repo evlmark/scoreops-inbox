@@ -532,6 +532,7 @@
         <div class="modal-title" id="ind-modal-title">Dialogue</div>
         <div class="modal-meta" id="ind-modal-meta"></div>
       </div>
+      <button class="copy-link-btn" id="ind-copy-link" onclick="copyIndLink()">🔗 Copy link</button>
       <button class="modal-close" onclick="closeIndModal()">✕</button>
     </div>
     <div class="chat-body" id="ind-modal-body"><div class="loading">Loading…</div></div>
@@ -794,6 +795,8 @@ function copyShareLink(type) {
 // Открыть модалку по хэшу в URL (#conv/<id>)
 function openFromHash() {
   const h = location.hash.replace(/^#/, '');
+  const mi = h.match(/^ind\/(.+)$/);
+  if (mi) { setLine('individuals'); openIndConv(mi[1], true); return; }
   const m = h.match(/^(conv)\/(.+)$/);
   if (!m) return;
   openConv(m[2], true);
@@ -956,7 +959,10 @@ function renderIndInbox() {
   wrap.innerHTML = h + '</tbody></table>';
 }
 
-async function openIndConv(id) {
+let openIndId = null;
+async function openIndConv(id, fromHash) {
+  openIndId = id;
+  if (!fromHash) location.hash = `ind/${id}`;
   document.getElementById('ind-modal').classList.add('open');
   document.getElementById('ind-modal-body').innerHTML = '<div class="loading">Loading transcript…</div>';
   document.getElementById('ind-modal-title').textContent = 'Dialogue';
@@ -967,7 +973,22 @@ async function openIndConv(id) {
   if (d.error) { document.getElementById('ind-modal-body').innerHTML = `<div class="loading">${escHtml(d.error)}</div>`; return; }
   renderIndModal(d);
 }
-function closeIndModal(e) { if (!e || e.target === document.getElementById('ind-modal')) document.getElementById('ind-modal').classList.remove('open'); }
+function closeIndModal(e) {
+  if (!e || e.target === document.getElementById('ind-modal')) {
+    document.getElementById('ind-modal').classList.remove('open');
+    openIndId = null;
+    if (location.hash.startsWith('#ind/')) history.replaceState(null, '', location.pathname);
+  }
+}
+function copyIndLink() {
+  if (!openIndId) return;
+  const url = `${location.origin}${location.pathname}#ind/${openIndId}`;
+  const btn = document.getElementById('ind-copy-link');
+  navigator.clipboard.writeText(url).then(() => {
+    btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '🔗 Copy link'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => prompt('Copy this link:', url));
+}
 
 function renderIndModal(c) {
   document.getElementById('ind-modal-title').textContent = `${c.type === 'call' ? '📞 Call' : '💬 Chat'} · ${indTag(c.tags)}`;

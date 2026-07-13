@@ -935,7 +935,7 @@ async function loadIndInbox() {
   const wrap = document.getElementById('ind-inbox-wrap');
   wrap.innerHTML = '<div class="loading">Loading…</div>';
   let list;
-  try { list = await fetch(`${API}/individuals/conversations?limit=500`).then(r => r.json()); }
+  try { list = await fetch(`${API}/individuals/conversations?limit=5000`).then(r => r.json()); }
   catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
   _indList = Array.isArray(list) ? list : [];
   document.getElementById('ind-inbox-count').textContent = _indList.length ? `(${_indList.length})` : '';

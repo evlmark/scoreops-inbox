@@ -16,7 +16,32 @@ LINE_RE = re.compile(r"^(\d{2}-\d{2} \d{2}:\d{2}) (client|agent|bot): (.*)$")
 _ROLE = {"client": "customer", "bot": "bot", "agent": "agent"}
 
 
+# формат звонков: "Agent | 5.6-9.8 | текст; Client | 10.4-26.7 | текст; ..."
+# (роль | тайминг | текст, сегменты через '; '; всё может быть в одну строку)
+_CALL_ROLE = {"client": "customer", "agent": "agent", "bot": "bot"}
+_CALL_SPLIT = re.compile(r"\s*;\s*(?=(?:Agent|Client|Bot)\s*\|\s*[\d.\-]+\s*\|)", re.I)
+_CALL_SEG = re.compile(r"^(Agent|Client|Bot)\s*\|\s*[\d.\-]+\s*\|\s*(.*)$", re.I | re.S)
+
+
+def _looks_like_call(text: str) -> bool:
+    return bool(re.match(r"^\s*(Agent|Client|Bot)\s*\|\s*[\d.\-]+\s*\|", text or "", re.I))
+
+
+def parse_call_transcript(text: str):
+    turns = []
+    for part in _CALL_SPLIT.split(text or ""):
+        m = _CALL_SEG.match(part.strip())
+        if m:
+            role = _CALL_ROLE.get(m.group(1).lower(), "agent")
+            t = (m.group(2) or "").strip()
+            if t:
+                turns.append({"role": role, "text": t})
+    return turns
+
+
 def parse_transcript(text: str):
+    if _looks_like_call(text):            # звонок — другой формат
+        return parse_call_transcript(text)
     turns = []
     for raw in (text or "").split("\n"):
         m = LINE_RE.match(raw)
@@ -25,8 +50,6 @@ def parse_transcript(text: str):
             turns.append({"role": role, "text": m.group(3)})
         elif turns:                       # продолжение предыдущей реплики
             turns[-1]["text"] += "\n" + raw
-        # строки без префикса и без предыдущей реплики (напр. пустой первый разделитель) пропускаем
-    # чистим пустые
     return [t for t in turns if (t.get("text") or "").strip()]
 
 

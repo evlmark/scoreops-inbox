@@ -1098,7 +1098,11 @@ function renderIndModal(c) {
   const tr = c.transcript || [];
   if (!tr.length) html += '<div class="loading">No transcript.</div>';
   else for (const turn of tr) {
-    const isC = turn.role === 'customer', side = isC ? 'customer' : 'agent', label = isC ? '👤 Cliente' : '🎧 Agente', initial = isC ? 'C' : 'A', en = turn.text_en || '';
+    const isC = turn.role === 'customer', isBot = turn.role === 'bot';
+    const side = isC ? 'customer' : 'agent';
+    const label = isC ? '👤 Cliente' : (isBot ? '🤖 Bot' : '🎧 Agente');
+    const initial = isC ? 'C' : (isBot ? 'B' : 'A');
+    const en = turn.text_en || '';
     html += `<div class="bubble-row ${side}" style="margin-bottom:4px"><div class="avatar ${side}">${initial}</div><div><div style="font-size:10px;color:#9ca3af;font-weight:600;margin-bottom:3px">${label}</div><div class="bubble ${side}">${escHtml(turn.text || '')}</div></div></div><div class="bubble-en-wrap ${side}" style="margin-bottom:10px"><div class="bubble-en ${en ? '' : 'empty'}">${en ? escHtml(en) : '…not translated'}</div></div>`;
   }
   document.getElementById('ind-modal-body').innerHTML = html;
@@ -1159,7 +1163,9 @@ function renderIndCustomerModal(d) {
     const tr = c.transcript || [];
     if (!tr.length) body += `<div style="color:#9ca3af;font-size:12px;padding:2px 0 8px">(no transcript)</div>`;
     for (const turn of tr) {
-      const isC = turn.role === 'customer', side = isC ? 'customer' : 'agent', initial = isC ? 'C' : 'A', en = turn.text_en || '';
+      const isC = turn.role === 'customer', side = isC ? 'customer' : 'agent';
+      const initial = isC ? 'C' : (turn.role === 'bot' ? 'B' : 'A');
+      const en = turn.text_en || '';
       body += `<div class="bubble-row ${side}" style="margin-bottom:3px"><div class="avatar ${side}">${initial}</div><div><div class="bubble ${side}">${escHtml(turn.text || '')}</div></div></div><div class="bubble-en-wrap ${side}" style="margin-bottom:8px"><div class="bubble-en ${en ? '' : 'empty'}">${en ? escHtml(en) : '…not translated'}</div></div>`;
     }
   }

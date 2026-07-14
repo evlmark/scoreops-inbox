@@ -11,7 +11,9 @@ csv.field_size_limit(10 ** 7)
 
 from db import SessionLocal, IndividualDialogue, Base, engine  # noqa
 
-LINE_RE = re.compile(r"^(\d{2}-\d{2} \d{2}:\d{2}) (client|agent): (.*)$")
+LINE_RE = re.compile(r"^(\d{2}-\d{2} \d{2}:\d{2}) (client|agent|bot): (.*)$")
+
+_ROLE = {"client": "customer", "bot": "bot", "agent": "agent"}
 
 
 def parse_transcript(text: str):
@@ -19,7 +21,7 @@ def parse_transcript(text: str):
     for raw in (text or "").split("\n"):
         m = LINE_RE.match(raw)
         if m:
-            role = "customer" if m.group(2) == "client" else "agent"
+            role = _ROLE.get(m.group(2), "agent")
             turns.append({"role": role, "text": m.group(3)})
         elif turns:                       # продолжение предыдущей реплики
             turns[-1]["text"] += "\n" + raw

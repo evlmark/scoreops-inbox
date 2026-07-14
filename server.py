@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, or_
 from sqlalchemy.orm.attributes import flag_modified
 
 from db import (
@@ -25,6 +25,7 @@ from db import (
     Document as DBDocument, CrawlRun as DBCrawlRun, PullRun as DBPullRun,
     Topic as DBTopic, TopicSuggestion as DBTopicSuggestion,
     IndividualDialogue as DBIndividual, UserAccess as DBUserAccess,
+    Question as DBQuestion, QuestionTheme as DBQuestionTheme,
 )
 
 warnings.filterwarnings("ignore")
@@ -1418,6 +1419,9 @@ def _start_pending_worker():
         threading.Thread(target=_ind_translate_worker_loop, daemon=True).start()
     if n_ind:
         print(f"[ind-translate-worker] запущено потоков: {n_ind} (перевод физиков)")
+    if os.getenv("QUESTIONS_WORKER", "1") == "1":
+        threading.Thread(target=_questions_worker_loop, daemon=True).start()
+        print("[questions-worker] запущен (извлечение вопросов)")
 
 
 @app.get("/conversations")
@@ -1757,6 +1761,147 @@ def admin_logins():
             "last_seen": u.last_seen.isoformat() if u.last_seen else None,
             "hits": u.hits,
         } for u in rows]
+    finally:
+        db.close()
+
+
+# ═══════════════════ QUESTIONS (банк вопросов пользователей для базы знаний) ═══════════════════
+
+def _qslug(name: str) -> str:
+    s = re.sub(r"[^a-z0-9]+", "_", (name or "").strip().lower()).strip("_")
+    return s[:60] or "other"
+
+
+def _qtheme_get_or_create(db, name: str) -> str:
+    slug = _qslug(name)
+    t = db.query(DBQuestionTheme).filter_by(slug=slug).first()
+    if not t:
+        db.add(DBQuestionTheme(slug=slug, name=(name or "").strip()[:120] or slug))
+        db.flush()
+    return slug
+
+
+def _question_theme_catalog(db, limit: int = 60):
+    """Имена тем по популярности — идут в промпт, чтобы LLM переиспользовал существующие."""
+    rows = (db.query(DBQuestion.theme_slug, func.count().label("c"))
+              .group_by(DBQuestion.theme_slug).order_by(desc("c")).limit(limit).all())
+    slug2name = {t.slug: (t.name or t.slug) for t in db.query(DBQuestionTheme).all()}
+    return [slug2name.get(s, s) for s, _ in rows if s]
+
+
+def _extract_questions(conv, db) -> int:
+    """LLM: извлекает вопросы клиента из чата и относит к теме (каталог тем растёт).
+    Вставляет строки Question, помечает conv.questions_extracted=1. Возвращает число вопросов."""
+    turns = conv.transcript or []
+    lines = [("Cliente" if t.get("role") == "customer" else "Agente") + ": " + t["text"]
+             for t in turns if (t.get("text") or "").strip()]
+    convo = "\n".join(lines)
+    if not convo.strip():
+        conv.questions_extracted = 1
+        return 0
+    catalog = _question_theme_catalog(db)
+    cat_txt = "\n".join(f"- {n}" for n in catalog) if catalog else "(vacío — crea temas nuevos)"
+    prompt = f"""Analiza este chat de soporte de Banco Plata (cuentas PyME). Extrae TODAS las PREGUNTAS o dudas concretas que planteó EL CLIENTE (lo que necesita saber o resolver). Ignora saludos, agradecimientos y los mensajes del agente.
+
+Para cada pregunta:
+- "q": la pregunta tal como la formuló el cliente (en español, breve, sin datos personales).
+- "theme": un tema corto en INGLÉS para agrupar la pregunta de cara a reescribir la base de conocimiento. REUTILIZA un tema del catálogo si encaja; crea uno nuevo SOLO si ninguno aplica. Temas generales, a nivel de artículo de KB (p. ej. "Card delivery status", "Account closure", "Plan pricing").
+
+CATÁLOGO DE TEMAS EXISTENTES (reutiliza cuando encaje):
+{cat_txt}
+
+CHAT:
+{convo}
+
+Responde SOLO con JSON válido: {{"questions":[{{"q":"...","theme":"..."}}]}}. Si el cliente no hizo ninguna pregunta, responde {{"questions":[]}}."""
+    resp = EVALUATOR_CLIENT.chat.completions.create(
+        model="deepseek-chat", messages=[{"role": "user", "content": prompt}],
+        max_tokens=1200, temperature=0.2)
+    content = (resp.choices[0].message.content or "").strip()
+    content = re.sub(r"^```json\s*", "", content); content = re.sub(r"\s*```$", "", content)
+    qs = json.loads(content).get("questions", [])
+    n = 0
+    for item in qs:
+        q = (item.get("q") or "").strip()
+        if not q:
+            continue
+        slug = _qtheme_get_or_create(db, (item.get("theme") or "Other").strip())
+        db.add(DBQuestion(conversation_id=conv.id, customer_id=clean_customer_id(conv.customer_id),
+                          created_at=conv.created_at, text=q[:1000], theme_slug=slug))
+        n += 1
+    conv.questions_extracted = 1
+    return n
+
+
+def _questions_worker_loop():
+    """Серверный воркер извлечения вопросов (один поток — каталог тем строится консистентно).
+    Дренажит PyME-чаты (не фрагменты, не когорты), где вопросы ещё не извлечены."""
+    while True:
+        try:
+            db = SessionLocal()
+            try:
+                conv = (db.query(DBConversation)
+                          .filter(DBConversation.type == "chat",
+                                  DBConversation.cohort.is_(None),
+                                  DBConversation.merged_into.is_(None),
+                                  or_(DBConversation.questions_extracted == 0,
+                                      DBConversation.questions_extracted.is_(None)))
+                          .order_by(desc(DBConversation.created_at)).first())
+                if not conv:
+                    time.sleep(120)
+                    continue
+                cid = conv.id
+                try:
+                    _extract_questions(conv, db)
+                    db.commit()
+                except Exception as e:
+                    db.rollback()
+                    print(f"[questions-worker] {cid}: {e}")
+                    # чтобы не зациклиться на проблемном чате — помечаем обработанным
+                    c2 = db.query(DBConversation).filter_by(id=cid).first()
+                    if c2:
+                        c2.questions_extracted = 1
+                        db.commit()
+            finally:
+                db.close()
+            time.sleep(0.4)
+        except Exception as e:
+            print(f"[questions-worker] loop: {e}")
+            time.sleep(60)
+
+
+@app.get("/questions/themes")
+def questions_themes():
+    """Темы вопросов со счётчиками (для списка в разделе Questions)."""
+    db = SessionLocal()
+    try:
+        counts = dict(db.query(DBQuestion.theme_slug, func.count())
+                        .group_by(DBQuestion.theme_slug).all())
+        themes = db.query(DBQuestionTheme).all()
+        out = [{"slug": t.slug, "name": t.name or t.slug, "count": counts.get(t.slug, 0)} for t in themes]
+        out = [x for x in out if x["count"] > 0]
+        out.sort(key=lambda x: -x["count"])
+        return {"themes": out, "total": sum(x["count"] for x in out)}
+    finally:
+        db.close()
+
+
+@app.get("/questions")
+def questions_list(theme_slug: Optional[str] = None, q: Optional[str] = None, limit: int = 1000):
+    """Конкретные вопросы (формулировки клиентов) с ссылкой на исходный чат."""
+    db = SessionLocal()
+    try:
+        query = db.query(DBQuestion)
+        if theme_slug:
+            query = query.filter(DBQuestion.theme_slug == theme_slug)
+        if q:
+            query = query.filter(DBQuestion.text.ilike(f"%{q}%"))
+        rows = query.order_by(desc(DBQuestion.created_at)).limit(limit).all()
+        return [{
+            "id": r.id, "text": r.text, "conversation_id": r.conversation_id,
+            "customer_id": r.customer_id, "theme_slug": r.theme_slug,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        } for r in rows]
     finally:
         db.close()
 

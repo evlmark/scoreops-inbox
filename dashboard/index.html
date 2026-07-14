@@ -389,6 +389,7 @@
   <div class="tabs">
     <div class="tab active" data-tab="inbox"     onclick="switchTab('inbox')">📥 Real Inbox</div>
     <div class="tab"        data-tab="topics"    onclick="switchTab('topics')">🏷 Topics</div>
+    <div class="tab"        data-tab="questions" onclick="switchTab('questions')">❓ Questions</div>
     <div class="tab"        data-tab="users"     onclick="switchTab('users')">👥 Users</div>
     <div class="tab"        data-tab="knowledge" onclick="switchTab('knowledge')">🧠 Knowledge Base</div>
   </div>
@@ -498,6 +499,20 @@
              style="flex:0 0 320px;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
     </div>
     <div class="card" id="users-wrap"><div class="loading">Loading...</div></div>
+  </div>
+
+  <!-- Questions (банк вопросов для базы знаний) -->
+  <div class="tab-panel" id="tab-questions">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:16px">
+      <div class="section-title" style="margin:0">User questions <span id="q-total" style="color:#9ca3af;font-weight:500;font-size:13px"></span></div>
+      <input id="q-search" type="text" placeholder="Search question text…" oninput="onQSearch()"
+             style="flex:0 0 340px;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+    </div>
+    <div style="font-size:12px;color:#9ca3af;margin-bottom:12px">Questions extracted from real chats, grouped into themes. Click a theme → read how customers actually phrase it; each question links to its chat.</div>
+    <div style="display:flex;gap:16px;align-items:flex-start">
+      <div class="card" id="q-themes" style="flex:0 0 320px;max-height:70vh;overflow:auto;padding:6px"><div class="loading">Loading…</div></div>
+      <div class="card" id="q-list" style="flex:1;max-height:70vh;overflow:auto"><div class="loading" style="padding:16px">Select a theme →</div></div>
+    </div>
   </div>
  </div><!-- /pyme-view -->
 
@@ -897,6 +912,10 @@ function switchTab(name) {
     topicsTabInited = true;
     loadTopicsTab();
   }
+  if (name === 'questions' && !questionsTabInited) {
+    questionsTabInited = true;
+    loadQuestionsTab();
+  }
   if (name === 'users' && !usersTabInited) {
     usersTabInited = true;
     loadUsers();
@@ -906,6 +925,70 @@ function switchTab(name) {
 let knowledgeTabInited = false;
 let topicsTabInited = false;
 let usersTabInited = false;
+let questionsTabInited = false;
+
+/* ── Questions (банк вопросов для базы знаний) ── */
+let _qThemes = [];
+let _qActiveTheme = null;
+let _qSearchTimer = null;
+
+async function loadQuestionsTab() {
+  const tw = document.getElementById('q-themes');
+  tw.innerHTML = '<div class="loading">Loading…</div>';
+  let d;
+  try { d = await fetch(`${API}/questions/themes`).then(r => r.json()); }
+  catch (e) { tw.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
+  _qThemes = (d && d.themes) || [];
+  document.getElementById('q-total').textContent = d && d.total ? `(${d.total} questions · ${_qThemes.length} themes)` : '(none yet)';
+  renderQThemes();
+  if (_qThemes.length && !_qActiveTheme) selectQTheme(_qThemes[0].slug);
+}
+function renderQThemes() {
+  const tw = document.getElementById('q-themes');
+  if (!_qThemes.length) { tw.innerHTML = '<div class="loading" style="padding:16px">No questions extracted yet.</div>'; return; }
+  tw.innerHTML = _qThemes.map(t => {
+    const on = t.slug === _qActiveTheme;
+    return `<div class="q-theme" data-slug="${t.slug}" style="cursor:pointer;display:flex;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:8px;margin:2px 0;font-size:13px;${on ? 'background:#7c3aed;color:#fff' : 'color:#374151'}">
+      <span>${escHtml(t.name)}</span><b style="${on ? '' : 'color:#7c3aed'}">${t.count}</b></div>`;
+  }).join('');
+  tw.querySelectorAll('.q-theme').forEach(el => el.onclick = () => selectQTheme(el.dataset.slug));
+}
+async function selectQTheme(slug) {
+  _qActiveTheme = slug;
+  renderQThemes();
+  await loadQuestions();
+}
+async function loadQuestions() {
+  const lw = document.getElementById('q-list');
+  lw.innerHTML = '<div class="loading" style="padding:16px">Loading…</div>';
+  const search = (document.getElementById('q-search').value || '').trim();
+  let qs = '?limit=1000';
+  if (_qActiveTheme && !search) qs += `&theme_slug=${encodeURIComponent(_qActiveTheme)}`;
+  if (search) qs += `&q=${encodeURIComponent(search)}`;
+  let list;
+  try { list = await fetch(`${API}/questions${qs}`).then(r => r.json()); }
+  catch (e) { lw.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
+  renderQuestions(Array.isArray(list) ? list : []);
+}
+function renderQuestions(list) {
+  const lw = document.getElementById('q-list');
+  const search = (document.getElementById('q-search').value || '').trim();
+  const themeName = (_qThemes.find(t => t.slug === _qActiveTheme) || {}).name || '';
+  const head = search ? `Search “${escHtml(search)}” · ${list.length}` : `${escHtml(themeName)} · ${list.length} questions`;
+  if (!list.length) { lw.innerHTML = `<div style="padding:14px 18px;font-size:12px;color:#9ca3af">${head}<br>No questions.</div>`; return; }
+  let h = `<div style="padding:12px 18px 8px;font-size:12px;color:#6b7280;font-weight:700;position:sticky;top:0;background:#fff;border-bottom:1px solid #eef0f4">${head}</div>`;
+  for (const q of list) {
+    h += `<div style="padding:10px 18px;border-bottom:1px solid #f3f4f6;display:flex;gap:12px;align-items:flex-start">
+      <div style="flex:1">
+        <div style="font-size:13px;color:#1f2937">${escHtml(q.text)}</div>
+        <div style="font-size:10px;color:#9ca3af;margin-top:3px">${q.created_at ? formatPlain(q.created_at) : ''}</div>
+      </div>
+      <a onclick="openConv('${q.conversation_id}')" style="cursor:pointer;color:#7c3aed;font-weight:600;font-size:12px;white-space:nowrap">open chat ↗</a>
+    </div>`;
+  }
+  lw.innerHTML = h;
+}
+function onQSearch() { clearTimeout(_qSearchTimer); _qSearchTimer = setTimeout(loadQuestions, 250); }
 
 /* ══════════ Individuals line (клиенты-физики) ══════════ */
 let LINE = 'pyme';

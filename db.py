@@ -115,6 +115,7 @@ class Conversation(Base):
     account_type = Column(String, index=True, nullable=True) # 'PFAE External'/'PFAE Golden'/'Persona Moral'/'No Empresa account' (из funnel по customer_id)
     tariff = Column(String, nullable=True)                   # имя тарифа из funnel (только при открытом счёте): Emprendedor/Independiente/Empresario…
     merged_into = Column(String, index=True, nullable=True)  # id «основного» диалога, если этот чат — короткий фрагмент-продолжение (склейка)
+    questions_extracted = Column(Integer, default=0, index=True)  # извлечены ли вопросы пользователя (для раздела Questions)
 
 
 class Document(Base):
@@ -218,6 +219,26 @@ class IndividualDialogue(Base):
     imported_at = Column(DateTime, default=datetime.utcnow)
 
 
+class QuestionTheme(Base):
+    """Тема вопросов пользователей (динамический каталог, формируется LLM под базу знаний)."""
+    __tablename__ = "question_themes"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    slug = Column(String, unique=True, index=True)
+    name = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class Question(Base):
+    """Отдельный вопрос клиента, извлечённый из чата (для переписывания базы знаний)."""
+    __tablename__ = "questions"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    conversation_id = Column(String, index=True)   # ссылка на исходный чат (conversations.id)
+    customer_id = Column(String, index=True, nullable=True)
+    created_at = Column(DateTime, index=True, nullable=True)  # дата исходного чата
+    text = Column(Text)                            # формулировка вопроса (ES)
+    theme_slug = Column(String, index=True, nullable=True)
+
+
 class UserAccess(Base):
     """Кто заходит в дашборд (по Google-логину). Обновляется троттлингом из middleware."""
     __tablename__ = "user_access"
@@ -259,6 +280,7 @@ def _run_migrations():
                 "ALTER TABLE conversations ADD COLUMN account_type VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN tariff VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN merged_into VARCHAR",
+                "ALTER TABLE conversations ADD COLUMN questions_extracted INTEGER DEFAULT 0",
                 "ALTER TABLE documents ADD COLUMN internal INTEGER DEFAULT 0",
             ]:
                 try:
@@ -292,6 +314,7 @@ def _run_migrations():
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS account_type VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS tariff VARCHAR",
                 "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS merged_into VARCHAR",
+                "ALTER TABLE conversations ADD COLUMN IF NOT EXISTS questions_extracted INTEGER DEFAULT 0",
                 "ALTER TABLE documents ADD COLUMN IF NOT EXISTS internal INTEGER DEFAULT 0",
             ]:
                 try:

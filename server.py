@@ -1419,7 +1419,7 @@ def _start_pending_worker():
         threading.Thread(target=_ind_translate_worker_loop, daemon=True).start()
     if n_ind:
         print(f"[ind-translate-worker] запущено потоков: {n_ind} (перевод физиков)")
-    if os.getenv("QUESTIONS_WORKER", "1") == "1":
+    if os.getenv("QUESTIONS_WORKER", "0") == "1":   # пауза: первый прогон делаем Claude'ом, потом включим
         threading.Thread(target=_questions_worker_loop, daemon=True).start()
         print("[questions-worker] запущен (извлечение вопросов)")
 

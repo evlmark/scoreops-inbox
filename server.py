@@ -1383,9 +1383,11 @@ def _start_pending_worker():
     _worker_started = True
     threading.Thread(target=_pending_worker_loop, daemon=True).start()
     print("[pending-worker] запущен (self-heal обработки)")
-    if os.getenv("IND_TRANSLATE_WORKER", "1") == "1":
+    n_ind = int(os.getenv("IND_TRANSLATE_WORKERS", "4"))
+    for _ in range(max(0, n_ind)):
         threading.Thread(target=_ind_translate_worker_loop, daemon=True).start()
-        print("[ind-translate-worker] запущен (перевод физиков)")
+    if n_ind:
+        print(f"[ind-translate-worker] запущено потоков: {n_ind} (перевод физиков)")
 
 
 @app.get("/conversations")

@@ -1347,6 +1347,34 @@ def _pending_worker_loop():
             time.sleep(60)
 
 
+def _ind_translate_worker_loop():
+    """Серверный воркер перевода диалогов физиков (Individuals): переводит ES→EN
+    батчами прямо на Railway (без зависимости от локальной машины). Спит, когда всё
+    переведено. Трудные (не выровнялись) помечает translated, чтобы не зацикливаться."""
+    while True:
+        try:
+            db = SessionLocal()
+            try:
+                q = db.query(DBIndividual).filter(DBIndividual.status != "translated").limit(6)
+                try:
+                    pend = q.with_for_update(skip_locked=True).all()
+                except Exception:
+                    pend = q.all()
+                if not pend:
+                    time.sleep(120)
+                    continue
+                for d in pend:
+                    if not _translate_individual(d):
+                        d.status = "translated"   # не зацикливаемся — оставим ES
+                db.commit()
+            finally:
+                db.close()
+            time.sleep(1)
+        except Exception as e:
+            print(f"[ind-translate-worker] {e}")
+            time.sleep(60)
+
+
 @app.on_event("startup")
 def _start_pending_worker():
     global _worker_started
@@ -1355,6 +1383,9 @@ def _start_pending_worker():
     _worker_started = True
     threading.Thread(target=_pending_worker_loop, daemon=True).start()
     print("[pending-worker] запущен (self-heal обработки)")
+    if os.getenv("IND_TRANSLATE_WORKER", "1") == "1":
+        threading.Thread(target=_ind_translate_worker_loop, daemon=True).start()
+        print("[ind-translate-worker] запущен (перевод физиков)")
 
 
 @app.get("/conversations")

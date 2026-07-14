@@ -21,6 +21,14 @@ extension/*.pem
 api/
 PyME\ Agents\ Keys.txt
 *.keys.txt
+# спарсенная KB + сохранённая Google-кука (секрет)
+clean_output/
+GSITES_COOKIES*.txt
+_cookies.json
+# локальные аналитические выгрузки с данными клиентов
+analysis/switcher/
+analysis/cls/
+analysis/*.csv
 
 # OS
 .DS_Store

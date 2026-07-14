@@ -509,7 +509,9 @@
   <div class="tab-panel active" id="itab-inbox">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div class="section-title" style="margin:0">Real conversations <span id="ind-inbox-count" style="color:#9ca3af;font-weight:500;font-size:13px"></span></div>
+      <button id="ind-filters-clear" onclick="clearIndFilters()" style="display:none;cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:7px;padding:5px 12px;font-size:12px;font-weight:600;color:#374151">✕ Clear filters</button>
     </div>
+    <div id="ind-filters" style="margin-bottom:14px"></div>
     <div class="card" id="ind-inbox-wrap"><div class="loading">Loading…</div></div>
   </div>
   <div class="tab-panel" id="itab-users">
@@ -527,6 +529,9 @@
 <!-- ══════════ Individuals dialogue modal ══════════ -->
 <div class="modal-overlay" id="ind-modal" onclick="closeIndModal(event)">
   <div class="modal" onclick="event.stopPropagation()" style="width:760px;position:relative">
+    <button class="conv-nav-btn prev" id="ind-nav-prev" onclick="navigateIndConv(-1)" title="Previous (←)">‹</button>
+    <button class="conv-nav-btn next" id="ind-nav-next" onclick="navigateIndConv(1)" title="Next (→)">›</button>
+    <span class="conv-nav-counter" id="ind-nav-counter"></span>
     <div class="modal-header">
       <div class="modal-header-info">
         <div class="modal-title" id="ind-modal-title">Dialogue</div>
@@ -930,7 +935,15 @@ function indProductBadges(list) {
 }
 function indTag(tags) { return ((tags || '').split('|')[0] || '').trim() || '—'; }
 
-let _indList = [];
+let _indList = [];              // все загруженные диалоги
+let _indFiltered = [];          // после фильтров (порядок для навигации ‹ ›)
+let _indProdFilter = new Set(); // выбранные продукты
+let _indTagFilter = new Set();  // выбранные теги (верхний уровень)
+
+function indTagTops(tags) {      // множество тегов верхнего уровня диалога
+  return [...new Set((tags || '').split('|').map(t => t.split(' - ')[0].trim()).filter(Boolean))];
+}
+
 async function loadIndInbox() {
   const wrap = document.getElementById('ind-inbox-wrap');
   wrap.innerHTML = '<div class="loading">Loading…</div>';
@@ -938,14 +951,43 @@ async function loadIndInbox() {
   try { list = await fetch(`${API}/individuals/conversations?limit=5000`).then(r => r.json()); }
   catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
   _indList = Array.isArray(list) ? list : [];
-  document.getElementById('ind-inbox-count').textContent = _indList.length ? `(${_indList.length})` : '';
+  buildIndFilters();
   renderIndInbox();
 }
+
+function buildIndFilters() {
+  const el = document.getElementById('ind-filters');
+  const prodSet = new Set(), tagSet = new Set();
+  for (const c of _indList) { (c.products || []).forEach(p => prodSet.add(p)); indTagTops(c.tags).forEach(t => tagSet.add(t)); }
+  const chips = (arr, kind) => arr.sort().map(v => {
+    const active = (kind === 'prod' ? _indProdFilter : _indTagFilter).has(v);
+    return `<button class="ind-chip" data-kind="${kind}" data-val="${escHtml(v)}" style="cursor:pointer;border:1px solid ${active ? '#7c3aed' : '#d1d5db'};background:${active ? '#7c3aed' : '#fff'};color:${active ? '#fff' : '#374151'};border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;margin:0 6px 6px 0">${escHtml(v)}</button>`;
+  }).join('');
+  el.innerHTML =
+    `<div style="margin-bottom:6px"><span style="font-size:11px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-right:8px">Products</span>${chips([...prodSet], 'prod')}</div>`
+    + `<div><span style="font-size:11px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-right:8px">Tags</span>${chips([...tagSet], 'tag')}</div>`;
+  el.querySelectorAll('.ind-chip').forEach(b => b.onclick = () => toggleIndFilter(b.dataset.kind, b.dataset.val));
+}
+function toggleIndFilter(kind, val) {
+  const s = kind === 'prod' ? _indProdFilter : _indTagFilter;
+  s.has(val) ? s.delete(val) : s.add(val);
+  buildIndFilters(); renderIndInbox();
+}
+function clearIndFilters() { _indProdFilter.clear(); _indTagFilter.clear(); buildIndFilters(); renderIndInbox(); }
+
 function renderIndInbox() {
   const wrap = document.getElementById('ind-inbox-wrap');
-  if (!_indList.length) { wrap.innerHTML = '<div class="loading">No dialogues.</div>'; return; }
+  _indFiltered = _indList.filter(c => {
+    const prodOk = !_indProdFilter.size || (c.products || []).some(p => _indProdFilter.has(p));
+    const tagOk = !_indTagFilter.size || indTagTops(c.tags).some(t => _indTagFilter.has(t));
+    return prodOk && tagOk;
+  });
+  const hasFilter = _indProdFilter.size || _indTagFilter.size;
+  document.getElementById('ind-filters-clear').style.display = hasFilter ? 'inline-block' : 'none';
+  document.getElementById('ind-inbox-count').textContent = hasFilter ? `(${_indFiltered.length} of ${_indList.length})` : `(${_indList.length})`;
+  if (!_indFiltered.length) { wrap.innerHTML = '<div class="loading">No dialogues match the filters.</div>'; return; }
   let h = '<table class="sessions-table"><thead><tr><th>DATE</th><th>TYPE</th><th>TOPIC / TAGS</th><th>PRODUCTS</th><th>LINK</th><th></th></tr></thead><tbody>';
-  for (const c of _indList) {
+  for (const c of _indFiltered) {
     const link = c.record_url ? `<a href="${escHtml(c.record_url)}" target="_blank" onclick="event.stopPropagation()" style="color:#7c3aed">🔗 rec</a>` : '<span style="color:#d1d5db">—</span>';
     h += `<tr class="session-row" onclick="openIndConv('${c.id}')">
       <td class="time-text">${formatPlain(c.created_at)}</td>
@@ -958,6 +1000,26 @@ function renderIndInbox() {
   }
   wrap.innerHTML = h + '</tbody></table>';
 }
+function updateIndNav() {
+  const list = _indFiltered || [];
+  const idx = list.findIndex(c => c.id === openIndId);
+  const p = document.getElementById('ind-nav-prev'), n = document.getElementById('ind-nav-next'), ct = document.getElementById('ind-nav-counter');
+  if (idx < 0 || !list.length) { p.disabled = true; n.disabled = true; ct.textContent = ''; return; }
+  p.disabled = (idx <= 0); n.disabled = (idx >= list.length - 1);
+  ct.textContent = `${idx + 1} / ${list.length}`;
+}
+function navigateIndConv(delta) {
+  const list = _indFiltered || [];
+  const idx = list.findIndex(c => c.id === openIndId);
+  if (idx < 0) return;
+  const nx = list[idx + delta];
+  if (nx) openIndConv(nx.id);
+}
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('ind-modal').classList.contains('open')) return;
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); navigateIndConv(-1); }
+  if (e.key === 'ArrowRight') { e.preventDefault(); navigateIndConv(1); }
+});
 
 let openIndId = null;
 async function openIndConv(id, fromHash) {
@@ -972,6 +1034,7 @@ async function openIndConv(id, fromHash) {
   catch (e) { document.getElementById('ind-modal-body').innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
   if (d.error) { document.getElementById('ind-modal-body').innerHTML = `<div class="loading">${escHtml(d.error)}</div>`; return; }
   renderIndModal(d);
+  updateIndNav();
 }
 function closeIndModal(e) {
   if (!e || e.target === document.getElementById('ind-modal')) {

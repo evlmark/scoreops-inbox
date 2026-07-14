@@ -1012,7 +1012,7 @@ function renderIndInbox() {
   let h = '<table class="sessions-table"><thead><tr><th>DATE</th><th>TYPE</th><th>TOPIC / TAGS</th><th>PRODUCTS</th><th>LINK</th><th></th></tr></thead><tbody>';
   for (const c of _indFiltered) {
     const link = c.record_url ? `<a href="${escHtml(c.record_url)}" target="_blank" onclick="event.stopPropagation()" style="color:#7c3aed">🔗 rec</a>` : '<span style="color:#d1d5db">—</span>';
-    h += `<tr class="session-row" onclick="openIndConv('${c.id}')">
+    h += `<tr class="session-row" data-id="${c.id}" onclick="openIndConv('${c.id}')">
       <td class="time-text">${formatPlain(c.created_at)}</td>
       <td>${convTypeBadge(c.type)}</td>
       <td style="color:#374151">${escHtml(indTag(c.tags))}</td>
@@ -1022,6 +1022,23 @@ function renderIndInbox() {
     </tr>`;
   }
   wrap.innerHTML = h + '</tbody></table>';
+  markIndOpenRow();
+}
+function markIndOpenRow() {
+  document.querySelectorAll('#ind-inbox-wrap tr.session-row').forEach(tr => {
+    const on = tr.dataset.id === openIndId;
+    tr.style.background = on ? '#f5f3ff' : '';
+    tr.style.boxShadow = on ? 'inset 3px 0 0 #7c3aed' : '';
+    const topicCell = tr.children[2];
+    let mark = tr.querySelector('.ind-open-mark');
+    if (on && !mark && topicCell) {
+      mark = document.createElement('span');
+      mark.className = 'ind-open-mark';
+      mark.textContent = ' ← open';
+      mark.style.cssText = 'color:#7c3aed;font-weight:700;font-size:11px;margin-left:6px';
+      topicCell.appendChild(mark);
+    } else if (!on && mark) { mark.remove(); }
+  });
 }
 function updateIndNav() {
   const list = _indFiltered || [];
@@ -1047,6 +1064,7 @@ document.addEventListener('keydown', e => {
 let openIndId = null;
 async function openIndConv(id, fromHash) {
   openIndId = id;
+  markIndOpenRow();
   if (!fromHash) location.hash = `ind/${id}`;
   document.getElementById('ind-modal').classList.add('open');
   document.getElementById('ind-modal-body').innerHTML = '<div class="loading">Loading transcript…</div>';
@@ -1063,6 +1081,7 @@ function closeIndModal(e) {
   if (!e || e.target === document.getElementById('ind-modal')) {
     document.getElementById('ind-modal').classList.remove('open');
     openIndId = null;
+    markIndOpenRow();
     if (location.hash.startsWith('#ind/')) history.replaceState(null, '', location.pathname);
   }
 }

@@ -1379,8 +1379,9 @@ def _pending_worker_loop():
 
 def _ind_translate_worker_loop():
     """Серверный воркер перевода диалогов физиков (Individuals): переводит ES→EN
-    батчами прямо на Railway (без зависимости от локальной машины). Спит, когда всё
-    переведено. Трудные (не выровнялись) помечает translated, чтобы не зацикливаться."""
+    батчами прямо на Railway. Статус ставит сама _translate_individual (translated,
+    когда все реплики переведены; иначе pending — с пофразовым фолбэком провалы редки).
+    Спит, когда всё переведено."""
     while True:
         try:
             db = SessionLocal()
@@ -1394,8 +1395,7 @@ def _ind_translate_worker_loop():
                     time.sleep(120)
                     continue
                 for d in pend:
-                    if not _translate_individual(d):
-                        d.status = "translated"   # не зацикливаемся — оставим ES
+                    _translate_individual(d)
                 db.commit()
             finally:
                 db.close()
@@ -1764,35 +1764,53 @@ def admin_logins():
 # ═══════════════════ INDIVIDUALS (клиенты-физики) — отдельная линия ═══════════════════
 # Только отображение: чат ES+EN, ссылка, продуктовые флаги. Без топиков/оценки.
 
-def _translate_individual(dlg) -> bool:
-    """Переводит транскрипт одного диалога физика (ES→EN) одним вызовом DeepSeek,
-    выравнивая по номерам строк. Пишет text_en в реплики. Возвращает True при успехе."""
+def _ind_translate_chunk(texts: list):
+    """Переводит список ES-строк одним вызовом DeepSeek → list[str] той же длины или None."""
+    numbered = "\n".join(f"{j}. {t}" for j, t in enumerate(texts))
+    prompt = ("Translate each numbered Spanish line to natural English. "
+              "Return ONLY a JSON array of strings, exactly the same length and order, no numbering.\n\n" + numbered)
+    try:
+        resp = EVALUATOR_CLIENT.chat.completions.create(
+            model="deepseek-chat", messages=[{"role": "user", "content": prompt}],
+            max_tokens=8000, temperature=0.1)
+        content = (resp.choices[0].message.content or "").strip()
+        content = re.sub(r"^```json\s*", "", content); content = re.sub(r"\s*```$", "", content)
+        arr = json.loads(content)
+        if isinstance(arr, list) and len(arr) == len(texts):
+            return [str(x) for x in arr]
+    except Exception as e:
+        print(f"[ind-translate chunk] {e}")
+    return None
+
+
+def _translate_individual(dlg, chunk: int = 15) -> bool:
+    """Переводит транскрипт диалога физика ES→EN: чанками по `chunk` реплик; если чанк
+    не выровнялся — пофразовый фолбэк через translate_to_english (надёжно).
+    status=translated только когда ВСЕ реплики переведены, иначе остаётся pending."""
     from sqlalchemy.orm.attributes import flag_modified
     turns = list(dlg.transcript or [])
     idxs = [i for i, t in enumerate(turns) if (t.get("text") or "").strip() and not t.get("text_en")]
     if not idxs:
         dlg.status = "translated"
         return True
-    numbered = "\n".join(f"{j}. {turns[i]['text']}" for j, i in enumerate(idxs))
-    prompt = ("Translate each numbered Spanish line to natural English. "
-              "Return ONLY a JSON array of strings, same length and order, no numbering.\n\n" + numbered)
-    try:
-        resp = EVALUATOR_CLIENT.chat.completions.create(
-            model="deepseek-chat", messages=[{"role": "user", "content": prompt}],
-            max_tokens=4000, temperature=0.1)
-        content = (resp.choices[0].message.content or "").strip()
-        content = re.sub(r"^```json\s*", "", content); content = re.sub(r"\s*```$", "", content)
-        arr = json.loads(content)
-        if isinstance(arr, list) and len(arr) == len(idxs):
-            for j, i in enumerate(idxs):
-                turns[i]["text_en"] = str(arr[j])
-            dlg.transcript = turns
-            flag_modified(dlg, "transcript")
-            dlg.status = "translated"
-            return True
-    except Exception as e:
-        print(f"[ind-translate] {dlg.id}: {e}")
-    return False
+    changed = False
+    for s in range(0, len(idxs), chunk):
+        group = idxs[s:s + chunk]
+        arr = _ind_translate_chunk([turns[i]["text"] for i in group])
+        if arr:
+            for j, i in enumerate(group):
+                turns[i]["text_en"] = arr[j]; changed = True
+        else:                                   # фолбэк: по одной реплике
+            for i in group:
+                en = translate_to_english(turns[i]["text"])
+                if en:
+                    turns[i]["text_en"] = en; changed = True
+    if changed:
+        dlg.transcript = turns
+        flag_modified(dlg, "transcript")
+    done = all(turns[i].get("text_en") for i in idxs)
+    dlg.status = "translated" if done else "pending"
+    return done
 
 
 @app.post("/admin/individuals/translate")

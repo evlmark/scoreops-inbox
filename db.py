@@ -218,6 +218,16 @@ class IndividualDialogue(Base):
     imported_at = Column(DateTime, default=datetime.utcnow)
 
 
+class UserAccess(Base):
+    """Кто заходит в дашборд (по Google-логину). Обновляется троттлингом из middleware."""
+    __tablename__ = "user_access"
+    email = Column(String, primary_key=True)
+    name = Column(String, nullable=True)
+    first_seen = Column(DateTime, default=datetime.utcnow)
+    last_seen = Column(DateTime, default=datetime.utcnow, index=True)
+    hits = Column(Integer, default=0)
+
+
 def init_db():
     Base.metadata.create_all(engine)
     # Migration: add columns that may not exist in already-created tables

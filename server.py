@@ -24,7 +24,7 @@ from db import (
     Conversation as DBConversation, detect_agent_name,
     Document as DBDocument, CrawlRun as DBCrawlRun, PullRun as DBPullRun,
     Topic as DBTopic, TopicSuggestion as DBTopicSuggestion,
-    IndividualDialogue as DBIndividual,
+    IndividualDialogue as DBIndividual, UserAccess as DBUserAccess,
 )
 
 warnings.filterwarnings("ignore")
@@ -79,6 +79,35 @@ def _is_extension_path(path: str) -> bool:
     return False
 
 
+_access_last = {}   # email -> last write ts (троттлинг записи, чтобы не писать на каждый запрос)
+
+
+def _record_access(info: dict):
+    """Логирует вход пользователя (email) в таблицу user_access, не чаще раза в 2 мин."""
+    try:
+        email = (info.get("email") or "").lower()
+        if not email:
+            return
+        now = time.time()
+        if now - _access_last.get(email, 0) < 120:
+            return
+        _access_last[email] = now
+        db = SessionLocal()
+        try:
+            u = db.query(DBUserAccess).filter_by(email=email).first()
+            if not u:
+                u = DBUserAccess(email=email, name=info.get("name"), first_seen=datetime.utcnow(), hits=0)
+                db.add(u)
+            u.name = info.get("name") or u.name
+            u.last_seen = datetime.utcnow()
+            u.hits = (u.hits or 0) + 1
+            db.commit()
+        finally:
+            db.close()
+    except Exception:
+        pass
+
+
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         if request.method == "OPTIONS":
@@ -104,6 +133,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             try:
                 info = verify_google_token(auth_header[7:])
                 request.state.user = info
+                _record_access(info)
                 return await call_next(request)
             except Exception as e:
                 return JSONResponse(status_code=401, content={"error": f"Auth failed: {str(e)[:200]}"})
@@ -1711,6 +1741,22 @@ def get_customer(customer_id: str):
                        for s, n in sorted(topics.items(), key=lambda x: -x[1])],
             "conversations": convs,
         }
+    finally:
+        db.close()
+
+
+@app.get("/admin/logins")
+def admin_logins():
+    """Кто заходил в дашборд (Google-логины): email, имя, первый/последний вход, кол-во запросов."""
+    db = SessionLocal()
+    try:
+        rows = db.query(DBUserAccess).order_by(desc(DBUserAccess.last_seen)).all()
+        return [{
+            "email": u.email, "name": u.name,
+            "first_seen": u.first_seen.isoformat() if u.first_seen else None,
+            "last_seen": u.last_seen.isoformat() if u.last_seen else None,
+            "hits": u.hits,
+        } for u in rows]
     finally:
         db.close()
 

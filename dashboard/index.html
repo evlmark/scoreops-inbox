@@ -959,21 +959,44 @@ function buildIndFilters() {
   const el = document.getElementById('ind-filters');
   const prodSet = new Set(), tagSet = new Set();
   for (const c of _indList) { (c.products || []).forEach(p => prodSet.add(p)); indTagTops(c.tags).forEach(t => tagSet.add(t)); }
-  const chips = (arr, kind) => arr.sort().map(v => {
-    const active = (kind === 'prod' ? _indProdFilter : _indTagFilter).has(v);
-    return `<button class="ind-chip" data-kind="${kind}" data-val="${escHtml(v)}" style="cursor:pointer;border:1px solid ${active ? '#7c3aed' : '#d1d5db'};background:${active ? '#7c3aed' : '#fff'};color:${active ? '#fff' : '#374151'};border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;margin:0 6px 6px 0">${escHtml(v)}</button>`;
-  }).join('');
-  el.innerHTML =
-    `<div style="margin-bottom:6px"><span style="font-size:11px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-right:8px">Products</span>${chips([...prodSet], 'prod')}</div>`
-    + `<div><span style="font-size:11px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-right:8px">Tags</span>${chips([...tagSet], 'tag')}</div>`;
-  el.querySelectorAll('.ind-chip').forEach(b => b.onclick = () => toggleIndFilter(b.dataset.kind, b.dataset.val));
-}
-function toggleIndFilter(kind, val) {
-  const s = kind === 'prod' ? _indProdFilter : _indTagFilter;
-  s.has(val) ? s.delete(val) : s.add(val);
-  buildIndFilters(); renderIndInbox();
+  const dd = (kind, label, vals, sel) => {
+    const n = sel.size;
+    const items = vals.sort().map(v =>
+      `<label class="ind-dd-item" style="display:flex;align-items:center;gap:8px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap">
+        <input type="checkbox" data-kind="${kind}" data-val="${escHtml(v)}" ${sel.has(v) ? 'checked' : ''}> ${escHtml(v)}</label>`).join('')
+      || '<div style="padding:8px 12px;color:#9ca3af;font-size:12px">—</div>';
+    return `<div class="ind-dd" data-kind="${kind}" style="position:relative">
+      <button class="ind-dd-btn" style="cursor:pointer;border:1px solid ${n ? '#7c3aed' : '#d1d5db'};background:${n ? '#f5f3ff' : '#fff'};color:#374151;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600">${label}${n ? ` · ${n}` : ''} ▾</button>
+      <div class="ind-dd-panel" style="display:none;position:absolute;z-index:50;top:calc(100% + 4px);left:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);max-height:300px;overflow:auto;min-width:210px;padding:4px 0">${items}</div>
+    </div>`;
+  };
+  el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${dd('prod', 'Products', [...prodSet], _indProdFilter)}${dd('tag', 'Tags', [...tagSet], _indTagFilter)}</div>`;
+  el.querySelectorAll('.ind-dd').forEach(box => {
+    const btn = box.querySelector('.ind-dd-btn'), panel = box.querySelector('.ind-dd-panel');
+    btn.onclick = e => {
+      e.stopPropagation();
+      const open = panel.style.display === 'block';
+      document.querySelectorAll('#ind-filters .ind-dd-panel').forEach(p => p.style.display = 'none');
+      panel.style.display = open ? 'none' : 'block';
+    };
+    panel.onclick = e => e.stopPropagation();
+    panel.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.onchange = () => {
+        const s = cb.dataset.kind === 'prod' ? _indProdFilter : _indTagFilter;
+        cb.checked ? s.add(cb.dataset.val) : s.delete(cb.dataset.val);
+        const n = s.size, lbl = cb.dataset.kind === 'prod' ? 'Products' : 'Tags';
+        btn.textContent = `${lbl}${n ? ` · ${n}` : ''} ▾`;
+        btn.style.borderColor = n ? '#7c3aed' : '#d1d5db';
+        btn.style.background = n ? '#f5f3ff' : '#fff';
+        renderIndInbox();
+      };
+    });
+  });
 }
 function clearIndFilters() { _indProdFilter.clear(); _indTagFilter.clear(); buildIndFilters(); renderIndInbox(); }
+document.addEventListener('click', () => {
+  document.querySelectorAll('#ind-filters .ind-dd-panel').forEach(p => p.style.display = 'none');
+});
 
 function renderIndInbox() {
   const wrap = document.getElementById('ind-inbox-wrap');

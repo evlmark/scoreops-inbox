@@ -1021,10 +1021,14 @@ function indTag(tags) { return ((tags || '').split('|')[0] || '').trim() || '—
 let _indList = [];              // все загруженные диалоги
 let _indFiltered = [];          // после фильтров (порядок для навигации ‹ ›)
 let _indProdFilter = new Set(); // выбранные продукты
-let _indTagFilter = new Set();  // выбранные теги (верхний уровень)
+let _indTagFilter = new Set();  // выбранные теги (верхний уровень / категория)
+let _indSubFilter = new Set();  // выбранные теги 2-го уровня (полный «Категория - Подтема»)
 
 function indTagTops(tags) {      // множество тегов верхнего уровня диалога
   return [...new Set((tags || '').split('|').map(t => t.split(' - ')[0].trim()).filter(Boolean))];
+}
+function indTagSubs(tags) {      // множество тегов 2-го уровня (полные атомарные теги)
+  return [...new Set((tags || '').split('|').map(t => t.trim()).filter(Boolean))];
 }
 
 async function loadIndInbox() {
@@ -1040,8 +1044,8 @@ async function loadIndInbox() {
 
 function buildIndFilters() {
   const el = document.getElementById('ind-filters');
-  const prodSet = new Set(), tagSet = new Set();
-  for (const c of _indList) { (c.products || []).forEach(p => prodSet.add(p)); indTagTops(c.tags).forEach(t => tagSet.add(t)); }
+  const prodSet = new Set(), tagSet = new Set(), subSet = new Set();
+  for (const c of _indList) { (c.products || []).forEach(p => prodSet.add(p)); indTagTops(c.tags).forEach(t => tagSet.add(t)); indTagSubs(c.tags).forEach(t => subSet.add(t)); }
   const dd = (kind, label, vals, sel) => {
     const n = sel.size;
     const items = vals.sort().map(v =>
@@ -1053,7 +1057,7 @@ function buildIndFilters() {
       <div class="ind-dd-panel" style="display:none;position:absolute;z-index:50;top:calc(100% + 4px);left:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);max-height:300px;overflow:auto;min-width:210px;padding:4px 0">${items}</div>
     </div>`;
   };
-  el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${dd('prod', 'Products', [...prodSet], _indProdFilter)}${dd('tag', 'Tags', [...tagSet], _indTagFilter)}</div>`;
+  el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${dd('prod', 'Products', [...prodSet], _indProdFilter)}${dd('tag', 'Category', [...tagSet], _indTagFilter)}${dd('sub', 'Subtag', [...subSet], _indSubFilter)}</div>`;
   el.querySelectorAll('.ind-dd').forEach(box => {
     const btn = box.querySelector('.ind-dd-btn'), panel = box.querySelector('.ind-dd-panel');
     btn.onclick = e => {
@@ -1065,9 +1069,11 @@ function buildIndFilters() {
     panel.onclick = e => e.stopPropagation();
     panel.querySelectorAll('input[type=checkbox]').forEach(cb => {
       cb.onchange = () => {
-        const s = cb.dataset.kind === 'prod' ? _indProdFilter : _indTagFilter;
+        const SETS = { prod: _indProdFilter, tag: _indTagFilter, sub: _indSubFilter };
+        const LBL = { prod: 'Products', tag: 'Category', sub: 'Subtag' };
+        const s = SETS[cb.dataset.kind];
         cb.checked ? s.add(cb.dataset.val) : s.delete(cb.dataset.val);
-        const n = s.size, lbl = cb.dataset.kind === 'prod' ? 'Products' : 'Tags';
+        const n = s.size, lbl = LBL[cb.dataset.kind];
         btn.textContent = `${lbl}${n ? ` · ${n}` : ''} ▾`;
         btn.style.borderColor = n ? '#7c3aed' : '#d1d5db';
         btn.style.background = n ? '#f5f3ff' : '#fff';
@@ -1076,7 +1082,7 @@ function buildIndFilters() {
     });
   });
 }
-function clearIndFilters() { _indProdFilter.clear(); _indTagFilter.clear(); buildIndFilters(); renderIndInbox(); }
+function clearIndFilters() { _indProdFilter.clear(); _indTagFilter.clear(); _indSubFilter.clear(); buildIndFilters(); renderIndInbox(); }
 document.addEventListener('click', () => {
   document.querySelectorAll('#ind-filters .ind-dd-panel').forEach(p => p.style.display = 'none');
 });
@@ -1086,9 +1092,10 @@ function renderIndInbox() {
   _indFiltered = _indList.filter(c => {
     const prodOk = !_indProdFilter.size || (c.products || []).some(p => _indProdFilter.has(p));
     const tagOk = !_indTagFilter.size || indTagTops(c.tags).some(t => _indTagFilter.has(t));
-    return prodOk && tagOk;
+    const subOk = !_indSubFilter.size || indTagSubs(c.tags).some(t => _indSubFilter.has(t));
+    return prodOk && tagOk && subOk;
   });
-  const hasFilter = _indProdFilter.size || _indTagFilter.size;
+  const hasFilter = _indProdFilter.size || _indTagFilter.size || _indSubFilter.size;
   document.getElementById('ind-filters-clear').style.display = hasFilter ? 'inline-block' : 'none';
   document.getElementById('ind-inbox-count').textContent = hasFilter ? `(${_indFiltered.length} of ${_indList.length})` : `(${_indList.length})`;
   if (!_indFiltered.length) { wrap.innerHTML = '<div class="loading">No dialogues match the filters.</div>'; return; }

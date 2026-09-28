@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<title>Types of Inquiries</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDF1F7; --surface:#FFFFFF; --surface-2:#F4F6FA;
+    --border:#DCE3ED; --border-strong:#C4CEDC;
+    --text:#182233; --text-muted:#5C6B80; --text-faint:#8996A8;
+    --accent:#1660C7; --accent-strong:#0D4695; --accent-soft:#E3ECFB;
+    --warn:#9A5B12; --warn-soft:#FBEEDD;
+    --critical:#AC2B22; --critical-soft:#FBE7E4;
+    --mixed:#6B4FA0; --mixed-soft:#EFE8F8;
+    --good:#1E7A4C; --good-soft:#E1F3EA;
+    --call:#4A5FC1; --call-soft:#E7E9FA; --teal:#0E8F84; --teal-soft:#DFF3F1; --rose:#C2367B; --rose-soft:#FBE3EE;
+    --shadow: 0 1px 2px rgba(24,34,51,.06), 0 6px 20px -8px rgba(24,34,51,.12);
+    --glass-bg: rgba(255,255,255,.6); --glass-bg-strong: rgba(255,255,255,.78);
+    --glass-border: rgba(255,255,255,.75); --glass-hi: rgba(255,255,255,.85);
+    --glass-shadow: 0 1px 2px rgba(24,34,51,.05), 0 10px 30px -10px rgba(24,34,51,.18), inset 0 1px 0 var(--glass-hi);
+    --glass-shadow-hover: 0 1px 2px rgba(24,34,51,.06), 0 14px 36px -12px rgba(24,34,51,.24), inset 0 1px 0 var(--glass-hi);
+    --blob1: rgba(50,110,230,.30); --blob2: rgba(150,80,220,.24); --blob3: rgba(20,170,150,.20);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0D1117; --surface:#1A2029; --surface-2:#212834;
+      --border:#2B3441; --border-strong:#3A4453;
+      --text:#E7ECF3; --text-muted:#9AA7B8; --text-faint:#6E7A8C;
+      --accent:#7EB0FF; --accent-strong:#A6C8FF; --accent-soft:#1D2C46;
+      --warn:#E3A353; --warn-soft:#372A16;
+      --critical:#F0847C; --critical-soft:#3B211F;
+      --mixed:#BBA1E8; --mixed-soft:#2A2340;
+      --good:#7BC9A0; --good-soft:#19301F;
+      --call:#9FADEB; --call-soft:#252A45; --teal:#5FD9CB; --teal-soft:#12302C; --rose:#F0A8CE; --rose-soft:#3A1E2C;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -8px rgba(0,0,0,.5);
+      --glass-bg: rgba(26,32,41,.55); --glass-bg-strong: rgba(30,37,47,.72);
+      --glass-border: rgba(255,255,255,.09); --glass-hi: rgba(255,255,255,.07);
+      --glass-shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 32px -10px rgba(0,0,0,.55), inset 0 1px 0 var(--glass-hi);
+      --glass-shadow-hover: 0 1px 2px rgba(0,0,0,.35), 0 14px 40px -12px rgba(0,0,0,.6), inset 0 1px 0 var(--glass-hi);
+      --blob1: rgba(90,150,255,.35); --blob2: rgba(175,110,255,.28); --blob3: rgba(45,210,190,.22);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0D1117; --surface:#1A2029; --surface-2:#212834;
+    --border:#2B3441; --border-strong:#3A4453;
+    --text:#E7ECF3; --text-muted:#9AA7B8; --text-faint:#6E7A8C;
+    --accent:#7EB0FF; --accent-strong:#A6C8FF; --accent-soft:#1D2C46;
+    --warn:#E3A353; --warn-soft:#372A16;
+    --critical:#F0847C; --critical-soft:#3B211F;
+    --mixed:#BBA1E8; --mixed-soft:#2A2340;
+    --good:#7BC9A0; --good-soft:#19301F;
+    --call:#9FADEB; --call-soft:#252A45; --teal:#5FD9CB; --teal-soft:#12302C; --rose:#F0A8CE; --rose-soft:#3A1E2C;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -8px rgba(0,0,0,.5);
+    --glass-bg: rgba(26,32,41,.55); --glass-bg-strong: rgba(30,37,47,.72);
+    --glass-border: rgba(255,255,255,.09); --glass-hi: rgba(255,255,255,.07);
+    --glass-shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 32px -10px rgba(0,0,0,.55), inset 0 1px 0 var(--glass-hi);
+    --glass-shadow-hover: 0 1px 2px rgba(0,0,0,.35), 0 14px 40px -12px rgba(0,0,0,.6), inset 0 1px 0 var(--glass-hi);
+    --blob1: rgba(90,150,255,.35); --blob2: rgba(175,110,255,.28); --blob3: rgba(45,210,190,.22);
+  }
+  *{box-sizing:border-box;}
+  body{ background:var(--bg); color:var(--text); font-family:"IBM Plex Sans", system-ui, sans-serif; font-size:14px; line-height:1.5; position:relative; }
+  body::before{
+    content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(640px circle at 12% 8%, var(--blob1), transparent 65%),
+      radial-gradient(720px circle at 88% 6%, var(--blob2), transparent 65%),
+      radial-gradient(680px circle at 45% 95%, var(--blob3), transparent 65%);
+  }
+  .num{ font-family:"IBM Plex Mono", ui-monospace, monospace; font-variant-numeric:tabular-nums; }
+  h1,h2,.display{ font-family:"Manrope", system-ui, sans-serif; text-wrap:balance; }
+  a{ color:inherit; }
+  .shell{ max-width:1060px; margin:0 auto; padding:0 20px 64px; }
+
+  header.top{ position:sticky; top:0; z-index:20; background:var(--glass-bg-strong); backdrop-filter:blur(22px) saturate(160%); -webkit-backdrop-filter:blur(22px) saturate(160%); padding:18px 20px 14px; margin:0 -20px; border-bottom:1px solid var(--glass-border); box-shadow:0 8px 24px -16px rgba(24,34,51,.25); }
+  .top-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .eyebrow{ font-family:"IBM Plex Mono", monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:500; margin:0 0 6px; }
+  h1{ font-size:25px; font-weight:800; margin:0; letter-spacing:-.01em; }
+  .subtitle{ color:var(--text-muted); font-size:13px; margin-top:4px; }
+  .meta-pill{ display:inline-flex; align-items:center; gap:6px; background:var(--glass-bg); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%); border:1px solid var(--glass-border); border-radius:99px; padding:6px 12px; font-size:12px; color:var(--text-muted); white-space:nowrap; }
+  .meta-pill b{ color:var(--text); font-family:"IBM Plex Mono",monospace; }
+  .lang-switch{ display:flex; gap:2px; background:var(--glass-bg); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%); border:1px solid var(--glass-border); border-radius:9px; padding:2px; }
+  .lang-switch button{ font:inherit; font-size:11.5px; font-weight:700; padding:5px 10px; border-radius:6px; border:none; background:transparent; color:var(--text-muted); cursor:pointer; }
+  .lang-switch button.active{ background:var(--accent); color:#fff; }
+  nav.jump{ display:flex; gap:8px; margin-top:14px; }
+  nav.jump button{ font:inherit; font-size:12.5px; font-weight:600; color:var(--text-muted); background:transparent; border:1px solid var(--border); border-radius:8px; padding:6px 12px; cursor:pointer; }
+  nav.jump button.active{ color:var(--accent-strong); border-color:var(--accent); background:var(--accent-soft); }
+
+  .kpis{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:22px 0 26px; }
+  .kpi{ background:var(--glass-bg); backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%); border:1px solid var(--glass-border); border-radius:16px; padding:14px 16px; box-shadow:var(--glass-shadow); }
+  .kpi .v{ font-family:"Manrope"; font-size:25px; font-weight:800; letter-spacing:-.01em; }
+  .kpi .l{ font-size:11.5px; color:var(--text-muted); margin-top:2px; }
+
+  section{ margin-top:36px; }
+  .section-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .section-head h2{ font-size:18px; font-weight:800; margin:0; }
+  .section-head .hint{ font-size:12.5px; color:var(--text-faint); }
+
+  .overview-chart{ display:flex; flex-direction:column; gap:10px; background:var(--glass-bg); backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%); border:1px solid var(--glass-border); border-radius:16px; box-shadow:var(--glass-shadow); padding:16px 18px; margin-bottom:18px; }
+  .ov-row{ display:grid; grid-template-columns:170px 1fr auto; align-items:center; gap:12px; }
+  .ov-label{ font-size:12.5px; font-weight:700; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ov-track{ height:12px; border-radius:6px; background:var(--surface-2); border:1px solid var(--border); overflow:hidden; }
+  .ov-fill{ height:100%; border-radius:6px; }
+  .ov-fill.theme-origination{ background:linear-gradient(90deg, var(--accent-strong), var(--accent)); }
+  .ov-fill.theme-aml_kyb{ background:var(--critical); }
+  .ov-fill.theme-payments{ background:var(--call); }
+  .ov-fill.theme-product{ background:var(--good); }
+  .ov-fill.theme-vas{ background:var(--mixed); }
+  .ov-fill.theme-overdraft{ background:var(--warn); }
+  .ov-fill.theme-acquiring{ background:var(--teal); }
+  .ov-fill.theme-cancel_active{ background:var(--rose); }
+  .ov-fill.theme-calls_unresolved{ background:var(--border-strong); }
+  .ov-fill.theme-personal_topic{ background:var(--mixed); }
+  .ov-fill.theme-misc{ background:var(--text-faint); }
+  .ov-value{ font-size:12.5px; font-weight:700; color:var(--text); white-space:nowrap; text-align:right; min-width:90px; }
+  @media (max-width:640px){
+    .ov-row{ grid-template-columns:1fr; gap:4px; }
+    .ov-value{ text-align:left; }
+  }
+  .controls{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px; align-items:center; }
+  .filter-group{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .global-controls{ background:var(--glass-bg); backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%); border:1px solid var(--glass-border); border-radius:16px; padding:16px 18px; box-shadow:var(--glass-shadow); flex-direction:column; align-items:stretch; gap:12px; }
+  .global-controls .filter-group{ width:100%; }
+  .filter-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); font-weight:700; margin-right:2px; }
+  .chip{ font:inherit; font-size:12.5px; font-weight:600; cursor:pointer; padding:6px 12px; border-radius:99px; border:1px solid var(--glass-border); background:var(--glass-bg); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%); color:var(--text-muted); }
+  .chip.active{ background:var(--accent); border-color:var(--accent); color:#fff; backdrop-filter:none; -webkit-backdrop-filter:none; }
+  .search{ flex:1; min-width:180px; font:inherit; font-size:13px; padding:7px 12px; border-radius:10px; border:1px solid var(--glass-border); background:var(--glass-bg); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%); color:var(--text); }
+  .search::placeholder{ color:var(--text-faint); }
+
+  .rows{ display:flex; flex-direction:column; gap:8px; }
+  .type-group{ margin-bottom:22px; }
+  .type-group:last-child{ margin-bottom:0; }
+  .type-group-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:10px 16px; margin-bottom:10px; border-radius:12px; border:1px solid var(--glass-border); border-left:3px solid var(--border); background:var(--glass-bg); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%); }
+  .type-group-head .tg-name{ font-family:"Manrope"; font-weight:800; font-size:14px; letter-spacing:-.01em; }
+  .type-group-head .tg-count{ font-size:12px; color:var(--text-faint); font-weight:600; }
+  .type-group-head.type-Пресейл{ border-left-color:var(--accent); } .type-group-head.type-Пресейл .tg-name{ color:var(--accent-strong); }
+  .type-group-head.type-Обслуживание{ border-left-color:var(--border-strong); } .type-group-head.type-Обслуживание .tg-name{ color:var(--text-muted); }
+  .type-group-head.type-Отмена{ border-left-color:var(--warn); } .type-group-head.type-Отмена .tg-name{ color:var(--warn); }
+  .type-group-head.type-Дефект{ border-left-color:var(--critical); } .type-group-head.type-Дефект .tg-name{ color:var(--critical); }
+  .type-group-head.type-Смешанная{ border-left-color:var(--mixed); } .type-group-head.type-Смешанная .tg-name{ color:var(--mixed); }
+  .type-group-head.type-Позитив{ border-left-color:var(--good); } .type-group-head.type-Позитив .tg-name{ color:var(--good); }
+  .mega-theme-card.type-Отмена{ border-left-color:var(--warn); } .mega-theme-card.type-Отмена .tg-name{ color:var(--warn); }
+  .mega-theme-card.type-Позитив{ border-left-color:var(--good); } .mega-theme-card.type-Позитив .tg-name{ color:var(--good); }
+  .type-group-head.theme-origination{ border-left-color:var(--accent); } .type-group-head.theme-origination .tg-name{ color:var(--accent-strong); }
+  .type-group-head.theme-aml_kyb{ border-left-color:var(--critical); } .type-group-head.theme-aml_kyb .tg-name{ color:var(--critical); }
+  .type-group-head.theme-payments{ border-left-color:var(--call); } .type-group-head.theme-payments .tg-name{ color:var(--call); }
+  .type-group-head.theme-product{ border-left-color:var(--good); } .type-group-head.theme-product .tg-name{ color:var(--good); }
+  .type-group-head.theme-vas{ border-left-color:var(--mixed); } .type-group-head.theme-vas .tg-name{ color:var(--mixed); }
+  .type-group-head.theme-overdraft{ border-left-color:var(--warn); } .type-group-head.theme-overdraft .tg-name{ color:var(--warn); }
+  .type-group-head.theme-acquiring{ border-left-color:var(--teal); } .type-group-head.theme-acquiring .tg-name{ color:var(--teal); }
+  .type-group-head.theme-cancel_active{ border-left-color:var(--rose); } .type-group-head.theme-cancel_active .tg-name{ color:var(--rose); }
+  .type-group-head.theme-calls_unresolved{ border-left-color:var(--border-strong); } .type-group-head.theme-calls_unresolved .tg-name{ color:var(--text-muted); }
+  .type-group-head.theme-personal_topic{ border-left-color:var(--mixed); } .type-group-head.theme-personal_topic .tg-name{ color:var(--mixed); }
+  .type-group-head.theme-misc{ border-left-color:var(--border-strong); } .type-group-head.theme-misc .tg-name{ color:var(--text-muted); }
+  .type-group-rows{ display:flex; flex-direction:column; gap:8px; }
+  .row{ background:var(--glass-bg); backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%); border:1px solid var(--glass-border); border-radius:16px; box-shadow:var(--glass-shadow); overflow:hidden; transition:box-shadow .15s ease; }
+  .row:hover{ box-shadow:var(--glass-shadow-hover); }
+  .row summary{ list-style:none; cursor:pointer; padding:13px 16px; display:grid; grid-template-columns:auto 1fr auto auto 18px; align-items:center; gap:14px; }
+  .row summary::-webkit-details-marker{ display:none; }
+  .badge-row{ display:flex; gap:5px; flex-wrap:wrap; }
+  .type-badge{ font-size:11px; font-weight:600; padding:3px 8px; border-radius:6px; white-space:nowrap; }
+  .type-Пресейл{ background:var(--accent-soft); color:var(--accent-strong); }
+  .type-Обслуживание{ background:var(--surface-2); color:var(--text-muted); border:1px solid var(--border); }
+  .type-Отмена{ background:var(--warn-soft); color:var(--warn); }
+  .type-Дефект{ background:var(--critical-soft); color:var(--critical); }
+  .type-Смешанная{ background:var(--mixed-soft); color:var(--mixed); }
+  .type-Позитив{ background:var(--good-soft); color:var(--good); }
+  .chan-badge{ font-size:11px; font-weight:600; padding:3px 8px; border-radius:6px; background:var(--call-soft); color:var(--call); }
+  .name{ font-weight:600; font-size:13.5px; min-width:0; }
+  .name-wrap{ display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .bar-track{ height:8px; border-radius:4px; background:var(--surface-2); border:1px solid var(--border); overflow:hidden; width:100%; max-width:340px; min-width:80px; flex:none; }
+  .bar-fill{ height:100%; background:linear-gradient(90deg, var(--accent-strong), var(--accent)); border-radius:4px; }
+  .metric{ text-align:right; white-space:nowrap; }
+  .metric .v{ font-size:13.5px; font-weight:600; }
+  .metric .l{ font-size:10.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.04em; }
+  .chevron{ color:var(--text-faint); transition:transform .15s ease; }
+  .row[open] .chevron{ transform:rotate(90deg); }
+  .row .detail{ padding:2px 16px 18px; border-top:1px solid var(--border); }
+  .row .detail-inner{ padding-top:14px; display:flex; flex-direction:column; gap:14px; max-width:780px; }
+  .desc{ color:var(--text); font-size:13.5px; }
+  .split{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .split-track{ flex:1; max-width:260px; height:8px; border-radius:4px; overflow:hidden; display:flex; background:var(--surface-2); min-width:100px; }
+  .split-a{ background:var(--accent); height:100%; }
+  .split-b{ background:var(--border-strong); height:100%; }
+  .split-c{ background:var(--text-faint); height:100%; opacity:.5; }
+  .split-legend{ font-size:11.5px; color:var(--text-muted); display:flex; gap:10px; flex-wrap:wrap; }
+  .split-legend span::before{ content:"●"; margin-right:4px; font-size:9px; position:relative; top:-1px; }
+  .split-legend .a::before{ color:var(--accent); }
+  .split-legend .b::before{ color:var(--border-strong); }
+  .split-legend .c::before{ color:var(--text-faint); }
+  .split-caption{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-faint); font-weight:700; white-space:nowrap; }
+  .split3-track .t-active{ background:var(--good); height:100%; }
+  .split3-track .t-onboarding{ background:var(--accent); height:100%; }
+  .split3-track .t-other{ background:var(--border-strong); height:100%; }
+  .split-legend .ta::before{ color:var(--good); }
+  .split-legend .tb::before{ color:var(--accent); }
+  .split-legend .tc::before{ color:var(--border-strong); }
+  .quotes{ display:flex; flex-direction:column; gap:10px; }
+  .quote{ background:var(--surface-2); border-left:3px solid var(--accent); border-radius:0 8px 8px 0; padding:9px 12px; }
+  .quote.note{ border-left-color:var(--call); }
+  .quote .es{ font-style:italic; color:var(--text-muted); font-size:12.5px; }
+  .quote .ru{ font-size:13px; margin-top:3px; }
+  .quote .tag{ font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); font-weight:700; margin-bottom:3px; }
+  .quote-id{ font-size:10.5px; color:var(--text-faint); margin-top:5px; }
+  .dialog-link{ display:inline-block; font-size:11px; font-weight:600; color:var(--accent-strong); margin-top:5px; text-decoration:none; }
+  .dialog-link:hover{ text-decoration:underline; }
+  .callout{ background:var(--accent-soft); border-radius:8px; padding:11px 13px; font-size:13px; display:flex; gap:8px; }
+  .callout b{ color:var(--accent-strong); }
+  .callout.timing{ background:var(--surface-2); border:1px solid var(--border); }
+  .callout.timing b{ color:var(--text); }
+  .pair-badge{ font-size:11px; font-weight:600; padding:3px 8px; border-radius:6px; background:var(--surface-2); color:var(--text-muted); border:1px dashed var(--border-strong); white-space:nowrap; }
+  .pair-mini-split{ display:flex; align-items:center; gap:8px; }
+  .pair-mini-track{ height:5px; border-radius:3px; overflow:hidden; display:flex; background:var(--surface-2); width:120px; flex:none; }
+  .pair-mini-a{ background:var(--accent); height:100%; }
+  .pair-mini-b{ background:var(--call); height:100%; }
+  .pair-mini-legend{ font-size:11px; color:var(--text-faint); white-space:nowrap; }
+  .pair-mini-legend .a{ color:var(--accent-strong); font-weight:600; }
+  .pair-mini-legend .b{ color:var(--call); font-weight:600; }
+  .mega-theme-card{ margin-bottom:22px; border-left-width:3px; }
+  .mega-theme-card:last-child{ margin-bottom:0; }
+  .mega-theme-summary{ display:flex !important; align-items:baseline; justify-content:space-between; gap:10px; padding:14px 16px; }
+  .mega-theme-summary .tg-name{ font-family:"Manrope"; font-weight:800; font-size:14px; letter-spacing:-.01em; }
+  .mega-theme-summary .tg-count{ font-size:12px; color:var(--text-faint); font-weight:600; margin-right:4px; }
+  .mega-theme-card.theme-origination{ border-left-color:var(--accent); } .mega-theme-card.theme-origination .tg-name{ color:var(--accent-strong); }
+  .mega-theme-card.theme-aml_kyb{ border-left-color:var(--critical); } .mega-theme-card.theme-aml_kyb .tg-name{ color:var(--critical); }
+  .mega-theme-card.theme-payments{ border-left-color:var(--call); } .mega-theme-card.theme-payments .tg-name{ color:var(--call); }
+  .mega-theme-card.theme-product{ border-left-color:var(--good); } .mega-theme-card.theme-product .tg-name{ color:var(--good); }
+  .mega-theme-card.theme-vas{ border-left-color:var(--mixed); } .mega-theme-card.theme-vas .tg-name{ color:var(--mixed); }
+  .mega-theme-card.theme-overdraft{ border-left-color:var(--warn); } .mega-theme-card.theme-overdraft .tg-name{ color:var(--warn); }
+  .mega-theme-card.theme-acquiring{ border-left-color:var(--teal); } .mega-theme-card.theme-acquiring .tg-name{ color:var(--teal); }
+  .mega-theme-card.theme-cancel_active{ border-left-color:var(--rose); } .mega-theme-card.theme-cancel_active .tg-name{ color:var(--rose); }
+  .mega-theme-card.theme-calls_unresolved{ border-left-color:var(--border-strong); } .mega-theme-card.theme-calls_unresolved .tg-name{ color:var(--text-muted); }
+  .mega-theme-card.theme-personal_topic{ border-left-color:var(--mixed); } .mega-theme-card.theme-personal_topic .tg-name{ color:var(--mixed); }
+  .mega-theme-card.theme-misc{ border-left-color:var(--border-strong); } .mega-theme-card.theme-misc .tg-name{ color:var(--text-muted); }
+  .mega-detail{ gap:0 !important; max-width:none !important; }
+  .mega-item{ padding:14px 0; }
+  .mega-item:first-child{ padding-top:0; }
+  .mega-item:last-child{ padding-bottom:0; }
+  .mega-item > summary{ list-style:none; cursor:pointer; }
+  .mega-item > summary::-webkit-details-marker{ display:none; }
+  .mega-item[open] .chevron{ transform:rotate(90deg); }
+  .mega-item-head{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px 14px; }
+  .mega-item-metric{ font-size:14px; color:var(--text); font-weight:700; white-space:nowrap; }
+  .mega-item-metric .v{ color:var(--accent-strong); }
+  .mega-item-body{ max-width:780px; display:flex; flex-direction:column; gap:14px; padding-top:14px; }
+  .mega-divider{ height:1px; background:var(--border-strong); margin:4px 0; }
+  .pair-detail{ gap:0 !important; }
+  .pair-sub{ padding:12px 0; display:flex; flex-direction:column; gap:14px; }
+  .pair-sub:first-child{ padding-top:0; }
+  .pair-sub:last-child{ padding-bottom:0; }
+  .pair-sub-head{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  .pair-sub-metric{ font-size:12.5px; color:var(--text-muted); font-weight:600; }
+  .pair-divider{ height:1px; background:var(--border); margin:2px 0; }
+  .ids-block{ display:flex; flex-direction:column; gap:6px; }
+  .ids-head{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; }
+  .ids-head .l{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); font-weight:600; }
+  .copy-btn{ font:inherit; font-size:11px; font-weight:600; color:var(--accent-strong); background:var(--accent-soft); border:1px solid transparent; border-radius:6px; padding:4px 9px; cursor:pointer; }
+  .copy-btn:active{ transform:translateY(1px); }
+  .ids-list{ display:flex; flex-wrap:wrap; gap:6px; }
+  .id-chip{ font-family:"IBM Plex Mono", monospace; font-size:11px; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; padding:3px 7px; color:var(--text-muted); }
+  .no-ids{ font-size:12.5px; color:var(--text-faint); }
+  .empty{ text-align:center; color:var(--text-faint); padding:30px 0; font-size:13px; }
+  footer{ margin-top:40px; padding-top:16px; border-top:1px solid var(--border); color:var(--text-faint); font-size:11.5px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  @media (max-width:640px){
+    .kpis{ grid-template-columns:repeat(2,1fr); }
+    .row summary{ grid-template-columns:1fr auto 18px; grid-template-areas:"badge trend chev" "name name name" "bar bar bar"; }
+    .row summary .badge-row{ grid-area:badge; justify-self:start; }
+    .row summary .name-wrap{ grid-area:name; }
+    .row summary .metric:nth-of-type(2){ display:none; }
+  }
+
+  .ov-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  @media (max-width:760px){ .ov-grid{ grid-template-columns:1fr; } }
+  .mini-split-block{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+  .mini-split-block:last-child{ margin-bottom:0; }
+  .mini-split-title{ font-size:12px; font-weight:700; color:var(--text-muted); }
+  .mini-split-track{ display:flex; height:14px; border-radius:7px; overflow:hidden; background:var(--surface-2); border:1px solid var(--border); }
+  .mini-split-track > span{ height:100%; }
+  .mini-split-legend{ font-size:11.5px; color:var(--text-muted); display:flex; gap:12px; flex-wrap:wrap; }
+  .mini-split-legend b{ color:var(--text); }
+  .trend-row{ display:grid; grid-template-columns:110px 1fr auto; align-items:center; gap:10px; margin-bottom:6px; }
+  .trend-row:last-child{ margin-bottom:0; }
+  .trend-label{ font-size:12px; color:var(--text-muted); font-weight:600; }
+  .trend-track{ height:10px; border-radius:5px; background:var(--surface-2); border:1px solid var(--border); overflow:hidden; }
+  .trend-fill{ height:100%; background:linear-gradient(90deg, var(--accent-strong), var(--accent)); border-radius:5px; }
+  .trend-value{ font-size:12px; font-weight:700; white-space:nowrap; }
+  .cat-trend-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .cat-trend-table th{ text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-faint); font-weight:700; padding:4px 8px; border-bottom:1px solid var(--border); }
+  .cat-trend-table td{ padding:6px 8px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  .cat-trend-table td.name{ white-space:normal; font-weight:600; }
+  .cat-trend-table .delta-up{ color:var(--critical); font-weight:700; }
+  .cat-trend-table .delta-down{ color:var(--good); font-weight:700; }
+  .cat-trend-table .delta-flat{ color:var(--text-faint); }
+  .cat-trend-caveat{ font-size:11px; color:var(--text-faint); margin-top:8px; }
+</style>
+
+<div class="shell">
+  <header class="top">
+    <div class="top-row">
+      <div>
+        <p class="eyebrow" data-i18n="eyebrow"></p>
+        <h1 data-i18n="title"></h1>
+        <p class="subtitle" data-i18n="subtitle"></p>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+        <div class="lang-switch">
+          <button data-lang="ru">RU</button>
+          <button data-lang="en">EN</button>
+          <button data-lang="es">ES</button>
+        </div>
+        <span class="meta-pill"><span data-i18n="weekLabel"></span> <b data-i18n="weekDate"></b></span>
+      </div>
+    </div>
+    <nav class="jump">
+      <button class="active" data-jump="cat" data-i18n="navInquiries"></button>
+      <button data-jump="clo" data-i18n="navClosures"></button>
+    </nav>
+  </header>
+
+  <div class="controls global-controls" id="globalControls" style="margin-bottom:16px;">
+    <div class="filter-group">
+      <span class="filter-label" data-i18n="channelLabel"></span>
+      <button class="chip active" data-chan="all" data-i18n="chanAll"></button>
+      <button class="chip" data-chan="Чаты" data-i18n="chanChats"></button>
+      <button class="chip" data-chan="Звонки" data-i18n="chanCalls"></button>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label" data-i18n="tenureFilterLabel"></span>
+      <button class="chip active" data-tenure-seg="all" data-i18n="tenureFilterAll"></button>
+      <button class="chip" data-tenure-seg="no_account" data-i18n="tenureBNoAccount"></button>
+      <button class="chip" data-tenure-seg="unknown_status" data-i18n="tenureBUnknown"></button>
+      <button class="chip" data-tenure-seg="unutilized" data-i18n="tenureBUnutilized"></button>
+      <button class="chip" data-tenure-seg="lt30" data-i18n="tenureBLt30"></button>
+      <button class="chip" data-tenure-seg="d30_90" data-i18n="tenureBD3090"></button>
+      <button class="chip" data-tenure-seg="d90_plus" data-i18n="tenureBD90Plus"></button>
+      <button class="chip" data-tenure-seg="soft_attrition" data-i18n="tenureBSoftAttrition"></button>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label" data-i18n="pfpmFilterLabel"></span>
+      <button class="chip active" data-pfpm-seg="all" data-i18n="pfpmFilterAll"></button>
+      <button class="chip" data-pfpm-seg="PFAE" data-i18n="pfpmFilterPfae"></button>
+      <button class="chip" data-pfpm-seg="PM" data-i18n="pfpmFilterPm"></button>
+      <button class="chip" data-pfpm-seg="unknown" data-i18n="pfpmFilterUnknown"></button>
+    </div>
+  </div>
+  <div class="cat-trend-caveat" id="globalSegCaveat" style="display:none; margin-bottom:16px;"></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section id="csat-section">
+    <div class="section-head">
+      <h2 data-i18n="csatHeading"></h2>
+      <span class="hint" data-i18n="csatHint"></span>
+    </div>
+    <div class="overview-chart" id="csatChart"></div>
+  </section>
+
+  <section id="overview-extra">
+    <div class="section-head">
+      <h2 data-i18n="ovHeading"></h2>
+      <span class="hint" data-i18n="ovHint"></span>
+    </div>
+    <div class="ov-grid">
+      <div class="overview-chart" id="tenurePfpmChart"></div>
+      <div class="overview-chart" id="trendRateChart"></div>
+    </div>
+    <div class="overview-chart" id="catTrendChart"></div>
+  </section>
+
+  <section id="cat">
+    <div class="section-head">
+      <h2 data-i18n="catHeading"></h2>
+      <span class="hint" data-i18n="catHint"></span>
+    </div>
+    <div class="overview-chart" id="themeChart"></div>
+    <div class="controls">
+      <input class="search" id="catSearch">
+      <div class="filter-group">
+        <span class="filter-label" data-i18n="typeLabel"></span>
+        <button class="chip active" data-type="all" data-i18n="typeAll"></button>
+        <button class="chip" data-type="Пресейл" data-i18n="typePresale"></button>
+        <button class="chip" data-type="Обслуживание" data-i18n="typeService"></button>
+        <button class="chip" data-type="Отмена" data-i18n="typeCancel"></button>
+        <button class="chip" data-type="Дефект" data-i18n="typeDefect"></button>
+        <button class="chip" data-type="Смешанная" data-i18n="typeMixed"></button>
+      </div>
+    </div>
+    <div class="rows" id="catRows"></div>
+    <p class="empty" id="catEmpty" style="display:none" data-i18n="emptyState"></p>
+  </section>
+
+  <section id="clo">
+    <div class="section-head">
+      <h2 data-i18n="cloHeading"></h2>
+      <span class="hint" data-i18n="cloHint"></span>
+    </div>
+    <div class="rows" id="cloRows"></div>
+  </section>
+
+  <footer>
+    <span data-i18n="footerLeft"></span>
+    <span data-i18n="footerRight"></span>
+  </footer>
+</div>
+
+<script>
+const UI = {
+  ru: { eyebrow:"Plata Empresa · Customer Care", title:"Types of Inquiries", subtitle:"Входящие обращения PyME — чаты и звонки, реплики клиентов. Неделя 14–20 сентября, собрано 21 сентября.",
+    weekLabel:"Неделя", navInquiries:"Категории обращений", navClosures:"Закрытия — причины", searchPh:"Поиск по названию или описанию…",
+    catHeading:"Категории обращений", catHint:"Каждый тикет попадает ровно в одну категорию (первое совпадение классификатора) — доля везде считается от общего числа обращений (1345)", ofAllInquiries:"от всех обращений", ticketsAbbrev:"тик.",
+    channelLabel:"Канал:", chanAll:"Все", chanChats:"Чаты", chanCalls:"Звонки",
+    typeLabel:"Тип:", typeAll:"Все", typePresale:"Пресейл", typeService:"Обслуживание", typeCancel:"Отмена", typeDefect:"Дефект", typeMixed:"Смешанная",
+    tenureFilterLabel:"Возраст в экосистеме:", tenureFilterAll:"Все",
+    tenureBNoAccount:"Без счёта", tenureBUnknown:"Статус неизвестен", tenureBUnutilized:"Неутиль", tenureBLt30:"<30 дней", tenureBD3090:"30-90 дней", tenureBD90Plus:"90+", tenureBSoftAttrition:"Софт атришн",
+    pfpmFilterLabel:"ПФАЕ/ПМ:", pfpmFilterAll:"Все", pfpmFilterPfae:"ПФАЕ", pfpmFilterPm:"ПМ", pfpmFilterUnknown:"Неизвестно",
+    segCaveat:"Фильтр по возрасту/ПФАЕ-ПМ считает тикеты (не клиентов) внутри каждой категории — числа выше и ниже показывают тикеты в этом срезе, доля по-прежнему от общего числа обращений (1345). Раздел «Закрытия» и CSAT не размечены по этим срезам (нет данных на уровне тикета) и продолжают показывать общие цифры.",
+    segCaveatBoth:" При одновременном выборе обоих срезов категория «Вопрос не про PyME» (2 тикета) не размечена совместно и показывает 0; ещё в 5 категориях числа могут отличаться на 1-2 тикета от одиночных срезов из-за уже известного, задокументированного пробела в разметке PERSONAL_TOPIC.",
+    csatSegNote:"Под текущим фильтром: {pct}% понравилось из {ans} отвеченных (дизлайков: {dis}). Посчитано по выборке в {sample} из {pub} отвеченных опросов недели (~82%, отдельный точечный запрос в Snowflake) — точное совпадение с шапкой раздела CSAT не гарантировано.",
+    closuresSegNote:"Классифицировано по возрасту/ПФАЕ-ПМ {classified} из {published} клиентов в этой причине (по репликам агента подтверждено, что у остальных клиент не назвал причину закрытия).",
+    closuresSegBoth:"Нет данных для одновременного среза по обоим фильтрам в этом разделе — выберите только один (возраст ИЛИ ПФАЕ-ПМ).",
+    emptyState:"Ничего не найдено под текущий фильтр.",
+    cloHeading:"Закрытия — причины", cloHint:"Причины закрытия счёта, названные клиентами напрямую, + случаи, когда агент удержал клиента",
+    footerLeft:"PyME Chat Pulse · внутренний отчёт Customer Care",
+    footerRight:"Источник: dwh_ops_qa_prod.customer_care · original_queue ILIKE '%pyme%'",
+    kpiClients:"клиентов за неделю", kpiCategories:"категорий обращений", kpiFcr:"звонков/чатов всего", kpiClosures:"запросов на закрытие · 4 спасено",
+    clientsWord:"клиентов", pctOf:"от", chatsWord:"чатов", callsWord:"звонков", agentNote:"Заметка агента (звонок)", clientQuote:"Прямая речь клиента",
+    withAccount:"со счётом PyME", withoutAccount:"без счёта", unknownAccount:"статус неизвестен", copyBtn:"Копировать", copyAllBtn:"Копировать все", copiedBtn:"Скопировано ✓",
+    noIds:"Показательных user id на этой неделе не отмечено.", idsLabel:"User ID (открыть диалог)",
+    savedBadge:"Спасено", closureBadge:"Закрытие", reasonsWord:"причин", meaningWord:"Что это значит", actionWord:"Что делать",
+    avgTime:"Среднее время обработки", medianWord:"медиана", ticketsWord:"тикетов", minWord:"мин", quoteFrom:"клиент", viewDialog:"Смотреть диалог",
+    themeOrigination:"Origination (открытие счёта)", themeAmlKyb:"AML + Antifraud + KYB", themePayments:"Payments", themeProduct:"Продукт + Тарифы", themeVas:"VAS (доп. сервисы)", themeOverdraft:"Overdraft", themeAcquiring:"Acquiring", themeCancelActive:"Отмена уже открытого счёта", themeMisc:"Тема не определена", themeCallsUnresolved:"Нет данных для классификации", themePersonalTopic:"Вопрос не про PyME",
+    originPostAccountLabel:"Счёт уже есть — финальные шаги онбординга (не «открытие», а обслуживание)",
+    originSecondApplicationLabel:"Счёт уже есть — вторая заявка / другое юрлицо",
+    pairBadge:"Чаты + звонки", expandAll:"Показать все подкатегории", weekDate:"14–20 сен 2026 (собрано 21 сен)",
+    tenureCaption:"Клиентский стаж:",
+    csatHeading:"CSAT", csatHint:"Оценка после чата/звонка по очереди PyME (t_csat_cs_after_chat_calls_results)",
+    csatLiked:"понравилось", csatDisliked:"не понравилось", csatAnswered:"ответивших из", csatSent:"отправлено",
+    csatReasonHeading:"Почему не понравилось — 18 дизлайков за неделю, разобраны вручную",
+    csatReasonProduct:"Проблема продукта/процесса", csatReasonAgent:"Проблема агента", csatReasonOther:"Другое / без сигнала",
+    csatUnattributedNote:"7 из 18 дизлайков совпали с тикетом из категории выше — они показаны внутри карточки этой категории (пометка «CSAT»). Ниже — остальные 11, которые не удалось привязать к конкретной категории:",
+    csatTrendTitle:"Доля лайков — 3 недели", csatReasonTrendTitle:"Причины дизлайков — 3 недели (доля от дизлайков той недели)",
+    ovHeading:"Срезы и динамика", ovHint:"Разбивка этой недели + сравнение с двумя предыдущими",
+    tenurePfpmTitle:"Возраст клиента и тип PFAE/PM (эта неделя, по обращавшимся клиентам)",
+    trendRateTitle:"Обращения на 1 реально активного клиента PyME (база: 3 739 клиентов с PFAE_FIN_ACTIVE_FLG=1 на 2026-09-19, fin_active_clients_daily_v2 — не просто открытый счёт, а подтверждённая финансовая активность)",
+    tenureCoverageCaveat:"Новая 6+1-бакетная сегментация (заменяет старую активный/без счёта/другое): «Без счёта» и «Неутиль» проверены по посуточным флагам PFAE_OPEN/UTIL_FLG (fin_active_clients_daily_v2) на дату обращения, возрастные бакеты (<30/30-90/90+) — по дате открытия счёта, «Софт атришн» — 90+ дней без финансовой активности (PFAE_FIN_ACTIVE_FLG=0) за последние 30 дней. Для ПМ (компаний) — по возрасту legal entity, без деления неутиль/софт-атришн (нет данных). «Статус неизвестен» — тикеты без customerid (в основном заброшенные чат-сессии и звонки со слабой линковкой), из общего числа 509 клиентов не входит по построению. Разбивка PFAE/PM ниже — отдельная, не связанная метрика (291+14=305 клиентов), см. pmCaveat.",
+    catTrendTitle:"Доля обращений по категориям — 3 недели (единый классификатор для честного сравнения)",
+    pmCaveat:"PM подтверждается через мост PRR/PCM (IDENTITY_MEMBERSHIPS, любая роль, статус ACTIVE/CLOSED), который имеет приоритет над личным PYME_ACCOUNT_FLG=false — полная история багов в taxonomy.md (найдено и исправлено 2026-09-14/15). Число PM на этой неделе (14) — в ожидаемом диапазоне 5-15 для полной недели; мост перепроверён по всей активной клиентской базе, повторной просадки не найдено.",
+    catTrendCaveat:"Недели 31 авг-6 сен и 7-13 сен здесь пересчитаны тем же регекс-классификатором для честного сравнения — цифры могут отличаться от их собственных опубликованных отчётов, где категоризация местами была более ручной.",
+    weekShort1:"31 авг-6 сен", weekShort2:"7-13 сен", weekShort3:"14-20 сен"
+  },
+  en: { eyebrow:"Plata Empresa · Customer Care", title:"Types of Inquiries", subtitle:"Inbound PyME support — chats and calls, client-side only. Week of Sep 14–20, built Sep 21.",
+    weekLabel:"Week", navInquiries:"Inquiry categories", navClosures:"Closures — reasons", searchPh:"Search by name or description…",
+    catHeading:"Inquiry categories", catHint:"Every ticket lands in exactly one category (first classifier match wins) — every share is computed against the total inquiry volume (1345)", ofAllInquiries:"of all inquiries", ticketsAbbrev:"tickets",
+    channelLabel:"Channel:", chanAll:"All", chanChats:"Chats", chanCalls:"Calls",
+    typeLabel:"Type:", typeAll:"All", typePresale:"Presale", typeService:"Servicing", typeCancel:"Cancellation", typeDefect:"Defect", typeMixed:"Mixed",
+    tenureFilterLabel:"Ecosystem age:", tenureFilterAll:"All",
+    tenureBNoAccount:"No account", tenureBUnknown:"Status unknown", tenureBUnutilized:"Unutilized", tenureBLt30:"<30 days", tenureBD3090:"30-90 days", tenureBD90Plus:"90+", tenureBSoftAttrition:"Soft attrition",
+    pfpmFilterLabel:"PFAE/PM:", pfpmFilterAll:"All", pfpmFilterPfae:"PFAE", pfpmFilterPm:"PM", pfpmFilterUnknown:"Unknown",
+    segCaveat:"The tenure/PFAE-PM filter counts tickets (not clients) inside each category — the numbers above and below show tickets in this slice, the share is still computed against the total inquiry volume (1345). The Closures section and CSAT aren't tagged by these slices (no ticket-level data) and keep showing overall figures.",
+    segCaveatBoth:" With both slices selected at once, the \"Not a PyME question\" category (2 tickets) isn't tagged jointly and shows 0; 5 other categories may differ by 1-2 tickets from the single-slice numbers due to a known, documented PERSONAL_TOPIC tagging gap.",
+    csatSegNote:"Under the current filter: {pct}% liked out of {ans} answered (dislikes: {dis}). Computed from a sample of {sample} of {pub} answered surveys this week (~82%, a separate targeted Snowflake pull) — an exact match with the CSAT section header isn't guaranteed.",
+    closuresSegNote:"{classified} of {published} clients in this reason are classified by tenure/PFAE-PM (agent replies confirm the rest never stated a closure reason).",
+    closuresSegBoth:"No data for a combined tenure+PFAE/PM slice in this section — pick only one filter at a time.",
+    emptyState:"Nothing matches the current filter.",
+    cloHeading:"Closures — reasons", cloHint:"Reasons clients gave for closing their account, plus cases where the agent retained the client",
+    footerLeft:"PyME Chat Pulse · internal Customer Care report",
+    footerRight:"Source: dwh_ops_qa_prod.customer_care · original_queue ILIKE '%pyme%'",
+    kpiClients:"clients this week", kpiCategories:"inquiry categories", kpiFcr:"chats/calls total", kpiClosures:"closure requests · 4 retained",
+    clientsWord:"clients", pctOf:"of", chatsWord:"chats", callsWord:"calls", agentNote:"Agent note (call)", clientQuote:"Client's own words",
+    withAccount:"with PyME account", withoutAccount:"no account", unknownAccount:"status unclear", copyBtn:"Copy", copyAllBtn:"Copy all", copiedBtn:"Copied ✓",
+    noIds:"No standout user ids for this category this week.", idsLabel:"User ID (open conversation)",
+    savedBadge:"Retained", closureBadge:"Closure", reasonsWord:"reasons", meaningWord:"What it means", actionWord:"What to do",
+    avgTime:"Avg. handling time", medianWord:"median", ticketsWord:"tickets", minWord:"min", quoteFrom:"client", viewDialog:"View dialog",
+    themeOrigination:"Origination (account opening)", themeAmlKyb:"AML + Antifraud + KYB", themePayments:"Payments", themeProduct:"Product & Pricing", themeVas:"VAS (value-added services)", themeOverdraft:"Overdraft", themeAcquiring:"Acquiring", themeCancelActive:"Cancelling an open account", themeMisc:"Theme not determined", themeCallsUnresolved:"No data available to classify", themePersonalTopic:"Not a PyME question",
+    originPostAccountLabel:"Already has an account — final onboarding steps (servicing, not \"opening\")",
+    originSecondApplicationLabel:"Already has an account — second application / another entity",
+    pairBadge:"Chats + calls", expandAll:"Show all sub-categories", weekDate:"Sep 14–20, 2026 (built Sep 21)",
+    tenureCaption:"Client tenure:",
+    csatHeading:"CSAT", csatHint:"Post chat/call rating, PyME queue (t_csat_cs_after_chat_calls_results)",
+    csatLiked:"liked", csatDisliked:"disliked", csatAnswered:"answered of", csatSent:"sent",
+    csatReasonHeading:"Why disliked — 18 dislikes this week, read by hand",
+    csatReasonProduct:"Product/process issue", csatReasonAgent:"Agent issue", csatReasonOther:"Other / no signal",
+    csatUnattributedNote:"7 of 18 dislikes matched a ticket from a category above — shown inside that category's card (tagged \"CSAT\"). Below are the remaining 11, which couldn't be tied to a specific category:",
+    csatTrendTitle:"Like share — 3 weeks", csatReasonTrendTitle:"Dislike reasons — 3 weeks (share of that week's dislikes)",
+    ovHeading:"Breakdowns & trends", ovHint:"This week's split + comparison with the two prior weeks",
+    tenurePfpmTitle:"Client tenure and PFAE/PM type (this week, contacting clients)",
+    trendRateTitle:"Contacts per truly active PyME client (base: 3,739 clients with PFAE_FIN_ACTIVE_FLG=1 as of 2026-09-19, fin_active_clients_daily_v2 — not just an open account, but confirmed financial activity)",
+    tenureCoverageCaveat:"New 6+1-bucket segmentation (replaces the old active/no-account/other): \"No account\" and \"Unutilized\" are checked against daily PFAE_OPEN/UTIL_FLG snapshots (fin_active_clients_daily_v2) as of the contact date; the age buckets (<30/30-90/90+) use the account's opening date; \"Soft attrition\" = 90+ days old with no financial activity (PFAE_FIN_ACTIVE_FLG=0) in the last 30 days. For PM (companies) — by legal-entity age, without an unutilized/soft-attrition split (no data available). \"Status unknown\" — tickets with no customerid (mostly abandoned chat sessions and weakly-linked calls) and by construction isn't part of the 509-client total. The PFAE/PM split below is a separate, unrelated metric (291+14=305 clients), see pmCaveat.",
+    catTrendTitle:"Category share — last 3 weeks (single classifier, for a fair comparison)",
+    pmCaveat:"PM is confirmed via the PRR/PCM bridge (IDENTITY_MEMBERSHIPS, any role, ACTIVE/CLOSED status), which overrides a personal PYME_ACCOUNT_FLG=false — full bug history in taxonomy.md (found and fixed 2026-09-14/15). This week's PM count (14) is within the expected 5-15 range for a full week; the bridge was re-verified against the entire active-client population and no regression was found.",
+    catTrendCaveat:"The Aug 31-Sep 6 and Sep 7-13 weeks here were reclassified with this same regex classifier for a fair comparison — numbers may differ from their own published reports, where categorization was partly more manual.",
+    weekShort1:"Aug 31-Sep 6", weekShort2:"Sep 7-13", weekShort3:"Sep 14-20"
+  },
+  es: { eyebrow:"Plata Empresa · Customer Care", title:"Types of Inquiries", subtitle:"Contactos entrantes PyME — chats y llamadas, solo lado del cliente. Semana del 14–20 de sep, armado el 21 de sep.",
+    weekLabel:"Semana", navInquiries:"Categorías de contacto", navClosures:"Cierres — motivos", searchPh:"Buscar por nombre o descripción…",
+    catHeading:"Categorías de contacto", catHint:"Cada ticket cae en exactamente una categoría (gana la primera coincidencia del clasificador) — todos los porcentajes se calculan sobre el volumen total (1345)", ofAllInquiries:"de todos los contactos", ticketsAbbrev:"tickets",
+    channelLabel:"Canal:", chanAll:"Todos", chanChats:"Chats", chanCalls:"Llamadas",
+    typeLabel:"Tipo:", typeAll:"Todos", typePresale:"Preventa", typeService:"Servicio", typeCancel:"Cancelación", typeDefect:"Defecto", typeMixed:"Mixto",
+    tenureFilterLabel:"Antigüedad en el ecosistema:", tenureFilterAll:"Todos",
+    tenureBNoAccount:"Sin cuenta", tenureBUnknown:"Estado desconocido", tenureBUnutilized:"Sin utilizar", tenureBLt30:"<30 días", tenureBD3090:"30-90 días", tenureBD90Plus:"90+", tenureBSoftAttrition:"Atrición suave",
+    pfpmFilterLabel:"PFAE/PM:", pfpmFilterAll:"Todos", pfpmFilterPfae:"PFAE", pfpmFilterPm:"PM", pfpmFilterUnknown:"Desconocido",
+    segCaveat:"El filtro de antigüedad/PFAE-PM cuenta tickets (no clientes) dentro de cada categoría — los números de arriba y abajo muestran tickets en ese corte, el porcentaje se sigue calculando sobre el volumen total (1345). La sección «Cierres» y CSAT no están etiquetados por estos cortes (sin datos a nivel de ticket) y siguen mostrando las cifras generales.",
+    segCaveatBoth:" Con ambos cortes seleccionados a la vez, la categoría «No es una pregunta de PyME» (2 tickets) no está etiquetada de forma conjunta y muestra 0; otras 5 categorías pueden diferir en 1-2 tickets respecto a los cortes individuales por un vacío de etiquetado ya conocido y documentado (PERSONAL_TOPIC).",
+    csatSegNote:"Bajo el filtro actual: {pct}% le gustó de {ans} respondidas (no le gustó: {dis}). Calculado sobre una muestra de {sample} de {pub} encuestas respondidas esta semana (~82%, una consulta específica a Snowflake) — no se garantiza una coincidencia exacta con el encabezado de la sección CSAT.",
+    closuresSegNote:"{classified} de {published} clientes en este motivo están clasificados por antigüedad/PFAE-PM (las respuestas del agente confirman que el resto nunca indicó un motivo de cierre).",
+    closuresSegBoth:"No hay datos para un corte combinado de antigüedad+PFAE-PM en esta sección — elige solo un filtro a la vez.",
+    emptyState:"No hay resultados para este filtro.",
+    cloHeading:"Cierres — motivos", cloHint:"Motivos de cierre de cuenta expresados por los clientes, más casos donde el agente retuvo al cliente",
+    footerLeft:"PyME Chat Pulse · reporte interno de Customer Care",
+    footerRight:"Fuente: dwh_ops_qa_prod.customer_care · original_queue ILIKE '%pyme%'",
+    kpiClients:"clientes esta semana", kpiCategories:"categorías de contacto", kpiFcr:"chats/llamadas totales", kpiClosures:"solicitudes de cierre · 4 retenidos",
+    clientsWord:"clientes", pctOf:"de", chatsWord:"chats", callsWord:"llamadas", agentNote:"Nota del agente (llamada)", clientQuote:"Palabras textuales del cliente",
+    withAccount:"con cuenta PyME", withoutAccount:"sin cuenta", unknownAccount:"estado incierto", copyBtn:"Copiar", copyAllBtn:"Copiar todo", copiedBtn:"Copiado ✓",
+    noIds:"Sin user ids destacados esta semana.", idsLabel:"User ID (abrir conversación)",
+    savedBadge:"Retenido", closureBadge:"Cierre", reasonsWord:"motivos", meaningWord:"Qué significa", actionWord:"Qué hacer",
+    avgTime:"Tiempo medio de gestión", medianWord:"mediana", ticketsWord:"tickets", minWord:"min", quoteFrom:"cliente", viewDialog:"Ver diálogo",
+    themeOrigination:"Origination (apertura de cuenta)", themeAmlKyb:"AML + Antifraud + KYB", themePayments:"Payments", themeProduct:"Producto y Tarifas", themeVas:"VAS (servicios de valor agregado)", themeOverdraft:"Overdraft", themeAcquiring:"Acquiring", themeCancelActive:"Cancelar una cuenta ya abierta", themeMisc:"Tema no determinado", themeCallsUnresolved:"Sin datos para clasificar", themePersonalTopic:"Pregunta que no es de PyME",
+    originPostAccountLabel:"Ya tiene cuenta — pasos finales del onboarding (servicio, no \"apertura\")",
+    originSecondApplicationLabel:"Ya tiene cuenta — segunda solicitud / otra entidad",
+    pairBadge:"Chats + llamadas", expandAll:"Ver todas las subcategorías", weekDate:"14–20 sep 2026 (armado 21 sep)",
+    tenureCaption:"Antigüedad del cliente:",
+    csatHeading:"CSAT", csatHint:"Calificación post chat/llamada, cola PyME (t_csat_cs_after_chat_calls_results)",
+    csatLiked:"les gustó", csatDisliked:"no les gustó", csatAnswered:"respondidos de", csatSent:"enviados",
+    csatReasonHeading:"Por qué no les gustó — 18 dislikes esta semana, revisados a mano",
+    csatReasonProduct:"Problema de producto/proceso", csatReasonAgent:"Problema de agente", csatReasonOther:"Otro / sin señal",
+    csatUnattributedNote:"7 de 18 dislikes coincidieron con un ticket de una categoría de arriba — se muestran dentro de esa tarjeta de categoría (etiqueta \"CSAT\"). Abajo están los otros 11, que no se pudieron atribuir a una categoría específica:",
+    csatTrendTitle:"Proporción de likes — 3 semanas", csatReasonTrendTitle:"Motivos de dislike — 3 semanas (proporción de los dislikes de esa semana)",
+    ovHeading:"Desgloses y tendencias", ovHint:"Reparto de esta semana + comparación con las dos semanas anteriores",
+    tenurePfpmTitle:"Antigüedad del cliente y tipo PFAE/PM (esta semana, clientes que contactaron)",
+    trendRateTitle:"Contactos por cliente PyME realmente activo (base: 3,739 clientes con PFAE_FIN_ACTIVE_FLG=1 al 2026-09-19, fin_active_clients_daily_v2 — no solo una cuenta abierta, sino actividad financiera confirmada)",
+    tenureCoverageCaveat:"Nueva segmentación de 6+1 categorías (reemplaza la anterior activo/sin cuenta/otro): \"Sin cuenta\" y \"Sin utilizar\" se verifican con los flags diarios PFAE_OPEN/UTIL_FLG (fin_active_clients_daily_v2) a la fecha de contacto; los tramos de edad (<30/30-90/90+) usan la fecha de apertura de la cuenta; \"Atrición suave\" = 90+ días sin actividad financiera (PFAE_FIN_ACTIVE_FLG=0) en los últimos 30 días. Para PM (empresas) — por edad de la entidad legal, sin distinguir sin-utilizar/atrición suave (no hay datos). \"Estado desconocido\" — tickets sin customerid (mayormente sesiones de chat abandonadas y llamadas con vínculo débil), por construcción no forma parte del total de 509 clientes. El reparto PFAE/PM de abajo es una métrica aparte, no relacionada (291+14=305 clientes), ver pmCaveat.",
+    catTrendTitle:"Participación por categoría — últimas 3 semanas (mismo clasificador, para comparar de forma justa)",
+    pmCaveat:"PM se confirma mediante el puente PRR/PCM (IDENTITY_MEMBERSHIPS, cualquier rol, estado ACTIVE/CLOSED), que tiene prioridad sobre un PYME_ACCOUNT_FLG=false personal — historial completo de errores en taxonomy.md (encontrado y corregido el 2026-09-14/15). El número de PM esta semana (14) está dentro del rango esperado de 5-15 para una semana completa; el puente se reverificó contra toda la población de clientes activos y no se encontró ninguna regresión.",
+    catTrendCaveat:"Las semanas del 31 ago-6 sep y 7-13 sep aquí fueron reclasificadas con este mismo clasificador regex para comparar de forma justa — los números pueden diferir de sus propios reportes publicados, donde la categorización fue en parte más manual.",
+    weekShort1:"31 ago-6 sep", weekShort2:"7-13 sep", weekShort3:"14-20 sep"
+  }
+};
+
+const CATS = [{"name": {"ru": "Тема не определена", "en": "Theme not determined", "es": "Tema no determinado"}, "type": "Смешанная", "channel": "Чаты", "clients": 347, "chats": 626, "calls": 0, "pct": 46.5, "desc": {"ru": "626 из 1045 чатов (60%) — реальный текст клиента, не подошедший ни под одну тему. У 305 из 626 был активный счёт на момент обращения, у 177 не было, у 144 — неясно.", "en": "626 of 1045 chats (60%) had real client text that didn't fit any topical theme. 305 of 626 had an active account at contact time, 177 didn't, 144 unclear.", "es": "626 de 1045 chats (60%) tienen texto real del cliente que no encajó en ningún tema. 305 de 626 tenían cuenta activa al momento del contacto, 177 no, 144 sin claridad."}, "quotes": [{"customerid": "8c2cfec0-5e4f-4158-80c3-0b0ca7774c90", "taskId": "02773627-c18b-4c52-b48c-213c2189bffe", "es": "Cuál es el número de cuenta de mi tarjeta empresarial. No sale... esa es la clave interbancaria, número de cuenta, el de mi cuenta no la cuenta clave", "ru": "Какой номер счёта у моей бизнес-карты? Не показывает... это клабе, а мне нужен именно номер счёта, не клабе", "en": "What's the account number for my business card? It's not showing... that's the CLABE, I need the actual account number, not the CLABE"}, {"customerid": "daa4c454-ee13-4e18-b023-06b917fbe7dd", "taskId": "0228e728-7bed-4042-903f-aa90dbb7c9c1", "es": "Pregunta cuando se podrá invertir los no ciudadanos?", "ru": "Вопрос — когда смогут инвестировать нерезиденты (не граждане)?", "en": "Question — when will non-citizens be able to invest?"}, {"customerid": null, "taskId": "712d7a23-d980-4ee6-99da-a2c5857e4ccf", "csatCat": "product", "es": "Mismo cliente — también escribió esta semana sobre una transferencia bloqueada y un mandato judicial sobre la cuenta (categoría \"Tema no determinado\")", "ru": "Тот же клиент — на неделе также писал(а) про заблокированный перевод и судебное постановление на счёт (категория «Тема не определена»)", "en": "Same client — also wrote this week about a blocked transfer and a court order on the account (\"Theme not determined\" category)", "note": true}, {"customerid": null, "taskId": "9acf463c-af4d-4410-9751-956fdfc88f50", "csatCat": "other", "es": "Único ticket del cliente esta semana (categoría \"Tema no determinado\") — inició una solicitud de tarjeta y se arrepintió, no es un problema técnico", "ru": "Единственный тикет клиента на неделе (категория «Тема не определена») — начал(а) заявку на карту и передумал(а), не техническая проблема", "en": "This client's only ticket this week (\"Theme not determined\" category) — started a card application and changed their mind, not a technical issue", "note": true}, {"customerid": null, "taskId": "1011584b-bdd7-44a8-a52a-b0e3ae2fb212", "csatCat": "product", "es": "Mismo ticket que la categoría \"Tema no determinado\" — las tarjetas de clientes referidos no pasan aunque el crédito ya está aprobado", "ru": "Тот же тикет, что и в категории «Тема не определена» — карты у рекомендованных клиентов не проходят, хотя кредит уже одобрен", "en": "Same ticket as this week's \"Theme not determined\" category — referred clients' cards aren't going through despite the credit already being approved", "note": true}], "analysis": {"ru": "Доля упала до 46.5% (было 48.0%) — 19 тикетов про заблокированный счёт/карту выделены в отдельную категорию «Заблокированный счёт/карта» (см. ниже, тема AML+KYB). Остальное похоже на предыдущие недели (общие вопросы про номер счёта, лимиты, функционал), новых кластеров сверх уже отслеживаемых кандидатов в taxonomy.md не найдено.", "en": "Share dropped to 46.5% (was 48.0%) — 19 tickets about a blocked account/card were split out into their own new category, \"Blocked account/card\" (see below, AML+KYB theme). The rest looks like prior weeks (account-number confusion, limits, functionality), no new clusters found beyond the candidates already tracked in taxonomy.md.", "es": "La proporción bajó a 46.5% (era 48.0%) — 19 tickets sobre cuenta/tarjeta bloqueada se separaron en una nueva categoría, \"Cuenta/tarjeta bloqueada\" (ver abajo, tema AML+KYB). El resto se parece a semanas anteriores (confusión sobre el número de cuenta, límites, funcionalidad), no se encontraron clústeres nuevos más allá de los candidatos ya registrados en taxonomy.md."}, "withAcc": 305, "noAcc": 177, "unknown": 144, "ids": ["79567c47-44f7-47c3-a0fa-ff70d6e024f6", "f1a449e4-02ec-4900-a727-9d9f0f5105c9"], "idsNote": null, "avgMinutes": 10.3, "medianMinutes": 6.9, "timedCount": 625, "theme": "misc", "tenureCounts": {"no_account": 194, "unknown_status": 109, "unutilized": 159, "lt30": 106, "d30_90": 57, "d90_plus": 2, "soft_attrition": 0}, "isMisc": true, "pfpmCounts": {"PFAE": 314, "PM": 13, "unknown": 299}, "jointKey": "MISC"}, {"name": {"ru": "Заблокированный счёт/карта", "en": "Blocked account/card", "es": "Cuenta/tarjeta bloqueada"}, "type": "Обслуживание", "channel": "Чаты", "clients": 11, "chats": 19, "calls": 0, "pct": 1.4, "desc": {"ru": "19 тикетов от 11 клиентов про заблокированный счёт/карту — просьба разблокировать или непонятно, почему заблокировали (16 из 19 с активным счётом, 3 без).", "en": "19 tickets from 11 clients about a blocked account/card — asking to unblock, or unclear why it got blocked (16 of 19 have an active account, 3 don't).", "es": "19 tickets de 11 clientes sobre cuenta/tarjeta bloqueada — piden desbloquear o no entienden por qué se bloqueó (16 de 19 tienen cuenta activa, 3 no)."}, "quotes": [{"customerid": "71c023ad-3992-42b5-905d-fce3943f19b0", "taskId": "45fd63c6-7e5e-4d34-8d75-d596b4812424", "es": "Hola, ayúdame a desbloquear mi tarjeta •1344", "ru": "Здравствуйте, помогите разблокировать мою карту •1344", "en": "Hi, please help me unblock my card •1344"}, {"customerid": "9397cad6-7d65-46f1-be88-0397f4246f5b", "taskId": "e9dc0a2e-2cbc-4534-961d-51d1a2ef56e5", "es": "Lo que pasa es que intenté hacer una compra en Shane y me bloquearon la tarjeta y no me dejaron hacer el pago. En la página de Shane dice, la transacción no está permitida por el banco titular.", "ru": "Дело в том, что я пытался сделать покупку в Shane, и мне заблокировали карту, платёж не прошёл. На странице Shane написано, что операция не разрешена банком-эмитентом.", "en": "The thing is I tried to make a purchase at Shane and they blocked my card, the payment didn't go through. Shane's page says the transaction isn't allowed by the issuing bank."}, {"customerid": null, "taskId": "563f926e-8dea-4bc6-a641-7ee70e77e424", "csatCat": "product", "es": "Mismo cliente que la categoría \"Cuenta/tarjeta bloqueada\" de esta semana — insatisfecho con la explicación del bloqueo", "ru": "Тот же клиент, что и в категории «Заблокированный счёт/карта» этой недели — недоволен объяснением причины блокировки", "en": "Same client as this week's \"Blocked account/card\" category — unhappy with the explanation for why the account was blocked", "note": true}], "analysis": {"ru": "Новая категория, выделена из MISC 2026-09-22 — раньше эти тикеты просто терялись в «Тема не определена». Пересчёт по тому же классификатору на прошлых неделях показывает, что это не разовый всплеск: 31 авг-6 сен — 11 тикетов (0.8%), 7-13 сен — 8 тикетов (0.6%), эта неделя — 19 (1.4%). В основном это блок карты/счёта из-за подозрительной операции или технического сбоя, а не по вине клиента.", "en": "New category, split out of MISC on 2026-09-22 — these tickets used to disappear into \"Theme not determined\". Re-running the same classifier against prior weeks shows this isn't a one-week spike: 31 Aug-6 Sep — 11 tickets (0.8%), 7-13 Sep — 8 tickets (0.6%), this week — 19 (1.4%). Mostly a card/account block triggered by a suspicious transaction or a technical glitch, not something the client did wrong.", "es": "Categoría nueva, separada de MISC el 2026-09-22 — antes estos tickets se perdían en \"Tema no determinado\". Al re-ejecutar el mismo clasificador contra semanas anteriores se ve que no es un pico de una sola semana: 31 ago-6 sep — 11 tickets (0.8%), 7-13 sep — 8 tickets (0.6%), esta semana — 19 (1.4%). En su mayoría es un bloqueo de tarjeta/cuenta por una operación sospechosa o una falla técnica, no por algo que hizo el cliente."}, "withAcc": 16, "noAcc": 3, "unknown": 0, "ids": ["45fd63c6-7e5e-4d34-8d75-d596b4812424", "e9dc0a2e-2cbc-4534-961d-51d1a2ef56e5"], "idsNote": null, "avgMinutes": 11.7, "medianMinutes": 8.4, "timedCount": 19, "theme": "aml_kyb", "tenureCounts": {"no_account": 3, "unknown_status": 0, "unutilized": 0, "lt30": 3, "d30_90": 13, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 16, "PM": 0, "unknown": 3}, "jointKey": "ACCOUNT_BLOCKED"}, {"name": {"ru": "Нет данных для классификации", "en": "No data available to classify", "es": "Sin datos para clasificar"}, "type": "Смешанная", "channel": "Чаты", "clients": 48, "chats": 87, "calls": 0, "pct": 6.5, "desc": {"ru": "87 чат-тикетов совсем без текста клиента за 14-20 сентября (8%, в норме). Объединено со звонками (тот же честный статус — классифицировать нечего) в одну карточку ниже.", "en": "87 chat tickets with zero client text for Sep 14-20 (8%, normal range). Merged with calls (same honest status — literally nothing to classify) into one card below.", "es": "87 tickets de chat sin ningún texto del cliente para el 14-20 de sep (8%, rango normal). Combinado con las llamadas (mismo estatus honesto — no hay nada que clasificar) en una sola tarjeta abajo."}, "quotes": [], "analysis": {"ru": "Доля в норме на полной неделе. Из этих тикетов подавляющее большинство — вообще без единого сообщения (сессия открыта, но клиент не написал ни слова), остальные — с одним пустым сообщением (скорее всего вложение/стикер без текста).", "en": "Share is within the normal range for a full week. The large majority of these have literally zero messages logged (session opened, client never typed), the rest have one empty message (likely a non-text attachment/sticker).", "es": "La proporción está dentro de lo normal para una semana completa. La gran mayoría no tiene ningún mensaje registrado (sesión abierta, el cliente nunca escribió), el resto tiene un mensaje vacío (probablemente un adjunto/sticker sin texto)."}, "withAcc": 53, "noAcc": 26, "unknown": 8, "ids": [], "idsNote": null, "avgMinutes": 5.2, "medianMinutes": 3.3, "timedCount": 87, "theme": "calls_unresolved", "tenureCounts": {"no_account": 27, "unknown_status": 3, "unutilized": 2, "lt30": 26, "d30_90": 28, "d90_plus": 1, "soft_attrition": 0}, "pairKey": "no_data_pair", "pfpmCounts": {"PFAE": 55, "PM": 0, "unknown": 32}, "jointKey": "NO_SIGNAL"}, {"name": {"ru": "Звонки: причина не зафиксирована по темам", "en": "Calls: not classified by topic", "es": "Llamadas: sin clasificar por tema"}, "type": "Обслуживание", "channel": "Звонки", "clients": 151, "chats": 0, "calls": 300, "pct": 22.3, "desc": {"ru": "300 звонков за полную неделю 14-20 сентября (22% недельного объёма — в норме). По-прежнему нет доступа к таблице переводов (t_transferred_tasks) для классификации по теме — доступ не выдан под ролью PRODUCT_ANALYST (`does not exist or not authorized`), запрос у @semen.kochnev остаётся открытым.", "en": "300 calls for the full Sep 14-20 week (22% of weekly volume — normal range). Still no access to the transfer table (t_transferred_tasks) for topic classification — checked again under the PRODUCT_ANALYST role (`does not exist or not authorized`), request with @semen.kochnev still open.", "es": "300 llamadas para la semana completa del 14-20 de sep (22% del volumen semanal — rango normal). Sigue sin acceso a la tabla de transferencias (t_transferred_tasks) para clasificar por tema — revisado de nuevo bajo el rol PRODUCT_ANALYST (`does not exist or not authorized`), solicitud con @semen.kochnev sigue abierta."}, "quotes": [], "analysis": {"ru": "Держим отдельно от чатов без текста — оба честно «нет данных», но эта карточка 100% звонки. AHT по звонкам самостоятельно посчитан из created/closed timestamps — интерим-замена до появления доступа к t_aht_per_golden_metrics.", "en": "Kept separate from the no-text chats — both are honestly \"no data,\" but this card is 100% calls. Call AHT is self-computed from created/closed timestamps — an interim substitute until access to t_aht_per_golden_metrics lands.", "es": "Se mantiene separado de los chats sin texto — ambos son honestamente \"sin datos\", pero esta tarjeta es 100% llamadas. El AHT de llamadas se calcula de forma propia a partir de created/closed — un sustituto interino hasta que llegue el acceso a t_aht_per_golden_metrics."}, "withAcc": 116, "noAcc": 71, "unknown": 113, "ids": [], "idsNote": null, "avgMinutes": 8.9, "medianMinutes": 5.1, "timedCount": 290, "theme": "calls_unresolved", "tenureCounts": {"no_account": 99, "unknown_status": 81, "unutilized": 59, "lt30": 39, "d30_90": 22, "d90_plus": 0, "soft_attrition": 0}, "isCallNote": true, "pairKey": "no_data_pair", "pfpmCounts": {"PFAE": 115, "PM": 7, "unknown": 178}, "jointKey": "calls"}, {"name": {"ru": "Выбор режима PF/PM", "en": "Choosing PF/PM mode & product fit", "es": "Elección de régimen PF/PM"}, "type": "Смешанная", "channel": "Чаты", "clients": 33, "chats": 59, "calls": 0, "pct": 4.4, "desc": {"ru": "59 тикетов от 33 клиентов — все без активного счёта на момент обращения (у 32 счёта ещё нет, у 27 — неясно). Клиенты путают PFAE и persona moral при первой подаче заявки.", "en": "59 tickets from 33 clients — all without an active account at contact time (32 have no account yet, 27 unclear). Clients confuse PFAE and persona moral on their first application.", "es": "59 tickets de 33 clientes — todos sin cuenta activa al momento del contacto (32 no tienen cuenta todavia, 27 sin claridad). Los clientes confunden PFAE y persona moral en su primera solicitud."}, "quotes": [{"customerid": "f1d9eada-0151-4ecf-a795-10777e864b3f", "taskId": "cbb3b8c5-1327-468b-be73-64fac4e682d3", "es": "No fue al revés, la aperturaron como persona física con actividad empresarial y la que yo necesito es la de PERSONA MORAL", "ru": "Всё наоборот — оформили как физлицо с предпринимательской деятельностью, а мне нужно юрлицо (persona moral)", "en": "It's the other way around — they opened it as an individual entrepreneur, but what I need is the legal-entity (persona moral) one"}, {"customerid": "9e2be44a-43b1-4681-a00f-6fa1fb10337c", "taskId": "6b0dc715-98fe-4449-b503-e9b6957d142a", "es": "Cuando le pongo entrar en la página de internet... me quiere sacar una cuenta empresarial a mi persona física yo la quiero para una persona moral", "ru": "Когда захожу на сайт... система предлагает бизнес-счёт на физлицо, а мне нужен на юрлицо (persona moral)", "en": "When I go to the website... it tries to open a business account under my individual profile, but I need it under a legal entity (persona moral)"}], "analysis": {"ru": "Похожий паттерн, что и раньше — заявки на нестандартные юрлица (гражданские ассоциации, разные режимы) чаще путаются в процессе выбора режима. Исправлено 2026-09-22: клиенты, у которых УЖЕ есть счёт (вторая заявка на другое юрлицо), выделены в отдельную карточку ниже.", "en": "Same pattern as before — applications for non-standard entity types (civil associations, different tax regimes) confuse the mode-selection process more often. Fixed 2026-09-22: clients who ALREADY have an account (second application for another entity) were split into their own card below.", "es": "Mismo patron de antes - las solicitudes de entidades no estandar (asociaciones civiles, distintos regimenes) se confunden mas seguido en el proceso de eleccion de regimen. Corregido 2026-09-22: los clientes que YA tienen cuenta (segunda solicitud para otra entidad) se separaron en su propia tarjeta abajo."}, "withAcc": 0, "noAcc": 32, "unknown": 27, "ids": [], "idsNote": null, "avgMinutes": 16.1, "medianMinutes": 11.7, "timedCount": 59, "theme": "origination", "tenureCounts": {"no_account": 35, "unknown_status": 19, "unutilized": 5, "lt30": 0, "d30_90": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 5, "PM": 0, "unknown": 54}, "jointKey": "PF_PM"}, {"name": {"ru": "Отмена уже открытого счёта", "en": "Cancelling an already-open account/plan", "es": "Cancelar cuenta ya abierta"}, "type": "Отмена", "channel": "Чаты", "clients": 45, "chats": 56, "calls": 0, "pct": 4.2, "desc": {"ru": "56 чатов от 45 клиентов с просьбой закрыть уже активный счёт/план — у 49 из 56 на момент обращения был активный счёт, у 4 не было, у 3 — неясно. 17 из 56 тикетов — голая просьба «cancelar mi cuenta» вообще без объяснения причины нигде в переписке; реальные названные причины — во вкладке «Закрытия».", "en": "56 chats from 45 clients asking to close an already-active account/plan — 49 of 56 show an active account at contact time, 4 show none, 3 unclear. 17 of 56 tickets are a bare \"cancelar mi cuenta\" with zero elaboration anywhere in the thread; real stated reasons are in the Closures tab.", "es": "56 chats de 45 clientes piden cerrar una cuenta/plan ya activo — 49 de 56 muestran cuenta activa al momento del contacto, 4 no muestran cuenta, 3 sin claridad. 17 de 56 tickets son un \"cancelar mi cuenta\" sin ninguna elaboración en todo el hilo; los motivos reales indicados están en la pestaña Cierres."}, "quotes": [{"customerid": "09e0cced-7279-42b9-81d7-2f97c9c603ca", "taskId": "a5edf55a-3d2d-42f2-a6ce-8a34e95b22e9", "es": "Quiero cancelar mi cuenta empresa, no puedo facturar por mi régimen fiscal, me informan que no está disponible, por lo que por ahora no me es útil, me quedo con mi cuenta personal solamente.", "ru": "Хочу отменить бизнес-счёт — не могу выставлять фактуры из-за своего налогового режима, сказали, что это недоступно, пока не полезен, оставлю только личный счёт.", "en": "I want to cancel my business account — I can't invoice under my tax regime, I'm told it's not available, so it's not useful for now, I'll just keep my personal account."}, {"customerid": "bef58462-affc-4832-9152-8bd2dedaa428", "taskId": "c1c39be6-7aa5-4bc8-9ca3-78cada479962", "es": "Quiero cancelar plata empresa", "ru": "Хочу отменить plata empresa", "en": "I want to cancel plata empresa"}, {"customerid": null, "taskId": "1767fdf4-925c-461a-80af-5104940d4fb0", "csatCat": "product", "es": "Mismo ticket que la categoría \"Cancelar cuenta ya abierta\" de esta semana (queja por un cargo de $2990 por tarjeta/cuenta)", "ru": "Тот же тикет, что и в категории «Отмена уже открытого счёта» (жалоба на плату $2990 за карту/счёт)", "en": "Same ticket as this week's \"Cancelling an already-open account\" category (complaint about a $2990 card/account fee)", "note": true}], "analysis": {"ru": "Большая доля голых просьб без причины — агенты, похоже, не фиксируют структурированную причину при закрытии; см. кросс-скан всех тикетов недели во вкладке «Закрытия» для реальных названных причин.", "en": "A large share are bare requests with no reason — agents don't appear to capture a structured reason at closure; see the week's cross-cutting scan in the Closures tab for real, stated reasons.", "es": "Una gran parte son solicitudes sin motivo — los agentes no parecen registrar un motivo estructurado al cierre; ver el escaneo transversal de la semana en la pestaña Cierres para los motivos reales indicados."}, "withAcc": 49, "noAcc": 4, "unknown": 3, "ids": ["2b641665-a667-48a5-9160-2ec70a2e7ae2", "d64176fd-69a7-4b13-adc8-1ee0bc0b0156"], "idsNote": null, "avgMinutes": 13.7, "medianMinutes": 8.5, "timedCount": 56, "theme": "cancel_active", "tenureCounts": {"no_account": 3, "unknown_status": 3, "unutilized": 34, "lt30": 5, "d30_90": 11, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 50, "PM": 0, "unknown": 6}, "jointKey": "CANCEL_OPEN"}, {"name": {"ru": "Планы / тарифы", "en": "Plans / pricing / cost", "es": "Planes / tarifas"}, "type": "Смешанная", "channel": "Чаты", "clients": 54, "chats": 61, "calls": 0, "pct": 4.5, "desc": {"ru": "61 тикетов от 54 клиентов — вопросы про планы, тарифы, бесплатный период (у 40 из 61 активный счёт, у 18 нет, у 3 — неясно).", "en": "61 tickets from 54 clients — questions about plans, pricing, the free period (40 of 61 have an active account, 18 don't, 3 unclear).", "es": "61 tickets de 54 clientes — preguntas sobre planes, tarifas, periodo gratis (40 de 61 tienen cuenta activa, 18 no, 3 sin claridad)."}, "quotes": [{"customerid": "76c11d83-1a4f-4ea9-a712-6cad39f2f99a", "taskId": "231eb3c6-afcf-426c-ab95-2dae4a16c229", "es": "Quisiera poder cambiar de plan en cuenta empresa, actualmente mi plan es empresarial pero yo quisiera bajarme al plan estándar", "ru": "Хотел(а) бы сменить план на бизнес-счёте — сейчас план «empresarial», хочу перейти на «стандарт»", "en": "I'd like to change my plan on the business account — currently it's the empresarial plan, but I'd like to downgrade to standard"}, {"customerid": "816a81a2-3654-4a43-a543-45bb0edbc963", "taskId": "30ae7eea-fd3d-4199-ae83-200bbb3587a4", "es": "Acabo de abrir la cuenta plata empresarial. ¿Es sin costo? ¿Sin comisiones por manejo de cuenta? ¿Sin anualidad? ¿Si no la utilizo no me cobran ninguna comisión?", "ru": "Только что открыл(а) бизнес-счёт Plata. Он бесплатный? Без комиссии за обслуживание? Без годовой платы? Если не пользуюсь — не спишут комиссию?", "en": "I just opened the plata empresarial account. Is it free? No account-maintenance fee? No annual fee? If I don't use it, no fee gets charged?"}], "analysis": {"ru": "Смешанный набор — часть про смену плана/скачивание до бесплатного, часть чистые пресейл-вопросы про комиссии сразу после открытия счёта.", "en": "A mixed set — some about plan changes/downgrades, some pure presale questions about fees right after opening the account.", "es": "Un conjunto mixto — parte sobre cambio/baja de plan, parte preguntas de presale puras sobre comisiones justo después de abrir la cuenta."}, "withAcc": 40, "noAcc": 18, "unknown": 3, "ids": ["c073a106-acb2-46b6-a0e7-5779aeed5279", "f5ec816f-24c6-46bd-939e-6b249ebe83ca"], "idsNote": null, "avgMinutes": 11.3, "medianMinutes": 8.6, "timedCount": 61, "theme": "product", "tenureCounts": {"no_account": 19, "unknown_status": 2, "unutilized": 15, "lt30": 14, "d30_90": 10, "d90_plus": 0, "soft_attrition": 1}, "pfpmCounts": {"PFAE": 41, "PM": 1, "unknown": 19}, "jointKey": "PLANS_PRICING"}, {"name": {"ru": "Документы / KYB", "en": "Documents / verification / KYB", "es": "Documentos / verificación / KYB"}, "type": "Смешанная", "channel": "Чаты", "clients": 10, "chats": 18, "calls": 0, "pct": 1.3, "desc": {"ru": "18 тикетов от 10 клиентов про .cer, acta constitutiva и другие документы (у 2 из 18 активный счёт, у 4 нет, у 12 — неясно, самая слабая привязка customer id среди категорий).", "en": "18 tickets from 10 clients about .cer, acta constitutiva, and other documents (2 of 18 have an active account, 4 don't, 12 unclear — the weakest customer-id linkage of any category).", "es": "18 tickets de 10 clientes sobre .cer, acta constitutiva y otros documentos (2 de 18 tiene cuenta activa, 4 no, 12 sin claridad — el enlace de customer id más débil de todas las categorías)."}, "quotes": [{"customerid": null, "taskId": "94995c6d-c9fa-4553-a230-4d20325d422f", "es": "Envié nuevamente la documentación: comprobante de domicilio, identificaciones, información de titulares económicos/UBO, testimonio completo del acta constitutiva. ¿Me pueden confirmar que todo fue recibido correctamente?", "ru": "Повторно отправил(а) документы: справку о месте жительства, удостоверения личности, данные бенефициарных владельцев (UBO), полный протокол учредительного акта. Подтвердите, что всё получено корректно?", "en": "I re-sent the documents: proof of address, IDs, beneficial-owner (UBO) info, the full constitutive-deed transcript. Can you confirm everything was received correctly?"}, {"customerid": null, "taskId": "2e064422-aad1-403b-b1af-3361f4ea4981", "es": "Me apoyas para completar mi trámite, porque me piden el Certificado .cer? La persona que me recomendó abrir cuenta con ustedes no me mencionó esto", "ru": "Помогите завершить оформление — просят сертификат .cer, но человек, который посоветовал открыть у вас счёт, об этом не предупреждал", "en": "Can you help me finish the process — they're asking for the .cer certificate, but the person who recommended opening an account with you never mentioned this"}], "analysis": {"ru": "Та же циклическая проблема .cer↔e.firma и низкая привязка customer id, что фиксировали и раньше (см. taxonomy.md).", "en": "The same .cer↔e.firma circular problem and weak customer-id linkage documented before (see taxonomy.md).", "es": "El mismo problema circular .cer↔e.firma y el enlace débil de customer id ya documentado antes (ver taxonomy.md)."}, "withAcc": 2, "noAcc": 4, "unknown": 12, "ids": ["149d42d6-6078-4a1f-9645-f27c6ff9773c", "e6ac7891-a1ac-4368-83a2-50905ad51906"], "idsNote": null, "avgMinutes": 9.0, "medianMinutes": 7.3, "timedCount": 18, "theme": "aml_kyb", "tenureCounts": {"no_account": 7, "unknown_status": 7, "unutilized": 0, "lt30": 3, "d30_90": 1, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 1, "PM": 2, "unknown": 15}, "jointKey": "KYC_DOCS"}, {"name": {"ru": "Статус заявки / долгое ожидание", "en": "Application status / long wait", "es": "Estatus de solicitud / espera larga"}, "type": "Обслуживание", "channel": "Чаты", "clients": 8, "chats": 14, "calls": 0, "pct": 1.0, "desc": {"ru": "14 тикетов от 8 клиентов, ждут ответа по своему запросу (все без активного счёта — у 4 нет счёта, у 10 неясно).", "en": "14 tickets from 8 clients waiting on a response to their request (all without an active account - 4 have none, 10 unclear).", "es": "14 tickets de 8 clientes esperando respuesta a su solicitud (todos sin cuenta activa - 4 no tienen, 10 sin claridad)."}, "quotes": [{"customerid": "11ff01c0-178e-4105-8894-7c9175a5b913", "taskId": "04a741eb-72bb-4df4-a0ab-87ad2e03c03c", "es": "Ya llevamos un mes tratando de aperturar la cuenta. Sigue en el mismo estatus que el 07 de septiembre — me comentaron que 48 horas después de la entrega de la tarjeta se tenía la cuenta y han pasado 13 días hábiles", "ru": "Уже месяц пытаемся открыть счёт. Статус не менялся с 7 сентября — говорили, что счёт откроется через 48 часов после доставки карты, а прошло 13 рабочих дней", "en": "We've been trying to open the account for a month now. Still the same status as Sep 7 — I was told the account would be ready 48 hours after the card was delivered, and 13 business days have passed"}, {"customerid": null, "taskId": "62612546-7815-4549-b918-3228bef2e49c", "es": "Como puedo saber cuando quedará activa mi cuenta de empresa que inicie como PM? Me dijeron que se tardarían 4 días. Ya se va a cumplir un mes.", "ru": "Как узнать, когда активируется мой бизнес-счёт (юрлицо, PM)? Говорили, что 4 дня, а скоро будет месяц.", "en": "How can I find out when my PM business account will activate? I was told 4 days, and it's about to be a month."}], "analysis": {"ru": "Явный признак SLA-несоответствия — обещанный срок расходится с реальностью на порядок в нескольких тикетах подряд. Исправлено 2026-09-22: один тикет про заблокированный/ограниченный счёт (не про статус заявки) перенесён в «Переводы» — регекс на «блокировку» ловил только точные фразы, расширен до основ bloque*/restring*.", "en": "A clear SLA mismatch - the promised timeframe is off from reality by an order of magnitude in several tickets in a row. Fixed 2026-09-22: one ticket about a blocked/restricted account (not application status) was moved to Transfers - the \"blocked\" skip-context only caught exact phrases, broadened to bloque*/restring* stems.", "es": "Una discrepancia de SLA clara - el plazo prometido esta muy lejos de la realidad en varios tickets seguidos. Corregido 2026-09-22: un ticket sobre una cuenta bloqueada/restringida (no sobre estatus de solicitud) se movio a Transferencias - el contexto de exclusion de bloqueo solo capturaba frases exactas, se amplio a raices bloque*/restring*."}, "withAcc": 0, "noAcc": 4, "unknown": 10, "ids": ["11ff01c0-178e-4105-8894-7c9175a5b913", "55aab3ff-b1c1-4f3e-8601-8c788f29de68"], "idsNote": null, "avgMinutes": 9.1, "medianMinutes": 8.7, "timedCount": 14, "theme": "origination", "tenureCounts": {"no_account": 8, "unknown_status": 6, "unutilized": 0, "lt30": 0, "d30_90": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 0, "PM": 0, "unknown": 14}, "jointKey": "STATUS_WAIT"}, {"name": {"ru": "Переводы / SPEI", "en": "Transfers / SPEI / deposits", "es": "Transferencias / SPEI"}, "type": "Дефект", "channel": "Чаты", "clients": 15, "chats": 19, "calls": 0, "pct": 1.4, "desc": {"ru": "19 тикетов от 15 клиентов про переводы и SPEI (у 16 из 19 активный счёт, у 1 нет, у 2 — неясно).", "en": "19 tickets from 15 clients about transfers and SPEI (16 of 19 have an active account, 1 does not, 2 unclear).", "es": "19 tickets de 15 clientes sobre transferencias y SPEI (16 de 19 tienen cuenta activa, 1 no, 2 sin claridad)."}, "quotes": [{"customerid": "a51f7a54-bb09-4921-8aed-4f11ae6dd815", "taskId": "129a61da-1b6f-47fd-abba-29f3ddfe92b2", "es": "Una pregunta, desde mi cuenta plata empresa ¿se pueden enviar transferencias internacionales a los Estados Unidos a un proveedor?", "ru": "Вопрос — можно ли с бизнес-счёта Plata отправлять международные переводы поставщику в США?", "en": "A question — can I send international transfers to a supplier in the US from my Plata business account?"}, {"customerid": "5184dbb3-0769-488f-a82c-4506b1a8a08e", "taskId": "22583d6f-e42a-49e6-9f5e-8bba1d13352b", "es": "No puedo recibir transferencias de otros bancos. Solo dice que no se puede realizar la transferencia — pero con clave interbancaria", "ru": "Не могу получать переводы из других банков. Просто пишет, что перевод невозможен — используя клабе", "en": "I can't receive transfers from other banks. It just says the transfer can't be made — using the CLABE"}, {"customerid": null, "taskId": "1444f2fa-92be-43f2-a0fc-8bfaa77dce49", "csatCat": "product", "es": "Mismo ticket que la categoría \"Transferencias / SPEI\" de esta semana — un pago por OXXO no se refleja en el saldo", "ru": "Тот же тикет, что и в категории «Переводы / SPEI» этой недели — платёж через OXXO не отразился на балансе", "en": "Same ticket as this week's \"Transfers / SPEI\" category — an OXXO payment isn't reflecting in the balance", "note": true}], "analysis": {"ru": "Смесь стандартных операционных вопросов и пары реальных сбоев с приёмом переводов — стоит присмотреться ко второму примеру.", "en": "A mix of standard operational questions and a couple of real transfer-receiving failures — the second example is worth a closer look.", "es": "Una mezcla de preguntas operativas estándar y un par de fallos reales al recibir transferencias — vale la pena revisar el segundo ejemplo."}, "withAcc": 16, "noAcc": 1, "unknown": 2, "ids": ["a51f7a54-bb09-4921-8aed-4f11ae6dd815", "a966410e-8a44-405b-af3f-b2871663de8f"], "idsNote": null, "avgMinutes": 10.9, "medianMinutes": 7.1, "timedCount": 19, "theme": "payments", "tenureCounts": {"no_account": 0, "unknown_status": 2, "unutilized": 5, "lt30": 5, "d30_90": 7, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 16, "PM": 1, "unknown": 2}, "jointKey": "TRANSFERS"}, {"name": {"ru": "CFDI / фактурация", "en": "CFDI / invoicing", "es": "CFDI / facturación"}, "type": "Смешанная", "channel": "Чаты", "clients": 10, "chats": 13, "calls": 0, "pct": 1.0, "desc": {"ru": "13 тикетов от 10 клиентов про CFDI/фактуры (у 11 из 13 активный счёт, у 2 нет, у 0 — неясно).", "en": "13 tickets from 10 clients about CFDI/invoicing (11 of 13 have an active account, 2 don't, 0 unclear).", "es": "13 tickets de 10 clientes sobre CFDI/facturación (11 de 13 tiene cuenta activa, 2 no, 0 sin claridad)."}, "quotes": [{"customerid": "4cf9322e-53fc-4d9c-88c3-c1e5125a97f4", "taskId": "32f3354f-1bc3-44d7-a4a8-1e5c82102f1c", "es": "Toda la plataforma falla demasiado, especialmente TODO lo de la sección de facturas, necesitan solucionarlo ya", "ru": "Вся платформа слишком часто сбоит, особенно раздел с фактурами — нужно срочно это чинить", "en": "The whole platform fails too often, especially everything in the invoicing section — this needs to get fixed now"}, {"customerid": "a51f7a54-bb09-4921-8aed-4f11ae6dd815", "taskId": "81f81dbc-66a9-423e-bdda-9b6c5dd52cb8", "es": "Quiero hacer una factura y me envía este error: Error en tus datos — El RFC y el nombre no coinciden", "ru": "Пытаюсь выставить фактуру, выдаёт ошибку: «Ошибка в данных — RFC и имя не совпадают»", "en": "I try to issue an invoice and get this error: 'Error in your data — the RFC and name don't match'"}], "analysis": {"ru": "Технические сбои в фактурации продолжают встречаться, не только вопросы «как это сделать».", "en": "Technical invoicing bugs keep showing up, not just \"how do I do this\" questions.", "es": "Los fallos técnicos de facturación siguen apareciendo, no solo preguntas de \"cómo lo hago\"."}, "withAcc": 11, "noAcc": 2, "unknown": 0, "ids": ["48ac4bac-1c59-4a89-aee1-5b4a166b7371", "4cf9322e-53fc-4d9c-88c3-c1e5125a97f4"], "idsNote": null, "avgMinutes": 10.9, "medianMinutes": 9.7, "timedCount": 13, "theme": "vas", "tenureCounts": {"no_account": 2, "unknown_status": 0, "unutilized": 5, "lt30": 4, "d30_90": 2, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 9, "PM": 2, "unknown": 2}, "jointKey": "CFDI"}, {"name": {"ru": "Обновление данных", "en": "Updating personal / tax data", "es": "Actualización de datos"}, "type": "Обслуживание", "channel": "Чаты", "clients": 10, "chats": 11, "calls": 0, "pct": 0.8, "desc": {"ru": "11 тикетов от 10 клиентов — в основном тот же заготовленный текст бота «Quiero actualizar mis datos personales» (у 10 из 11 активный счёт).", "en": "11 tickets from 10 clients — mostly the same canned bot opener \"Quiero actualizar mis datos personales\" (10 of 11 have an active account).", "es": "11 tickets de 10 clientes — sobre todo el mismo texto de bot \"Quiero actualizar mis datos personales\" (10 de 11 tienen cuenta activa)."}, "quotes": [{"customerid": "db981373-7b72-4cb7-9b4f-be4f12c1b0f1", "taskId": "1ba9ea38-3516-4854-9d6e-c45d8047c916", "es": "Hola. Quiero actualizar mis datos personales, ¿me pueden ayudar?", "ru": "Здравствуйте. Хочу обновить личные данные, поможете?", "en": "Hi. I want to update my personal data, can you help?"}, {"customerid": "628b6274-ac9d-43cb-b352-7ecdd273471c", "taskId": "3299a5f0-2459-4b1a-a438-7d9d55636757", "es": "El nombre de mi negocio, el cual es TBQ transporte y logística — entiendo, entonces por eso aparece con mi nombre, ¿cierto?", "ru": "Название моего бизнеса — TBQ transporte y logística. Понятно, поэтому и показывает моё имя, верно?", "en": "My business's name, which is TBQ transporte y logística — I see, that's why it's showing my personal name, right?"}], "analysis": {"ru": "Как и раньше — похоже на кнопку меню бота, повторяемую дословно почти во всех тикетах.", "en": "As before — looks like a bot-menu button repeated verbatim in nearly every ticket.", "es": "Como antes — parece un botón de menú del bot repetido textualmente en casi todos los tickets."}, "withAcc": 10, "noAcc": 1, "unknown": 0, "ids": ["db981373-7b72-4cb7-9b4f-be4f12c1b0f1", "bc567e9d-aba7-4033-a65a-7e262565ca7d"], "idsNote": null, "avgMinutes": 27.8, "medianMinutes": 14.7, "timedCount": 11, "theme": "aml_kyb", "tenureCounts": {"no_account": 0, "unknown_status": 0, "unutilized": 9, "lt30": 1, "d30_90": 1, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 11, "PM": 0, "unknown": 0}, "jointKey": "UPDATE_DATA"}, {"name": {"ru": "CLABE / номер счёта", "en": "Account number / CLABE / statements", "es": "CLABE / número de cuenta"}, "type": "Обслуживание", "channel": "Чаты", "clients": 9, "chats": 10, "calls": 0, "pct": 0.7, "desc": {"ru": "10 тикетов от 9 клиентов про CLABE и переводы (у 8 из 10 активный счёт, у 1 нет, у 1 — неясно).", "en": "10 tickets from 9 clients about CLABE and transfers (8 of 10 have an active account, 1 don't, 1 unclear).", "es": "10 tickets de 9 clientes sobre CLABE y transferencias (8 de 10 tienen cuenta activa, 1 no, 1 sin claridad)."}, "quotes": [{"customerid": "03a25cca-e294-4def-b967-af7d1e96f6e7", "taskId": "4f55af19-16ee-4175-b391-0686bf9d5fda", "es": "Un cliente me quiere hacer un pago. Cuando capturan la cuenta CLABE el sistema pide el nombre del banco y dicen que no aparece", "ru": "Клиент хочет мне заплатить. При вводе CLABE система запрашивает название банка, и оно не находится", "en": "A client wants to pay me. When they enter the CLABE the system asks for the bank name and says it's not found"}, {"customerid": "cc8ee497-8543-4492-bf5c-1a2c4cd18d0a", "taskId": "c3ace791-bb29-43c4-b82a-43d81cc6189d", "es": "Pedí hace un mes la cancelación de mi cuenta de empresa y sigue estando vigente... Ya no me permite ver mi CLABE para poder transferir", "ru": "Месяц назад просил(а) отменить бизнес-счёт, а он всё ещё активен... И теперь не даёт посмотреть CLABE, чтобы перевести деньги", "en": "I asked for my business account to be cancelled a month ago and it's still active... Now it won't let me see my CLABE to transfer money"}], "analysis": {"ru": "В основном стандартные операционные вопросы, но второй пример — побочный эффект незакрытого запроса на отмену (клиенту заблокировали доступ к CLABE до завершения закрытия).", "en": "Mostly standard operational questions, but the second example is a side effect of an unresolved cancellation request (the client's CLABE access got locked before closure completed).", "es": "Sobre todo preguntas operativas estándar, pero el segundo ejemplo es un efecto secundario de una solicitud de cancelación sin resolver (se bloqueó el acceso a la CLABE antes de completar el cierre)."}, "withAcc": 8, "noAcc": 1, "unknown": 1, "ids": ["03a25cca-e294-4def-b967-af7d1e96f6e7", "1b7946ea-f1ac-4c0f-a427-d2a68fa97ad5"], "idsNote": null, "avgMinutes": 20.5, "medianMinutes": 11.2, "timedCount": 10, "theme": "payments", "tenureCounts": {"no_account": 0, "unknown_status": 1, "unutilized": 4, "lt30": 4, "d30_90": 1, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 9, "PM": 0, "unknown": 1}, "jointKey": "CLABE"}, {"name": {"ru": "Отмена заявки (до открытия счёта)", "en": "Cancelling the application (pre-account)", "es": "Cancelar la solicitud (antes de abrir cuenta)"}, "type": "Отмена", "channel": "Чаты", "clients": 8, "chats": 8, "calls": 0, "pct": 0.6, "desc": {"ru": "8 тикетов от 8 клиентов — отмена ЗАЯВКИ до открытия счёта (не путать с CANCEL_OPEN). Почти все — без активного счёта.", "en": "8 tickets from 8 clients — cancelling the APPLICATION before opening (not to be confused with CANCEL_OPEN). Nearly all show no active account.", "es": "8 tickets de 8 clientes — cancelar la SOLICITUD antes de abrir (no confundir con CANCEL_OPEN). Casi todos sin cuenta activa."}, "quotes": [{"customerid": "0c28c774-aef4-4000-bb54-2d5951993404", "taskId": "a1379690-a476-44e7-b649-260cea4580ec", "es": "Quiero cancelar la solicitud para la cuenta empresa. Seleccioné actividades fiscales de más, las cuales no las tenemos registradas ante el SAT", "ru": "Хочу отменить заявку на бизнес-счёт. Выбрал(а) лишние виды деятельности, которые не зарегистрированы в SAT", "en": "I want to cancel the business account application. I selected extra fiscal activities that aren't registered with SAT"}, {"customerid": "5c074f8d-e36d-4be2-afb8-e06005cf268c", "taskId": "37659cd9-d9bb-4b85-8420-6638793eb019", "es": "El problema es que yo no me puedo desplazar porque estoy trabajando de 6am a 10pm en este lugar... si no es posible entonces me podrían ayudar a cancelar la solicitud", "ru": "Проблема в том, что я не могу отлучиться — работаю с 6 утра до 10 вечера... если доставку не организовать иначе, помогите отменить заявку", "en": "The problem is I can't get away — I'm working 6am to 10pm at this place... if it's not possible otherwise, could you help me cancel the application"}], "analysis": {"ru": "Не считаем как реальный отток счёта — это до-открытия, детали и остальные примеры — во вкладке «Закрытия». Один из 8 тикетов показывает активный счёт — это клиент, у которого уже ЕСТЬ счёт по другому продукту/юрлицу и который отменяет ОТДЕЛЬНУЮ, вторую заявку; не ошибка классификации.", "en": "Not counted as real account churn — this is pre-opening; more examples in the Closures tab. One of the 8 tickets shows an active account — that client already HAS an account for a different product/entity and is cancelling a SEPARATE, second application; not a classification error.", "es": "No se cuenta como churn real de cuenta — es antes de la apertura; más ejemplos en la pestaña Cierres. Uno de los 8 tickets muestra cuenta activa — ese cliente ya TIENE una cuenta para otro producto/entidad y está cancelando una solicitud SEPARADA, la segunda; no es un error de clasificación."}, "withAcc": 1, "noAcc": 5, "unknown": 2, "ids": ["5bdc2dfb-ddaf-498a-b351-75d3c58d0fc9", "cdff4459-f650-40bb-920c-0214c63723f3"], "idsNote": null, "avgMinutes": 9.9, "medianMinutes": 8.0, "timedCount": 8, "theme": "cancel_active", "tenureCounts": {"no_account": 7, "unknown_status": 0, "unutilized": 1, "lt30": 0, "d30_90": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 1, "PM": 0, "unknown": 7}, "jointKey": "CANCEL_APPLICATION"}, {"name": {"ru": "Кредит для бизнеса", "en": "Business credit", "es": "Crédito de negocio"}, "type": "Пресейл", "channel": "Чаты", "clients": 6, "chats": 7, "calls": 0, "pct": 0.5, "desc": {"ru": "7 тикетов от 6 клиентов про кредитную линию/займ (у 7 из 7 активный счёт).", "en": "7 tickets from 6 clients about a credit line/loan (7 of 7 have an active account).", "es": "7 tickets de 6 clientes sobre línea de crédito/préstamo (7 de 7 tienen cuenta activa)."}, "quotes": [{"customerid": "f24d13b9-5b4a-4690-badc-b11153ae84bb", "taskId": "fa989b01-cb6e-482b-afad-ae4680b1ddc7", "es": "En este caso hay algún tipo de préstamo en mi cuenta empresarial? Me apoyan por favor.", "ru": "Есть ли какой-то вид займа на моём бизнес-счёте? Помогите, пожалуйста.", "en": "Is there any kind of loan available on my business account? Please help."}, {"customerid": "83894dcf-8a45-4bf2-b89c-ef16129314d3", "taskId": "33d8e102-ea8f-4415-9622-89a824fd29c9", "es": "Préstamo empresarial. ¿No se puede un crédito de la tarjeta empresarial?", "ru": "Бизнес-займ. А кредит по бизнес-карте нельзя оформить?", "en": "Business loan. Can't I get a credit line through the business card?"}], "analysis": {"ru": "По-прежнему ранний спрос на овердрафт до запуска продукта (см. taxonomy.md — Overdraft владеет всем кредитным доменом уже сейчас, включая пресейл-интерес).", "en": "Still early demand for overdraft ahead of product launch (see taxonomy.md — Overdraft owns the whole credit domain already, including presale interest).", "es": "Sigue siendo demanda temprana de overdraft antes del lanzamiento del producto (ver taxonomy.md — Overdraft ya es dueño de todo el dominio de crédito, incluido el interés de presale)."}, "withAcc": 7, "noAcc": 0, "unknown": 0, "ids": ["4563e848-c9c9-484d-b39c-7ffe6b53805a", "082c6c8f-855a-49ee-a1ba-a424189c6f57"], "idsNote": null, "avgMinutes": 10.2, "medianMinutes": 8.1, "timedCount": 7, "theme": "overdraft", "tenureCounts": {"no_account": 0, "unknown_status": 0, "unutilized": 6, "lt30": 0, "d30_90": 1, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 7, "PM": 0, "unknown": 0}, "jointKey": "CREDIT"}, {"name": {"ru": "Активация карты", "en": "Card activation / linking", "es": "Activación de tarjeta"}, "type": "Дефект", "channel": "Чаты", "clients": 5, "chats": 5, "calls": 0, "pct": 0.4, "desc": {"ru": "5 тикетов от 5 клиентов не могут активировать карту (у 4 из 5 активный счёт — последний шаг онбординга).", "en": "5 tickets from 5 clients can't activate a card (4 of 5 have an active account — the last step of onboarding).", "es": "5 tickets de 5 clientes no pueden activar una tarjeta (4 de 5 tienen cuenta activa — el último paso del onboarding)."}, "quotes": [{"customerid": "c232b06a-1975-49d8-8429-3203a7d7f39d", "taskId": "a86fb50b-5219-4f69-a077-8c9d3b75a0ed", "es": "Me llegó mi tarjetas de empresa y débito pero no me deja activarlas", "ru": "Пришли карты — бизнес и дебетовая — но активировать не получается", "en": "My business and debit cards arrived but it won't let me activate them"}, {"customerid": "5fb84535-a4e3-49a4-8cd4-fbd5b0c3ec77", "taskId": "bbce4587-fe4b-4b26-8221-d239d0974c85", "es": "Cuando quiero activar la de crédito me dice que ya está vinculada a otra cuenta mía", "ru": "При попытке активировать кредитную карту пишет, что она уже привязана к другому моему счёту", "en": "When I try to activate the credit card it says it's already linked to another one of my accounts"}], "analysis": {"ru": "Тот же паттерн, что и раньше — активация после открытия счёта, иногда с техническими ошибками привязки к аккаунту.", "en": "Same pattern as before — activation after the account is already open, sometimes with technical account-linking errors.", "es": "Mismo patrón de antes — activación después de que la cuenta ya está abierta, a veces con errores técnicos de vinculación de cuenta."}, "withAcc": 4, "noAcc": 1, "unknown": 0, "ids": ["793524e8-eafa-4f57-9fab-1d9df786ccb2", "53101732-2910-4180-ab92-7ad19af642de"], "idsNote": null, "avgMinutes": 17.0, "medianMinutes": 17.0, "timedCount": 5, "theme": "origination", "tenureCounts": {"no_account": 0, "unknown_status": 0, "unutilized": 3, "lt30": 1, "d30_90": 1, "d90_plus": 0, "soft_attrition": 0}, "subgroup": "post_account", "pfpmCounts": {"PFAE": 4, "PM": 1, "unknown": 0}, "jointKey": "CARD_ACTIVATION"}, {"name": {"ru": "Терминал / приём карт (TPV)", "en": "POS terminal / card acceptance", "es": "Terminal / aceptación de tarjeta (TPV)"}, "type": "Пресейл", "channel": "Чаты", "clients": 4, "chats": 4, "calls": 0, "pct": 0.3, "desc": {"ru": "4 тикета от 4 клиентов про POS-терминал (у 2 из 4 активный счёт, у 2 нет).", "en": "4 tickets from 4 clients about a POS terminal (2 of 4 have an active account, 2 don't).", "es": "4 tickets de 4 clientes sobre terminal punto de venta (2 de 4 tiene cuenta activa, 2 no)."}, "quotes": [{"customerid": "d32af3ab-f662-4193-ba5f-1ff548f8812b", "taskId": "060f3294-a7a8-4862-93cc-ff60b08f9007", "es": "Hola, para la cuenta empresarial, ¿no manejan punto de venta?", "ru": "Здравствуйте, для бизнес-счёта — у вас есть терминал для приёма карт?", "en": "Hi, for the business account — do you offer a point-of-sale terminal?"}, {"customerid": "0a047b0a-c331-400c-8dc8-31d210b3c2b0", "taskId": "809f1611-d60c-4cb8-abd3-397973ac6561", "es": "¿Tienen algún dispositivo para cobro con tarjeta? ¿Puedo usar terminal Clip o Mercado Pago para cobrar con tarjeta?", "ru": "Есть ли у вас устройство для приёма карт? Можно ли использовать терминал Clip или Mercado Pago?", "en": "Do you have a card-payment device? Can I use a Clip or Mercado Pago terminal to accept cards?"}], "analysis": {"ru": "Малый объём — типичные пресейл-вопросы про приём платежей картой, Plata пока не предлагает собственный TPV.", "en": "Small volume — typical presale questions about accepting card payments; Plata doesn't yet offer its own TPV.", "es": "Volumen chico — preguntas de presale típicas sobre aceptar pagos con tarjeta; Plata aún no ofrece TPV propio."}, "withAcc": 2, "noAcc": 2, "unknown": 0, "ids": ["d32af3ab-f662-4193-ba5f-1ff548f8812b", "adc67d85-9b46-411b-8492-a563c802826c"], "idsNote": null, "avgMinutes": 7.1, "medianMinutes": 4.9, "timedCount": 4, "theme": "acquiring", "tenureCounts": {"no_account": 1, "unknown_status": 0, "unutilized": 1, "lt30": 0, "d30_90": 2, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 3, "PM": 0, "unknown": 1}, "jointKey": "TPV"}, {"name": {"ru": "Сбережения / доходность", "en": "Savings / yield / apartados", "es": "Ahorro / rendimiento"}, "type": "Пресейл", "channel": "Чаты", "clients": 4, "chats": 4, "calls": 0, "pct": 0.3, "desc": {"ru": "4 тикета от 4 клиентов про доходность и апартадос (у 4 из 4 активный счёт).", "en": "4 tickets from 4 clients about yield and apartados (4 of 4 have an active account).", "es": "4 tickets de 4 clientes sobre rendimiento y apartados (4 de 4 tienen cuenta activa)."}, "quotes": [{"customerid": "f10a08c6-26f6-45c4-aa20-55bdafe3c39a", "taskId": "156aaa73-0663-4ca7-8550-d478adb0671e", "es": "Tengo una pregunta, en mi cuenta ¿puedo meter dinero a Apartado? ¿Y qué rendimiento me da y hasta qué límite?", "ru": "Вопрос — можно ли на моём счёте класть деньги в «Апартадо»? Какая доходность и до какого лимита?", "en": "A question — can I put money into an Apartado on my account? What yield does it give and up to what limit?"}, {"customerid": "f4d749e2-d9ff-44df-86e3-3735b03920e7", "taskId": "5cead09d-2e8e-419b-b4be-ae1056e819e2", "es": "Entiendo que de mi ahorro designará el 2.5% a mi cuenta empresa, ¿cierto?", "ru": "Правильно ли понимаю, что из моих сбережений 2.5% будет направляться на бизнес-счёт?", "en": "Am I right that 2.5% of my savings will be assigned to my business account?"}], "analysis": {"ru": "Стандартные пресейл-вопросы про доходность продукта, малый объём.", "en": "Standard presale questions about the product's yield, small volume.", "es": "Preguntas de presale estándar sobre el rendimiento del producto, volumen chico."}, "withAcc": 4, "noAcc": 0, "unknown": 0, "ids": ["f10a08c6-26f6-45c4-aa20-55bdafe3c39a", "3cceec1d-e7a7-433e-8b00-4e0ea34ae29b"], "idsNote": null, "avgMinutes": 11.1, "medianMinutes": 10.7, "timedCount": 4, "theme": "vas", "tenureCounts": {"no_account": 0, "unknown_status": 0, "unutilized": 2, "lt30": 2, "d30_90": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 4, "PM": 0, "unknown": 0}, "jointKey": "SAVINGS"}, {"name": {"ru": "Спорные списания / мошенничество", "en": "Disputed charges / fraud", "es": "Cargos en disputa / fraude"}, "type": "Обслуживание", "channel": "Чаты", "clients": 4, "chats": 4, "calls": 0, "pct": 0.3, "desc": {"ru": "4 тикета от 4 клиентов про мошенничество/неопознанные списания (у 3 из 4 активный счёт, у 1 не было).", "en": "4 tickets from 4 clients about fraud/unrecognized charges (3 of 4 have an active account, 1 doesn't).", "es": "4 tickets de 4 clientes sobre fraude/cargos no reconocidos (3 de 4 tienen cuenta activa, 1 no)."}, "quotes": [{"customerid": "0303921b-7980-4500-a35c-ac78a04e31ed", "taskId": "99e790cb-08d8-4ce0-93ab-f8e7c1cd330e", "es": "Tengo un cargo no reconocido. No he solicitado ningún Uber, hoy vengo despertando... veo que tengo un cargo de Uber de $23.10 y no he solicitado ningún Uber", "ru": "Есть неопознанное списание. Я не заказывал(а) никакой Uber, только проснулся(лась)... вижу списание Uber на $23.10, а Uber не заказывал(а)", "en": "I have an unrecognized charge. I didn't request any Uber, I just woke up... I see a $23.10 Uber charge and I never ordered an Uber"}, {"customerid": "e86b929c-ba37-4b8f-9771-24c6cf9bc816", "taskId": "c81fc582-d3a0-456d-838c-d3cac888722d", "es": "Acabo de sufrir un mega fraude", "ru": "Только что столкнулся(лась) с крупным мошенничеством", "en": "I just experienced a huge fraud"}, {"customerid": null, "taskId": "99e790cb-08d8-4ce0-93ab-f8e7c1cd330e", "csatCat": "product", "es": "Mismo cliente que la categoría \"Cargos en disputa / fraude\" de esta semana — probablemente insatisfecho con el manejo de la disputa", "ru": "Тот же клиент, что и в категории «Спорные списания / мошенничество» этой недели — вероятно, недоволен ходом разбора спора", "en": "Same client as this week's \"Disputed charges / fraud\" category — likely unhappy with how the dispute is being handled", "note": true}], "analysis": {"ru": "Малый, но чувствительный объём — стоит следить за скоростью разблокировки карты после подтверждения спорного списания.", "en": "Small but sensitive volume — worth tracking how fast the card gets unblocked once a disputed charge is confirmed.", "es": "Volumen chico pero sensible — vale la pena seguir la velocidad de desbloqueo de la tarjeta una vez confirmado el cargo en disputa."}, "withAcc": 3, "noAcc": 1, "unknown": 0, "ids": ["5db4687f-8bef-4c23-9afe-12185ed1a054", "fe6d5e2e-6e97-430f-b065-e635e59c722d"], "idsNote": null, "avgMinutes": 21.3, "medianMinutes": 22.1, "timedCount": 4, "theme": "aml_kyb", "tenureCounts": {"no_account": 1, "unknown_status": 0, "unutilized": 0, "lt30": 1, "d30_90": 2, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 4, "PM": 0, "unknown": 0}, "jointKey": "FRAUD_DISPUTE"}, {"name": {"ru": "Онбординг: общие вопросы", "en": "Onboarding: general questions", "es": "Onboarding: preguntas generales"}, "type": "Пресейл", "channel": "Чаты", "clients": 1, "chats": 3, "calls": 0, "pct": 0.2, "desc": {"ru": "3 тикета — про статус процесса открытия счёта в целом.", "en": "3 tickets — about the account-opening process in general.", "es": "3 tickets — sobre el proceso de apertura de cuenta en general."}, "quotes": [{"customerid": null, "taskId": "d19841cf-d972-4782-96d7-bb7220d8fe09", "es": "Llevo esperando casi 15 días para terminar el proceso de apertura de cuenta", "ru": "Уже почти 15 дней жду завершения открытия счёта", "en": "I've been waiting almost 15 days to finish the account-opening process"}, {"customerid": null, "taskId": "fe674583-2431-433f-aa78-afa66b9d2817", "es": "¿Cómo vamos con el proceso de apertura de cuenta? ¿Qué más nos falta? Me urge poder tener la cuenta", "ru": "Как продвигается открытие счёта? Что ещё нужно? Мне срочно нужен счёт", "en": "How's the account-opening process going? What else is needed? I urgently need the account"}], "analysis": {"ru": "Малый объём, ничего особенного. Исправлено 2026-09-22: тикет «хочу личный счёт, бизнес уже есть» перенесён в «Вопрос не про PyME» — обнаружен клиент со счётом внутри Origination, это и привело к находке (см. taxonomy.md).", "en": "Small volume, nothing unusual. Fixed 2026-09-22: the \"want a personal account, already have the business one\" ticket was moved to \"Not a PyME question\" — an account-holder was found inside Origination, which led to finding it (see taxonomy.md).", "es": "Volumen chico, nada fuera de lo común. Corregido 2026-09-22: el ticket \"quiero cuenta personal, ya tengo la de negocio\" se movió a \"Pregunta que no es de PyME\" — se encontró un titular de cuenta dentro de Origination, lo que llevó a encontrarlo (ver taxonomy.md)."}, "withAcc": 0, "noAcc": 1, "unknown": 2, "ids": ["e7aefc51-8a0a-4c72-98d4-a8125297106a"], "idsNote": null, "avgMinutes": 13.8, "medianMinutes": 10.7, "timedCount": 3, "theme": "origination", "tenureCounts": {"no_account": 0, "unknown_status": 2, "unutilized": 0, "lt30": 0, "d30_90": 1, "d90_plus": 1, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 0, "PM": 0, "unknown": 3}, "jointKey": "ONBOARDING_GENERAL"}, {"name": {"ru": "Кэшбэк / промо", "en": "Cashback / promotions", "es": "Cashback / promociones"}, "type": "Смешанная", "channel": "Чаты", "clients": 3, "chats": 3, "calls": 0, "pct": 0.2, "desc": {"ru": "3 тикета от 3 клиентов про кэшбэк/промо (у 3 из 3 активный счёт).", "en": "3 tickets from 3 clients about cashback/promo (3 of 3 have an active account).", "es": "3 tickets de 3 clientes sobre cashback/promoción (3 de 3 tiene cuenta activa)."}, "quotes": [{"customerid": "6dfe5edb-512c-4cd2-adb3-22fc26206b3a", "taskId": "e39fd598-139a-4196-afb7-61d78472f408", "es": "Buen día, ¿la cuenta de empresa también participa en acumulación en Cashback mensual?", "ru": "Добрый день, бизнес-счёт тоже участвует в ежемесячном накоплении кэшбэка?", "en": "Good morning, does the business account also participate in monthly cashback accrual?"}, {"customerid": "d3a78c7b-6699-4bc1-b073-e75738565d54", "taskId": "af2d9e11-83c9-4172-a41b-4c3295dcc47e", "es": "¿Cuándo termina la promoción? Es para la empresarial, las demás cuentas todo ok", "ru": "Когда заканчивается акция? Это про бизнес-счёт, с остальными всё в порядке", "en": "When does the promotion end? This is about the business account, the other accounts are fine"}], "analysis": {"ru": "Малый объём — рано делать выводы о тренде.", "en": "Small volume — too early to draw a trend conclusion.", "es": "Volumen chico — muy pronto para sacar conclusiones de tendencia."}, "withAcc": 3, "noAcc": 0, "unknown": 0, "ids": ["7bf1bf57-c3f9-4d8e-9082-03af45138da3", "d3a78c7b-6699-4bc1-b073-e75738565d54"], "idsNote": null, "avgMinutes": 6.6, "medianMinutes": 7.0, "timedCount": 3, "theme": "vas", "tenureCounts": {"no_account": 0, "unknown_status": 0, "unutilized": 3, "lt30": 0, "d30_90": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 3, "PM": 0, "unknown": 0}, "jointKey": "CASHBACK_PROMO"}, {"name": {"ru": "Доставка карты / отслеживание", "en": "Card delivery / tracking", "es": "Entrega de tarjeta / rastreo"}, "type": "Обслуживание", "channel": "Чаты", "clients": 2, "chats": 2, "calls": 0, "pct": 0.1, "desc": {"ru": "2 тикета от 2 клиентов про логистику доставки карты.", "en": "2 tickets from 2 clients about card-delivery logistics.", "es": "2 tickets de 2 clientes sobre logística de entrega de tarjeta."}, "quotes": [{"customerid": "53101732-2910-4180-ab92-7ad19af642de", "taskId": "6d49b9b4-f2ee-493e-a30f-45d7c775ad00", "es": "Buen día, sigue sin tener movimiento la entrega de mi tarjeta. Según llegaba el 16 y desde el 17 no hay movimiento", "ru": "Добрый день, доставка карты всё ещё не двигается. Должна была прийти 16-го, а с 17-го нет никаких обновлений", "en": "Good morning, my card delivery still hasn't moved. It was supposed to arrive on the 16th, and there's been no update since the 17th"}, {"customerid": "42f59ce5-9649-4bc9-9ff0-8d8217592103", "taskId": "7131e3e8-dfd3-4d6a-9d93-a2ff33f455ac", "es": "Primero no me llega la tarjeta, luego dan mal mi dirección a paquetería, luego que ya estaba cancelada, luego que llega en una fecha diferente y luego que no puedo activarla", "ru": "Сначала карта не приходит, потом курьерской службе передают неверный адрес, потом говорят, что доставка отменена, потом — другая дата, потом — что не могу её активировать", "en": "First the card doesn't arrive, then the wrong address gets passed to the courier, then they say it was already cancelled, then a different date, then that I can't activate it"}], "analysis": {"ru": "Небольшой объём — все примеры про логистику доставки, не про сам продукт.", "en": "Small volume — all examples about delivery logistics, not the product itself.", "es": "Volumen chico — todos los ejemplos son sobre logística de entrega, no sobre el producto en sí."}, "withAcc": 1, "noAcc": 0, "unknown": 1, "ids": ["53101732-2910-4180-ab92-7ad19af642de", "42f59ce5-9649-4bc9-9ff0-8d8217592103"], "idsNote": null, "avgMinutes": 11.0, "medianMinutes": 11.0, "timedCount": 2, "theme": "origination", "tenureCounts": {"no_account": 1, "unknown_status": 0, "unutilized": 0, "lt30": 1, "d30_90": 0, "d90_plus": 0, "soft_attrition": 0}, "subgroup": "post_account", "pfpmCounts": {"PFAE": 0, "PM": 1, "unknown": 1}, "jointKey": "DELIVERY"}, {"name": {"ru": "Роли / пользователи / команда", "en": "Roles / users / team", "es": "Roles / usuarios / equipo"}, "type": "Дефект", "channel": "Чаты", "clients": 1, "chats": 1, "calls": 0, "pct": 0.1, "desc": {"ru": "1 тикет за неделю — совпадение с фразой «equipo de trabajo», но по содержанию тикет не про роли/пользователей, а про уведомления по одобрению кредита. Слабое совпадение, оставлено как есть, т.к. подходящей альтернативной категории тоже нет.", "en": "1 ticket this week — matched on the phrase \"equipo de trabajo\", but by content it's actually about credit-approval notifications, not roles/users. A weak match, left as-is since there's no clearly better category for it either.", "es": "1 ticket esta semana — coincidió con la frase \"equipo de trabajo\", pero por contenido es en realidad sobre notificaciones de aprobación de crédito, no sobre roles/usuarios. Una coincidencia débil, se deja así porque tampoco hay una categoría claramente mejor."}, "quotes": [{"customerid": "1949eee5-105e-403b-98cc-845ef2e3ab06", "taskId": "ac968b2b-ee76-4590-a80f-32fbaa4f9b9c", "es": "Me gustaría saber si los datos que subí de mi empresa fueron recibidos... espero que sí me autoricen el crédito, busco realizar inversiones en mi equipo de trabajo", "ru": "Хотел(а) бы узнать, получены ли документы по моей компании... надеюсь, одобрят кредит — хочу вложиться в свою команду", "en": "I'd like to know if the documents I uploaded for my company were received... hoping the credit gets approved, I want to invest in my team"}], "analysis": {"ru": "Единственный тикет недели с этим ключевым словом — статистически ничего не говорит о реальном спросе на управление ролями.", "en": "The only ticket this week with this keyword — statistically says nothing about real demand for roles management.", "es": "El único ticket de la semana con esta palabra clave — estadísticamente no dice nada sobre la demanda real de gestión de roles."}, "withAcc": 0, "noAcc": 1, "unknown": 0, "ids": ["1949eee5-105e-403b-98cc-845ef2e3ab06"], "idsNote": null, "avgMinutes": 7.3, "medianMinutes": 7.3, "timedCount": 1, "theme": "product", "tenureCounts": {"no_account": 1, "unknown_status": 0, "unutilized": 0, "lt30": 0, "d30_90": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpmCounts": {"PFAE": 0, "PM": 0, "unknown": 1}, "jointKey": "ROLES_TEAM"}, {"name": {"ru": "Вопрос не про PyME (личный продукт)", "en": "Not a PyME question (personal product)", "es": "Pregunta que no es de PyME (producto personal)"}, "type": "Смешанная", "channel": "Чаты", "clients": 2, "chats": 2, "calls": 0, "pct": 0.1, "desc": {"ru": "2 тикета за неделю — оба от клиентов, у которых уже есть бизнес-счёт, а вопрос про личный продукт (не бизнес-тема).", "en": "2 tickets this week — both from clients who already have a business account and are asking about a personal product (not a business topic).", "es": "2 tickets esta semana — ambos de clientes que ya tienen cuenta de negocio y preguntan por un producto personal (no es un tema de negocio)."}, "quotes": [{"customerid": "88c82c56-dfb2-412a-b562-7744d93ab6ad", "taskId": "bb0808dd-c436-49a5-8de8-511bc801c01e", "es": "Hola. Quiero abrir una cuenta personal plata. Ya tengo de empresa.", "ru": "Здравствуйте. Хочу открыть личный счёт Plata. Бизнес-счёт уже есть.", "en": "Hi. I want to open a personal Plata account. I already have the business one."}, {"customerid": "e7eb8424-a0ff-434f-9c6e-4fdebe9b97f4", "taskId": "fda55743-92da-4f26-9e4a-b2079a9e8323", "es": "La tarjeta de Empresa... Solo quiero cambiarla de la empresa a cuenta personal.", "ru": "Бизнес-карта... Хочу просто перевести её с бизнес-счёта на личный.", "en": "The business card... I just want to switch it from the business one to a personal account."}], "analysis": {"ru": "Добавлено 2026-09-22 — оба тикета раньше уходили в другие категории (один в «Онбординг: общие вопросы», другой в MISC) из-за совпадения с их регексами; обнаружен клиент со счётом в теме Origination, что и привело к находке (см. taxonomy.md).", "en": "Added 2026-09-22 — both tickets used to land in other categories (one in \"Onboarding: general questions\", the other in MISC) due to regex matches; an account-holder was found inside the Origination theme, which led to finding these (see taxonomy.md).", "es": "Añadido 2026-09-22 — ambos tickets antes caían en otras categorías (uno en \"Onboarding: preguntas generales\", el otro en MISC) por coincidencias de regex; se encontró un titular de cuenta dentro del tema Origination, lo que llevó a encontrarlos (ver taxonomy.md)."}, "withAcc": 2, "noAcc": 0, "unknown": 0, "ids": ["88c82c56-dfb2-412a-b562-7744d93ab6ad", "e7eb8424-a0ff-434f-9c6e-4fdebe9b97f4"], "idsNote": null, "avgMinutes": 14.4, "medianMinutes": 14.4, "timedCount": 2, "theme": "personal_topic", "tenureCounts": {"active": 1, "onboarding": 0, "other": 1}, "pfpmCounts": {"PFAE": 1, "PM": 1, "unknown": 0}}, {"name": {"ru": "Вторая заявка PyME (счёт уже есть)", "en": "Second PyME application (already has an account)", "es": "Segunda solicitud PyME (ya tiene cuenta)"}, "type": "Смешанная", "channel": "Чаты", "clients": 7, "chats": 9, "calls": 0, "pct": 0.7, "desc": {"ru": "9 тикетов от 7 клиентов — у всех уже ЕСТЬ активный счёт, пишут про ВТОРУЮ заявку/юрлицо (другая persona moral, конвертация режима, повторное открытие).", "en": "9 tickets from 7 clients - all ALREADY have an active account and are asking about a SECOND application/entity (another persona moral, mode conversion, reopening).", "es": "9 tickets de 7 clientes - todos YA tienen cuenta activa y preguntan por una SEGUNDA solicitud/entidad (otra persona moral, conversion de regimen, reapertura)."}, "quotes": [{"customerid": "00a80044-f075-4ba9-b5c4-461404122596", "taskId": "0c5738dd-56ad-44c4-acb2-104ce88e81a7", "es": "Lo que requiero es otra persona moral para otra empresa diferente que yo administro.", "ru": "Мне нужна ещё одна persona moral для другой компании, которой я тоже управляю.", "en": "What I need is another legal entity (persona moral) for a different company that I also manage."}, {"customerid": "548be8ea-fa2d-4fd2-85dd-d974335e08c0", "taskId": "9a15959b-1a68-4df8-a7f5-802387d8ab5f", "es": "No soy PFAE... en el SAT soy PF y para este movimiento era requisito ser PFAE y no lo soy, necesito el cierre.", "ru": "Я не PFAE... в SAT я числюсь как физлицо, а для этой операции требовалось быть PFAE — нужно закрыть.", "en": "I am not PFAE... in the SAT records I am an individual, and this required being PFAE, which I am not - I need it closed."}], "analysis": {"ru": "Добавлено 2026-09-22 — эти клиенты концептуально не «открывают счёт впервые», а имеют дело со вторым/параллельным юрлицом, оставлено внутри темы Origination, но отдельной группой (см. также divider «Уже есть счёт» ниже для активации/доставки карты).", "en": "Added 2026-09-22 — these clients are not conceptually opening an account for the first time, they are dealing with a second/parallel entity; kept inside the Origination theme, but as its own group (see also the Already-has-an-account divider below for card activation/delivery).", "es": "Anadido 2026-09-22 — estos clientes no estan conceptualmente abriendo una cuenta por primera vez, estan lidiando con una entidad segunda/paralela; se mantiene dentro del tema Origination, pero como grupo propio (ver tambien el divisor Ya-tiene-cuenta abajo para activacion/entrega de tarjeta)."}, "withAcc": 9, "noAcc": 0, "unknown": 0, "ids": ["2c6fc6aa-88e4-4b30-9122-47113723ca36", "00a80044-f075-4ba9-b5c4-461404122596", "9d5c2678-1483-42d6-9014-ee80acd60ec8", "548be8ea-fa2d-4fd2-85dd-d974335e08c0"], "idsNote": null, "avgMinutes": 11.1, "medianMinutes": 10.8, "timedCount": 9, "theme": "origination", "tenureCounts": {"no_account": 0, "unknown_status": 0, "unutilized": 4, "lt30": 3, "d30_90": 2, "d90_plus": 0, "soft_attrition": 0}, "subgroup": "second_application", "pfpmCounts": {"PFAE": 6, "PM": 3, "unknown": 0}, "jointKey": "PF_PM_SECOND"}];
+
+
+const CSAT_WEEKLY_TREND = [
+  {key: "weekShort1", sent: 545, answered: 130, liked: 99, disliked: 31},
+  {key: "weekShort2", sent: 565, answered: 118, liked: 103, disliked: 15},
+  {key: "weekShort3", sent: 492, answered: 114, liked: 96, disliked: 18}
+];
+const CSAT_REASON_TREND = [
+  {key: "csatReasonProduct", w: [22.6, 20.0, 50.0]},
+  {key: "csatReasonAgent", w: [12.9, 13.3, 27.8]},
+  {key: "csatReasonOther", w: [64.5, 66.7, 22.2]}
+];
+// All 18 dislikes this week (t_csat_cs_after_chat_calls_results, PyME queue, answered_flag=true, pop_was_dislike=true), read individually. choice = the survey's own CHOICE_IN_LAST_FORM (may be null/"no choice"). Where TEXT_IN_LAST_FORM was null, `note` gives the reasoning instead of a quote. Ones with a known matching ticket are folded into that category's quotes below (tagged csatCat); the rest stay in CSAT_DATA.dislikesUnattributed.
+const CSAT_DATA = {"sent": 492, "answered": 114, "liked": 96, "disliked": 18, "reasons": {"product": 9, "agent": 5, "other": 4}, "dislikesUnattributed": [{"cat": "agent", "taskId": "70027307-2226-4358-89d7-512077943585", "choice": "no choice", "es": "la primera no ayudo y el segundo ya ni contestó", "ru": "первый(ая) не помог(ла), а второй(ая) уже даже не ответил(а)", "en": "the first one didn't help and the second one didn't even reply"}, {"cat": "other", "taskId": "e906046b-72a3-4ee2-9b75-8b8161145d10", "choice": "question_answer_accuracy", "note": {"ru": "Ни чата, ни звонка с содержательным текстом от этого клиента на этой неделе не найдено — привязать к категории не получилось", "en": "No chat or call with usable text from this client found this week — couldn't attribute to a category", "es": "No se encontró chat ni llamada con texto útil de este cliente esta semana — no se pudo atribuir a una categoría"}}, {"cat": "other", "taskId": "fa8d3a8e-d3e2-4ef2-8b9a-be8ed5bc7742", "choice": "question_answer_accuracy", "note": {"ru": "Ни чата, ни звонка с содержательным текстом от этого клиента на этой неделе не найдено — привязать к категории не получилось", "en": "No chat or call with usable text from this client found this week — couldn't attribute to a category", "es": "No se encontró chat ni llamada con texto útil de este cliente esta semana — no se pudo atribuir a una categoría"}}, {"cat": "product", "taskId": "c94af5b8-dbc9-4393-b9d7-e1b22f17e7e6", "choice": "other", "es": "Aún no me resuelven nada. Llevo más de un mes esperando", "ru": "Мне до сих пор ничего не решили. Жду уже больше месяца", "en": "Still nothing resolved for me. I've been waiting over a month"}, {"cat": "agent", "taskId": "a66f65ce-3c7d-4f7b-a862-826b60c0ce6e", "choice": "agent_was_rude", "note": {"ru": "Явно отмечено «агент был груб», без комментария", "en": "Explicitly flagged \"agent was rude\", no comment", "es": "Marcado explícitamente \"agente fue grosero\", sin comentario"}}, {"cat": "agent", "taskId": "5a4ad093-8d54-4776-aa8e-073511fe8f9e", "choice": "response_speed", "note": {"ru": "Отмечена скорость ответа агента, без комментария", "en": "Agent response speed flagged, no comment", "es": "Se marcó la velocidad de respuesta del agente, sin comentario"}}, {"cat": "agent", "taskId": "19b00d1a-91d5-45d5-883c-46e1fbe05fc3", "choice": "agent_was_rude", "note": {"ru": "Явно отмечено «агент был груб», без комментария", "en": "Explicitly flagged \"agent was rude\", no comment", "es": "Marcado explícitamente \"agente fue grosero\", sin comentario"}}, {"cat": "product", "taskId": "e31c0737-83ed-4549-9e20-b9344bf8ccca", "choice": "other", "es": "No se resolvió mi reporte", "ru": "Моё обращение не было решено", "en": "My report was not resolved"}, {"cat": "other", "taskId": "4c885474-719a-4e00-89a4-79cbbf76152e", "choice": "question_answer_accuracy", "note": {"ru": "Ни чата, ни звонка с содержательным текстом от этого клиента на этой неделе не найдено — привязать к категории не получилось", "en": "No chat or call with usable text from this client found this week — couldn't attribute to a category", "es": "No se encontró chat ni llamada con texto útil de este cliente esta semana — no se pudo atribuir a una categoría"}}, {"cat": "product", "taskId": "4f55af19-16ee-4175-b391-0686bf9d5fda", "choice": "question_answer_accuracy", "es": "No me explicaron correctamente porqué al capturar la cuenta clabe para una transferenci NO aparece e nombre de Banco Plata. y porque capturarlo como STP. Eso no da credibilidad ante mis clientes ni confianza", "ru": "Мне неправильно объяснили, почему при вводе CLABE для перевода не показывается название Banco Plata, и почему нужно вводить как STP. Это подрывает доверие клиентов", "en": "They didn't explain correctly why entering the CLABE for a transfer doesn't show Banco Plata's name, or why to enter it as STP. This doesn't give credibility with my own clients"}, {"cat": "agent", "taskId": "4f0fdcb7-8c53-43bb-b516-4f45b2059850", "choice": "response_speed", "note": {"ru": "Отмечена скорость ответа агента, без комментария", "en": "Agent response speed flagged, no comment", "es": "Se marcó la velocidad de respuesta del agente, sin comentario"}}]};
+const CSAT_SEG = {"answeredSample": 94, "answeredPublished": 114, "dislikedSample": 15, "dislikedPublished": 18, "tenure": {"d30_90": 14, "lt30": 20, "no_account": 35, "d90_plus": 1, "unutilized": 23, "soft_attrition": 1, "unknown_status": 0}, "pfpm": {"PFAE": 54, "PM": 6, "unknown": 34}, "dislikeTenure": {"no_account": 7, "lt30": 1, "unutilized": 3, "d30_90": 4, "unknown_status": 0, "d90_plus": 0, "soft_attrition": 0}, "dislikePfpm": {"PFAE": 8, "PM": 0, "unknown": 7}}; // 7-bucket tenure + PFAE/PM breakdown of answered CSAT surveys (sample of 94/114, dislikes 15/18, see earlier caveat). No joint tenure7xPFPM3 cross-tab available for CSAT (small sample) -- combined tenure+PFAE/PM filter shows "no data" for CSAT, same as Closures.
+const TENURE_NOW = {"d30_90": 64, "unutilized": 157, "lt30": 85, "no_account": 198, "d90_plus": 4, "soft_attrition": 1, "unknown_status": 0}; // distinct chat clients with a customerid, full week Sep14-20, bucketed into 7 tenure/lifecycle buckets (без счёта/статус неизвестен/неутиль/<30/30-90/90+/софт атришн) via fin_active_clients_daily_v2 (PFAE_OPEN/UTIL/FIN_ACTIVE_FLG) snapshotted on the exact contact date, with local accounts CSV + PM legal-entity age as fallback/override. unknown_status has no distinct-client figure by construction (no resolvable customerid).
+const PFPM_NOW = {"PFAE": 291, "PM": 14}; // PFAE/PM split via ACCOUNTS.TYPE + PRR/PCM bridge (bridge overrides a personal PYME_ACCOUNT_FLG=false) -- see pmCaveat.
+const JOINT_TENURE_PFPM = {"MISC": {"d30_90": {"PFAE": 53, "PM": 4}, "unutilized": {"PFAE": 159}, "lt30": {"PFAE": 97, "unknown": 2, "PM": 7}, "no_account": {"unknown": 190, "PFAE": 4}, "unknown_status": {"unknown": 109}, "d90_plus": {"PM": 2}}, "KYC_DOCS": {"no_account": {"unknown": 7}, "unknown_status": {"unknown": 7}, "lt30": {"unknown": 1, "PM": 2}, "d30_90": {"PFAE": 1}}, "PF_PM_SECOND": {"unutilized": {"PFAE": 4}, "lt30": {"PM": 2, "PFAE": 1}, "d30_90": {"PM": 1, "PFAE": 1}}, "STATUS_WAIT": {"no_account": {"unknown": 8}, "unknown_status": {"unknown": 6}}, "NO_SIGNAL": {"no_account": {"unknown": 27}, "d30_90": {"PFAE": 28}, "lt30": {"PFAE": 24, "unknown": 2}, "unknown_status": {"unknown": 3}, "unutilized": {"PFAE": 2}, "d90_plus": {"PFAE": 1}}, "PLANS_PRICING": {"lt30": {"PFAE": 14}, "unutilized": {"PFAE": 15}, "d30_90": {"PFAE": 9, "PM": 1}, "no_account": {"unknown": 19}, "unknown_status": {"unknown": 2}, "soft_attrition": {"PFAE": 1}}, "TPV": {"d30_90": {"PFAE": 2}, "no_account": {"unknown": 1}, "unutilized": {"PFAE": 1}}, "CANCEL_APPLICATION": {"no_account": {"unknown": 7}, "unutilized": {"PFAE": 1}}, "CREDIT": {"unutilized": {"PFAE": 6}, "d30_90": {"PFAE": 1}}, "ACCOUNT_BLOCKED": {"d30_90": {"PFAE": 13}, "no_account": {"unknown": 3}, "lt30": {"PFAE": 3}}, "PF_PM": {"no_account": {"unknown": 35}, "unknown_status": {"unknown": 19}, "unutilized": {"PFAE": 5}}, "CANCEL_OPEN": {"unutilized": {"PFAE": 34}, "lt30": {"PFAE": 5}, "d30_90": {"PFAE": 11}, "no_account": {"unknown": 3}, "unknown_status": {"unknown": 3}}, "TRANSFERS": {"d30_90": {"PM": 1, "PFAE": 6}, "lt30": {"PFAE": 5}, "unutilized": {"PFAE": 5}, "unknown_status": {"unknown": 2}}, "SAVINGS": {"unutilized": {"PFAE": 2}, "lt30": {"PFAE": 2}}, "CFDI": {"unutilized": {"PFAE": 5}, "lt30": {"PFAE": 4}, "d30_90": {"PM": 2}, "no_account": {"unknown": 2}}, "UPDATE_DATA": {"unutilized": {"PFAE": 9}, "lt30": {"PFAE": 1}, "d30_90": {"PFAE": 1}}, "CASHBACK_PROMO": {"unutilized": {"PFAE": 3}}, "CLABE": {"unutilized": {"PFAE": 4}, "lt30": {"PFAE": 4}, "d30_90": {"PFAE": 1}, "unknown_status": {"unknown": 1}}, "DELIVERY": {"lt30": {"PM": 1}, "no_account": {"unknown": 1}}, "CARD_ACTIVATION": {"unutilized": {"PFAE": 3}, "lt30": {"PM": 1}, "d30_90": {"PFAE": 1}}, "FRAUD_DISPUTE": {"lt30": {"PFAE": 1}, "no_account": {"unknown": 1}, "d30_90": {"PFAE": 2}}, "ONBOARDING_GENERAL": {"d30_90": {"unknown": 1}, "d90_plus": {"PM": 1}, "unknown_status": {"unknown": 2}}, "ROLES_TEAM": {"no_account": {"unknown": 1}}, "calls": {"lt30": {"PFAE": 36, "unknown": 2, "PM": 1}, "no_account": {"unknown": 99}, "unutilized": {"PFAE": 59}, "d30_90": {"PM": 6, "PFAE": 16}, "unknown_status": {"unknown": 81}}}; // per-category joint 7-bucket-tenure x PFAE/PM ticket cross-tab, replaces the earlier 3-bucket (active/onboarding/other) version. Covers 24 of 25 CATS categories via jointKey (all except "Вопрос не про PyME", 2 tickets, too small/manual to reproduce).
+const ACTIVE_BASE = 3739; // PFAE_FIN_ACTIVE_FLG=1 in dwh_mobile_app_prod.dbt.fin_active_clients_daily_v2, business_dt 2026-09-19 (latest available; real financial activity, not just an open/non-closed account)
+const WEEKLY_TOTALS = [{"key": "weekShort1", "total": 1429}, {"key": "weekShort2", "total": 1335}, {"key": "weekShort3", "total": 1345}];
+const CATEGORY_TREND = [{"name": {"ru": "Разное / другое", "en": "Other / miscellaneous", "es": "Otros / varios"}, "w": [47.9, 51.2, 46.5]}, {"name": {"ru": "Звонки (не расклассифицированы по темам)", "en": "Calls (not classified by topic)", "es": "Llamadas (sin clasificar por tema)"}, "w": [19.2, 19.6, 22.3]}, {"name": {"ru": "Выбор режима PF/PM", "en": "Choosing PF/PM mode", "es": "Elección de régimen PF/PM"}, "w": [4.3, 6.0, 5.1]}, {"name": {"ru": "Планы / тарифы", "en": "Plans / pricing", "es": "Planes / tarifas"}, "w": [5.2, 4.1, 4.5]}, {"name": {"ru": "Отмена уже открытого счёта", "en": "Cancelling an open account", "es": "Cancelar cuenta ya abierta"}, "w": [4.1, 4.9, 4.2]}, {"name": {"ru": "Заблокированный счёт/карта", "en": "Blocked account/card", "es": "Cuenta/tarjeta bloqueada"}, "w": [0.8, 0.6, 1.4]}, {"name": {"ru": "Документы / KYB", "en": "Documents / KYB", "es": "Documentos / KYB"}, "w": [1.4, 1.4, 1.3]}, {"name": {"ru": "Переводы / SPEI", "en": "Transfers / SPEI", "es": "Transferencias / SPEI"}, "w": [1.4, 1.3, 1.3]}, {"name": {"ru": "Статус заявки / ожидание", "en": "Application status / wait", "es": "Estatus de solicitud / espera"}, "w": [1.4, 1.5, 1.1]}, {"name": {"ru": "CFDI / фактурация", "en": "CFDI / invoicing", "es": "CFDI / facturación"}, "w": [1.6, 0.7, 1.0]}, {"name": {"ru": "Обновление данных", "en": "Updating data", "es": "Actualización de datos"}, "w": [0.8, 0.7, 0.8]}, {"name": {"ru": "CLABE / номер счёта", "en": "CLABE / account number", "es": "CLABE / número de cuenta"}, "w": [0.6, 0.7, 0.7]}, {"name": {"ru": "Кредит для бизнеса", "en": "Business credit", "es": "Crédito de negocio"}, "w": [0.9, 0.6, 0.5]}];
+
+function renderCsatChart(){
+  const u = UI[currentLang];
+  const answered = CSAT_DATA.liked + CSAT_DATA.disliked;
+  const likePct = (CSAT_DATA.liked/(answered||1)*100).toFixed(0);
+  const rt = CSAT_DATA.reasons;
+  const rTotal = rt.product + rt.agent + rt.other;
+
+  const trendRows = CSAT_WEEKLY_TREND.map(w => {
+    const ans = w.liked + w.disliked;
+    const pct = ans ? (w.liked/ans*100) : 0;
+    return `<div class="trend-row">
+      <span class="trend-label">${u[w.key]}</span>
+      <div class="trend-track"><div class="trend-fill" style="width:${pct.toFixed(1)}%"></div></div>
+      <span class="trend-value num">${pct.toFixed(0)}% (${ans})</span>
+    </div>`;
+  }).join("");
+
+  const reasonRows = CSAT_REASON_TREND.map(c => {
+    const [a,b,c3] = c.w;
+    const delta = c3-b;
+    const dCls = Math.abs(delta) < 1.5 ? "delta-flat" : (delta>0 ? "delta-up" : "delta-down");
+    const dSign = delta>0 ? "+" : "";
+    return `<tr>
+      <td class="name">${u[c.key]}</td>
+      <td class="num">${a.toFixed(1)}%</td>
+      <td class="num">${b.toFixed(1)}%</td>
+      <td class="num">${c3.toFixed(1)}%</td>
+      <td class="num ${dCls}">${dSign}${delta.toFixed(1)} pp</td>
+    </tr>`;
+  }).join("");
+
+  const badgeKey = {product:"csatReasonProduct", agent:"csatReasonAgent", other:"csatReasonOther"};
+  const badgeColor = {product:"var(--critical)", agent:"var(--warn)", other:"var(--text-faint)"};
+  const dislikeRows = ["product","agent","other"].map(cat => {
+    const items = CSAT_DATA.dislikesUnattributed.filter(d => d.cat === cat);
+    if(!items.length) return "";
+    const rows = items.map(d => {
+      const body = d.note ? `<span style="color:var(--text-faint); font-style:italic;">${esc(t(d.note))}</span>` : `«${esc(t({ru:d.ru,en:d.en,es:d.es}))}»${currentLang!=="es" ? `<div class="ru" style="margin-top:2px;">«${esc(d.es)}»</div>` : ""}`;
+      return `<div class="quote" style="border-left-color:${badgeColor[cat]};"><div class="es">${body}</div></div>`;
+    }).join("");
+    return `<div class="mini-split-title" style="margin-top:14px; color:${badgeColor[cat]};">${u[badgeKey[cat]]} (${items.length})</div>${rows}`;
+  }).join("");
+
+  let csatSegHtml = "";
+  if(anySegActive() && activeChan !== "Звонки"){
+    const ten = activeTenureSeg, pf = activePfpmSeg;
+    if(bothSegActive()){
+      csatSegHtml = `<div class="cat-trend-caveat" style="margin-bottom:12px;">${u.closuresSegBoth}</div>`;
+    } else {
+      const ansN = ten !== "all" ? CSAT_SEG.tenure[ten] : CSAT_SEG.pfpm[pf];
+      const disN = ten !== "all" ? CSAT_SEG.dislikeTenure[ten] : CSAT_SEG.dislikePfpm[pf];
+      const pct = ansN ? ((ansN-disN)/ansN*100).toFixed(0) : "—";
+      const noteText = u.csatSegNote.replace("{pct}",pct).replace("{ans}",ansN).replace("{dis}",disN).replace("{sample}",CSAT_SEG.answeredSample).replace("{pub}",CSAT_SEG.answeredPublished);
+      csatSegHtml = `<div class="cat-trend-caveat" style="margin-bottom:12px;">${noteText}</div>`;
+    }
+  }
+
+  document.getElementById("csatChart").innerHTML = `
+    ${csatSegHtml}
+    <div class="mini-split-block">
+      <div class="mini-split-track">
+        <span style="width:${likePct}%; background:var(--good);"></span>
+        <span style="width:${100-likePct}%; background:var(--critical);"></span>
+      </div>
+      <div class="mini-split-legend">
+        <span><b class="num">${CSAT_DATA.liked}</b> ${u.csatLiked} (${likePct}%)</span>
+        <span><b class="num">${CSAT_DATA.disliked}</b> ${u.csatDisliked}</span>
+        <span><b class="num">${answered}</b> ${u.csatAnswered} <b class="num">${CSAT_DATA.sent}</b> ${u.csatSent}</span>
+      </div>
+    </div>
+    <div class="mini-split-block">
+      <div class="mini-split-title">${u.csatTrendTitle}</div>
+      ${trendRows}
+    </div>
+    <div class="mini-split-block">
+      <div class="mini-split-title">${u.csatReasonTrendTitle}</div>
+      <div style="overflow-x:auto;">
+      <table class="cat-trend-table">
+        <thead><tr><th></th><th class="num">${u.weekShort1}</th><th class="num">${u.weekShort2}</th><th class="num">${u.weekShort3}</th><th class="num">Δ</th></tr></thead>
+        <tbody>${reasonRows}</tbody>
+      </table>
+      </div>
+    </div>
+    <div class="mini-split-block">
+      <div class="mini-split-title">${u.csatReasonHeading}</div>
+      <div class="split">
+        <div class="split-track split3-track"><div class="t-active" style="width:${(rt.product/rTotal*100).toFixed(0)}%; background:var(--critical);"></div><div class="t-onboarding" style="width:${(rt.agent/rTotal*100).toFixed(0)}%; background:var(--warn);"></div><div class="t-other" style="width:${(rt.other/rTotal*100).toFixed(0)}%"></div></div>
+        <div class="split-legend"><span class="ta" style="color:var(--critical);">${rt.product} ${u.csatReasonProduct}</span><span class="tb" style="color:var(--warn);">${rt.agent} ${u.csatReasonAgent}</span><span class="tc">${rt.other} ${u.csatReasonOther}</span></div>
+      </div>
+      <div class="cat-trend-caveat" style="margin-top:10px;">${u.csatUnattributedNote}</div>
+      <div class="quotes" style="margin-top:8px;">${dislikeRows}</div>
+    </div>
+  `;
+}
+function renderTenurePfpmChart(){
+  const u = UI[currentLang];
+  const tt = TENURE7_ORDER.reduce((s,k)=>s+(TENURE_NOW[k]||0),0);
+  const pt = PFPM_NOW.PFAE+PFPM_NOW.PM;
+  const ten7 = tenure7BarHtml(TENURE_NOW, u);
+  document.getElementById("tenurePfpmChart").innerHTML = `
+    <div class="mini-split-block">
+      <div class="mini-split-title">${u.tenurePfpmTitle}</div>
+      <div class="mini-split-track">${ten7.bar}</div>
+      <div class="mini-split-legend">${ten7.legend}</div>
+      <div class="cat-trend-caveat">${u.tenureCoverageCaveat}</div>
+    </div>
+    <div class="mini-split-block">
+      <div class="mini-split-track">
+        <span style="width:${(PFPM_NOW.PFAE/pt*100).toFixed(0)}%; background:var(--accent);"></span>
+        <span style="width:${(PFPM_NOW.PM/pt*100).toFixed(1)}%; background:var(--mixed);"></span>
+      </div>
+      <div class="mini-split-legend">
+        <span><b class="num">${PFPM_NOW.PFAE}</b> PFAE (${(PFPM_NOW.PFAE/pt*100).toFixed(0)}%)</span>
+        <span><b class="num">${PFPM_NOW.PM}</b> Persona Moral (${(PFPM_NOW.PM/pt*100).toFixed(0)}%)</span>
+      </div>
+      <div class="cat-trend-caveat">${u.pmCaveat}</div>
+    </div>
+  `;
+}
+
+function renderTrendRateChart(){
+  const u = UI[currentLang];
+  const maxRate = Math.max(...WEEKLY_TOTALS.map(w=>w.total/ACTIVE_BASE));
+  const rows = WEEKLY_TOTALS.map(w=>{
+    const rate = w.total/ACTIVE_BASE;
+    return `<div class="trend-row">
+      <span class="trend-label">${u[w.key]}</span>
+      <div class="trend-track"><div class="trend-fill" style="width:${(rate/maxRate*100).toFixed(1)}%"></div></div>
+      <span class="trend-value num">${rate.toFixed(4)}</span>
+    </div>`;
+  }).join("");
+  document.getElementById("trendRateChart").innerHTML = `<div class="mini-split-title" style="margin-bottom:8px;">${u.trendRateTitle}</div>${rows}`;
+}
+
+function renderCatTrendChart(){
+  const u = UI[currentLang];
+  const rows = CATEGORY_TREND.map(c=>{
+    const [a,b,c3] = c.w;
+    const delta = c3-b;
+    const dCls = Math.abs(delta) < 0.15 ? "delta-flat" : (delta>0 ? "delta-up" : "delta-down");
+    const dSign = delta>0 ? "+" : "";
+    return `<tr>
+      <td class="name">${c.name[currentLang]}</td>
+      <td class="num">${a.toFixed(1)}%</td>
+      <td class="num">${b.toFixed(1)}%</td>
+      <td class="num">${c3.toFixed(1)}%</td>
+      <td class="num ${dCls}">${dSign}${delta.toFixed(1)} pp</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("catTrendChart").innerHTML = `
+    <div class="mini-split-title" style="margin-bottom:8px;">${u.catTrendTitle}</div>
+    <div style="overflow-x:auto;">
+    <table class="cat-trend-table">
+      <thead><tr><th></th><th class="num">${u.weekShort1}</th><th class="num">${u.weekShort2}</th><th class="num">${u.weekShort3}</th><th class="num">Δ</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>
+    <div class="cat-trend-caveat">${u.catTrendCaveat}</div>
+  `;
+}
+
+let currentLang = "ru";
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+const TENURE7_ORDER = ["no_account","unknown_status","unutilized","lt30","d30_90","d90_plus","soft_attrition"];
+const TENURE7_COLOR = {no_account:"var(--border-strong)", unknown_status:"var(--text-faint)", unutilized:"var(--mixed)", lt30:"var(--accent)", d30_90:"var(--teal)", d90_plus:"var(--good)", soft_attrition:"var(--critical)"};
+const TENURE7_LABELKEY = {no_account:"tenureBNoAccount", unknown_status:"tenureBUnknown", unutilized:"tenureBUnutilized", lt30:"tenureBLt30", d30_90:"tenureBD3090", d90_plus:"tenureBD90Plus", soft_attrition:"tenureBSoftAttrition"};
+function tenure7BarHtml(tc, u, sizePx){
+  const total = TENURE7_ORDER.reduce((s,k)=>s+(tc[k]||0),0);
+  if(!total) return "";
+  const bar = TENURE7_ORDER.map(k => `<div style="width:${((tc[k]||0)/total*100).toFixed(1)}%; background:${TENURE7_COLOR[k]}; opacity:${k==="unknown_status"?".5":"1"};"></div>`).join("");
+  const legend = TENURE7_ORDER.filter(k=>tc[k]).map(k => `<span><span style="color:${TENURE7_COLOR[k]};">●</span> <b class="num">${tc[k]}</b> ${u[TENURE7_LABELKEY[k]]} (${(tc[k]/total*100).toFixed(0)}%)</span>`).join("");
+  return {bar, legend, total};
+}
+function dashboardUrl(taskId){ return `https://web-production-50381.up.railway.app/dashboard/#conv/${encodeURIComponent(taskId)}`; }
+function t(field){ return typeof field === "object" && field !== null ? (field[currentLang] || field.ru) : field; }
+
+function applyUIStrings(){
+  const u = UI[currentLang];
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = u[el.dataset.i18n] || ""; });
+  document.querySelectorAll(".lang-switch button").forEach(b => b.classList.toggle("active", b.dataset.lang === currentLang));
+  document.getElementById("catSearch").placeholder = u.searchPh;
+  renderKpis();
+  renderCsatChart();
+  renderTenurePfpmChart();
+  renderTrendRateChart();
+  renderCatTrendChart();
+  renderThemeChart();
+  renderCatRows();
+  renderCloRows();
+  updateSegCaveat();
+  applyFilters();
+}
+
+function filteredCatsByChannel(){
+  return CATS.filter(c => activeChan === "all" || c.channel === activeChan);
+}
+function renderKpis(){
+  const u = UI[currentLang];
+  const anySeg = anySegActive();
+  const cats = filteredCatsByChannel();
+  const ticketTotal = anySeg ? cats.reduce((s,c)=>s+segCount(c),0) : cats.reduce((s,c)=>s+c.chats+c.calls,0);
+  const catCount = cats.filter(c => anySeg ? segCount(c) > 0 : true).length;
+  // Clients KPI only ever shows a verified distinct-client figure (TENURE_NOW/PFPM_NOW, chats-only by definition)
+  // — never a sum of per-category `clients`, since that double-counts clients who appear in multiple categories.
+  const baseClients = TENURE7_ORDER.reduce((s,k)=>s+(TENURE_NOW[k]||0),0);
+  let clientsVal = null;
+  if(activeChan === "Звонки") clientsVal = null; // no distinct-client figure exists for a calls-only view
+  else if(!anySeg) clientsVal = baseClients;
+  else if(bothSegActive()) clientsVal = null; // no verified joint distinct-client figure exists for tenure+PFAE/PM combined
+  else if(activeTenureSeg !== "all") clientsVal = TENURE_NOW[activeTenureSeg];
+  else clientsVal = PFPM_NOW[activePfpmSeg];
+  const clientsHtml = clientsVal === null
+    ? `<div class="v num">—</div><div class="l">${u.kpiClients} (${u.chatsWord})</div>`
+    : `<div class="v num">${clientsVal}</div><div class="l">${u.kpiClients} (${u.chatsWord})</div>`;
+  document.getElementById("kpis").innerHTML = `
+    <div class="kpi"><div class="v num">${ticketTotal}</div><div class="l">${u.kpiFcr}</div></div>
+    <div class="kpi"><div class="v num">${catCount}</div><div class="l">${u.kpiCategories}</div></div>
+    <div class="kpi">${clientsHtml}</div>
+    <div class="kpi"><div class="v num">52</div><div class="l">${u.kpiClosures}</div></div>
+    <div class="kpi"><div class="v num">${(CSAT_DATA.liked/((CSAT_DATA.liked+CSAT_DATA.disliked)||1)*100).toFixed(0)}%</div><div class="l">CSAT · ${CSAT_DATA.liked+CSAT_DATA.disliked} ${u.csatAnswered.split(" ")[0]}</div></div>
+  `;
+}
+
+const TOTAL_BASE = 1345; // total chats+calls tickets this week, no filters applied
+function currentTotalBase(){
+  const anySeg = anySegActive();
+  const cats = filteredCatsByChannel();
+  return anySeg ? cats.reduce((s,c)=>s+segCount(c),0) : cats.reduce((s,c)=>s+c.chats+c.calls,0);
+}
+function pctOfTotal(n){ return (n / (currentTotalBase()||1) * 100); }
+function trendBar(pct){ return `<div class="bar-track"><span class="bar-fill" style="width:${Math.min(100,pct*4)}%"></span></div>`; }
+
+function catBadges(c){
+  const u = UI[currentLang];
+  const chanBadge = c.channel === "Звонки" ? `<span class="chan-badge">${u.chanCalls}</span>` : "";
+  const typeBadge = `<span class="type-badge type-${esc(c.type)}">${u[typeLabelKey(c.type)] || c.type}</span>`;
+  return `${typeBadge}${chanBadge}`;
+}
+function renderCatBody(c){
+  const u = UI[currentLang];
+  const idsHtml = c.ids.length
+    ? `<div class="ids-block"><div class="ids-head"><span class="l">${u.idsLabel}</span>
+        <button class="copy-btn" data-copy="${esc(c.ids.join(', '))}">${u.copyAllBtn}</button></div>
+        <div class="ids-list">${c.ids.map(id=>`<span class="id-chip">${esc(id)}</span>`).join("")}</div></div>`
+    : `<p class="no-ids">${u.noIds}</p>`;
+  const csatBadgeKey = {product:"csatReasonProduct", agent:"csatReasonAgent", other:"csatReasonOther"};
+  const csatBadgeColor = {product:"var(--critical)", agent:"var(--warn)", other:"var(--text-faint)"};
+  const quotesHtml = c.quotes.map(q => {
+    const label = q.csatCat ? `CSAT · ${u[csatBadgeKey[q.csatCat]]}` : (q.note ? u.agentNote : u.clientQuote);
+    const secondary = currentLang === "es" ? "" : `<div class="ru">→ «${esc(t({ru:q.ru,en:q.en,es:""}))}»</div>`;
+    const idLine = q.customerid ? `<div class="quote-id num">${u.quoteFrom}: ${esc(q.customerid)}</div>` : "";
+    const dialogLink = q.taskId ? `<a class="dialog-link" href="${dashboardUrl(q.taskId)}" target="_blank" rel="noopener">${u.viewDialog} ↗</a>` : "";
+    const style = q.csatCat ? ` style="border-left-color:${csatBadgeColor[q.csatCat]};"` : "";
+    return `<div class="quote ${q.note?'note':''}"${style}><div class="tag">${label}</div><div class="es">«${esc(q.es)}»</div>${secondary}${idLine}${dialogLink}</div>`;
+  }).join("");
+  const timingHtml = c.avgMinutes != null
+    ? `<div class="callout timing"><span>⏱</span><span><b>${u.avgTime}:</b> <span class="num">${c.avgMinutes}</span> ${u.minWord} (${u.medianWord} <span class="num">${c.medianMinutes}</span>, <span class="num">${c.timedCount}</span> ${u.ticketsWord})</span></div>`
+    : "";
+  const tc = c.tenureCounts;
+  const ten7 = tc ? tenure7BarHtml(tc, u) : null;
+  const tenureHtml = (ten7 && ten7.total) ? `<div class="split">
+        <span class="split-caption">${u.tenureCaption}</span>
+        <div class="split-track">${ten7.bar}</div>
+        <div class="split-legend">${ten7.legend}</div>
+      </div>` : "";
+  return `<p class="desc">${esc(t(c.desc))}</p>
+      ${(c.withAcc||c.noAcc||c.unknown) ? `<div class="split">
+        <div class="split-track"><div class="split-a" style="width:${(c.withAcc/((c.withAcc+c.noAcc+(c.unknown||0))||1)*100).toFixed(0)}%"></div><div class="split-b" style="width:${(c.noAcc/((c.withAcc+c.noAcc+(c.unknown||0))||1)*100).toFixed(0)}%"></div><div class="split-c" style="width:${((c.unknown||0)/((c.withAcc+c.noAcc+(c.unknown||0))||1)*100).toFixed(0)}%"></div></div>
+        <div class="split-legend"><span class="a">${c.withAcc} ${u.withAccount}</span><span class="b">${c.noAcc} ${u.withoutAccount}</span>${c.unknown?`<span class="c">${c.unknown} ${u.unknownAccount}</span>`:""}</div>
+      </div>` : ""}
+      ${tenureHtml}
+      <div class="quotes">${quotesHtml}</div>
+      ${timingHtml}
+      <div class="callout"><span>💡</span><span>${esc(t(c.analysis))}</span></div>
+      ${idsHtml}`;
+}
+function pairInner(a, b){
+  const u = UI[currentLang];
+  const totalClients = a.clients + b.clients;
+  const aShare = (a.clients/(totalClients||1)*100).toFixed(0);
+  const bShare = (b.clients/(totalClients||1)*100).toFixed(0);
+  const miniSplit = `<div class="pair-mini-split">
+      <div class="pair-mini-track"><div class="pair-mini-a" style="width:${aShare}%"></div><div class="pair-mini-b" style="width:${bShare}%"></div></div>
+      <span class="pair-mini-legend"><span class="a">${a.clients} ${u.chatsWord}</span> · <span class="b">${b.clients} ${u.callsWord}</span></span>
+    </div>`;
+  const sub = c => {
+    const filtered = anyFilterActive();
+    const segN = segCount(c);
+    const metric = filtered
+      ? `<span class="v num">${segN}</span> ${u.ticketsAbbrev} · <span class="v num">${pctOfTotal(segN).toFixed(1)}%</span>`
+      : `<span class="v num">${c.clients}</span> ${u.clientsWord} · <span class="v num">${c.chats+c.calls}</span> ${u.ticketsAbbrev} · <span class="v num">${pctOfTotal(c.clients).toFixed(1)}%</span>`;
+    return `<div class="pair-sub">
+      <div class="pair-sub-head">
+        <span class="badge-row">${catBadges(c)}</span>
+        <span class="pair-sub-metric">${metric}</span>
+      </div>
+      ${renderCatBody(c)}
+    </div>`;
+  };
+  return { totalClients, miniSplit, body: `${sub(a)}<div class="pair-divider"></div>${sub(b)}` };
+}
+const megaChevron = `<svg class="chevron" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M7.5 4.5L13 10L7.5 15.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+function renderUnitAsMegaItem(unit){
+  const u = UI[currentLang];
+  const filtered = anyFilterActive();
+  if(unit.kind === "pair"){
+    const {a,b} = unit;
+    const {totalClients, miniSplit, body} = pairInner(a, b);
+    const segN = segCount(a)+segCount(b);
+    const pct = pctOfTotal(filtered ? segN : totalClients);
+    const totalTickets = a.chats+a.calls+b.chats+b.calls;
+    const metricHtml = filtered
+      ? `<span class="v num">${segN}</span> ${u.ticketsAbbrev} · <span class="v num">${pct.toFixed(1)}%</span>`
+      : `<span class="v num">${totalClients}</span> ${u.clientsWord} · <span class="v num">${totalTickets}</span> ${u.ticketsAbbrev} · <span class="v num">${pct.toFixed(1)}%</span>`;
+    return `<details class="mega-item" data-name="${esc(t(a.name).toLowerCase())} ${esc(t(b.name).toLowerCase())}" data-desc="${esc(t(a.desc).toLowerCase())}" data-type="${esc(a.type)}" data-chan="${esc(a.channel)}" data-pair-second-type="${esc(b.type)}" data-pair-second-chan="${esc(b.channel)}" data-seg-count="${segN}">
+      <summary class="mega-item-head">
+        <span class="badge-row"><span class="pair-badge">${u.pairBadge}</span></span>
+        <span class="name-wrap"><span class="name">${esc(t(a.name))}</span>${miniSplit}</span>
+        <span class="mega-item-metric">${metricHtml}</span>
+        ${megaChevron}
+      </summary>
+      <div class="mega-item-body pair-detail">${body}</div>
+    </details>`;
+  }
+  const c = unit.cat;
+  const segN = segCount(c);
+  const pct = pctOfTotal(filtered ? segN : c.clients);
+  const metricHtml = filtered
+    ? `<span class="v num">${segN}</span> ${u.ticketsAbbrev} · <span class="v num">${pct.toFixed(1)}%</span>`
+    : `<span class="v num">${c.clients}</span> ${u.clientsWord} · <span class="v num">${c.chats+c.calls}</span> ${u.ticketsAbbrev} · <span class="v num">${pct.toFixed(1)}%</span>`;
+  return `<details class="mega-item" data-name="${esc(t(c.name).toLowerCase())}" data-desc="${esc(t(c.desc).toLowerCase())}" data-type="${esc(c.type)}" data-chan="${esc(c.channel)}" data-seg-count="${segN}">
+      <summary class="mega-item-head">
+        <span class="badge-row">${catBadges(c)}</span>
+        <span class="name-wrap"><span class="name">${esc(t(c.name))}</span>${trendBar(pct)}</span>
+        <span class="mega-item-metric">${metricHtml}</span>
+        ${megaChevron}
+      </summary>
+      <div class="mega-item-body">${renderCatBody(c)}</div>
+    </details>`;
+}
+function renderMegaCard(theme, units, totalClients, groupPct, totalTickets){
+  const u = UI[currentLang];
+  const subgroupLabelKey = {second_application:"originSecondApplicationLabel", post_account:"originPostAccountLabel"};
+  let itemsHtml = "";
+  let lastSubgroup = null;
+  units.forEach((un,i) => {
+    const sg = (un.kind==="solo" && un.cat.subgroup) ? un.cat.subgroup : null;
+    if(sg && sg !== lastSubgroup){
+      itemsHtml += `<div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--text-muted); margin:16px 0 8px; padding-top:12px; border-top:1px dashed var(--border-strong);">${u[subgroupLabelKey[sg]] || sg}</div>`;
+    }
+    lastSubgroup = sg;
+    itemsHtml += renderUnitAsMegaItem(un);
+    if(i<units.length-1) itemsHtml += `<div class="mega-divider"></div>`;
+  });
+  const segHeadCount = anySegActive()
+    ? `<span class="num">${totalTickets}</span> ${u.ticketsAbbrev}`
+    : `<span class="num">${totalClients}</span> ${u.clientsWord} · <span class="num">${totalTickets}</span> ${u.ticketsAbbrev}`;
+  return `<details class="type-group row mega-theme-card theme-${esc(theme)}" data-theme="${esc(theme)}">
+    <summary class="mega-theme-summary">
+      <span class="tg-name">${u[themeLabelKey(theme)] || theme}</span>
+      <span class="tg-count">${units.length} · ${segHeadCount} · <span class="num">${groupPct.toFixed(1)}%</span> ${u.ofAllInquiries}</span>
+      <svg class="chevron" width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M7.5 4.5L13 10L7.5 15.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary>
+    <div class="detail"><div class="detail-inner mega-detail">${itemsHtml}</div></div>
+  </details>`;
+}
+
+
+const CLOSURES = [{"reason": {"ru": "Открыл случайно / трение в процессе оформления, путаница режимов", "en": "Opened by mistake / onboarding friction, wrong entity type", "es": "Abrió por error / fricción en el proceso, régimen equivocado"}, "clients": 12, "positive": false, "quotes": [{"es": "Hola quiero cancelar la cuenta empresa. No la Necesito, se aperturó por error", "ru": "Хочу отменить бизнес-счёт. Он мне не нужен, открылся по ошибке", "en": "I want to cancel the business account. I don't need it, it was opened by mistake", "customerid": "98a44483-3317-4c45-b408-cc4b038101f6"}, {"es": "No soy PFAE... no por qué en SAT soy PF y para este movimiento era requisito ser PFAE y no lo soy, necesito el cierre de cuenta para no tener inconvenientes con el SAT", "ru": "Я не PFAE... в SAT я числюсь как физлицо, а для этой операции требовалось быть PFAE — прошу закрыть счёт, чтобы не было проблем с налоговой", "en": "I'm not a PFAE... at SAT I'm registered as an individual, and this required being a PFAE which I'm not — I need the account closed to avoid issues with the tax authority", "customerid": "548be8ea-fa2d-4fd2-85dd-d974335e08c0"}, {"es": "Me hablaron para contratar esta cuenta. Entendí malamente que era una ampliación de los servicios a mi cuenta y me llegó la información con que es otra cuenta aparte que no me sirve y me va a generar muchas comisiones", "ru": "Мне позвонили и предложили оформить этот счёт. Я неправильно понял(а), что это расширение услуг моего счёта, а оказалось — отдельный счёт, который мне не нужен и принесёт комиссии", "en": "I was called to sign up for this account. I misunderstood it as an extension of my existing account's services, but it turned out to be a separate account I don't need and that will generate fees", "customerid": "6edd3833-4628-4a90-8a24-933a1f418589"}], "meaning": {"ru": "Клиент перепутал типы продукта/режима при подаче заявки, либо был неверно проинформирован исходящим звонком.", "en": "Client confused product types/modes when applying, or was misinformed on an outbound sales call.", "es": "El cliente confundió tipos de producto/régimen al solicitar, o fue mal informado en una llamada de venta saliente."}, "action": {"ru": "Уточнить формулировки на экране выбора продукта и скрипты исходящих звонков.", "en": "Clarify the wording on the product-selection screen and outbound call scripts.", "es": "Aclarar el texto en la pantalla de selección de producto y los guiones de llamadas salientes."}, "ids": ["98a44483-3317-4c45-b408-cc4b038101f6", "548be8ea-fa2d-4fd2-85dd-d974335e08c0"], "seg": {"classified": 8, "tenure": {"no_account": 4, "d30_90": 1, "lt30": 3, "unknown_status": 0, "unutilized": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpm": {"PFAE": 7, "PM": 0, "unknown": 1}}}, {"reason": {"ru": "Заявка ещё в процессе — отмена до открытия", "en": "Application-stage cancel (account never opened)", "es": "Cancelación en etapa de solicitud (nunca se abrió la cuenta)"}, "clients": 12, "positive": false, "quotes": [{"es": "Cancelar solicitud cuenta empresarial. No tengo interés, no tengo empresa", "ru": "Отменить заявку на бизнес-счёт. Не интересно, у меня нет бизнеса", "en": "Cancel the business account application. Not interested, I don't have a business", "customerid": "5bdc2dfb-ddaf-498a-b351-75d3c58d0fc9"}, {"es": "Aún no recibía la tarjeta. Pero ya no la quiero recibir, no tengo contrato firmado aún... ya que no la necesito", "ru": "Карту ещё не получил(а). Но уже не хочу её получать, договор ещё не подписан... она мне не нужна", "en": "I hadn't received the card yet. But I don't want it anymore, I haven't signed a contract yet... I don't need it", "customerid": "39bba901-a15e-4064-9c0b-2060d79ce959"}], "meaning": {"ru": "Решение отказаться от продукта ещё до того, как счёт реально открылся.", "en": "Decision to back out before the account was ever actually opened.", "es": "Decisión de desistir antes de que la cuenta realmente se abriera."}, "action": {"ru": "Не считать как реальный отток счёта — это до-открытие.", "en": "Don't count as real account churn — this is pre-opening.", "es": "No contar como churn real de cuenta — es antes de la apertura."}, "ids": ["5bdc2dfb-ddaf-498a-b351-75d3c58d0fc9"], "seg": {"classified": 5, "tenure": {"no_account": 4, "lt30": 1, "unknown_status": 0, "unutilized": 0, "d30_90": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpm": {"PFAE": 1, "PM": 0, "unknown": 4}}}, {"reason": {"ru": "Продукт не подходит / не видит ценности", "en": "Product/value gap — doesn't see enough value", "es": "Brecha de valor — no ve suficiente valor"}, "clients": 7, "positive": false, "quotes": [{"es": "La verdad es que ya tenía una cuenta empresa y quise darle la oportunidad a esta pero es muy ineficiente, seguiré con el otro banco... no me son funcionales, me ayudas a cancelarla por favor", "ru": "У меня уже был бизнес-счёт в другом банке, решил(а) попробовать этот, но он очень неэффективен, вернусь в тот банк... мне это не подходит, помогите отменить", "en": "I already had a business account elsewhere and wanted to give this one a chance, but it's very inefficient, I'll stick with the other bank... it's not working for me, please help me cancel", "customerid": "08bc024d-2b88-4ac0-b3a4-f656388a7dc9"}, {"es": "No estoy teniendo ventas como pensé que iba a tener y no puedo estar solventando una cuenta extra... Sí es que me dijeron que tenía que estar pagando cada mes una cantidad, no recuerdo cuánto, creo que $300", "ru": "Продаж не так много, как рассчитывал(а), не могу содержать лишний счёт... сказали, что нужно платить ежемесячно, кажется $300", "en": "I'm not getting the sales I expected and can't keep paying for an extra account... they told me I'd have to pay a monthly amount, I don't remember exactly, I think $300", "customerid": "cdf26e06-7b9d-4a0d-8ed9-30d3594ba33a"}], "meaning": {"ru": "Клиент не видит достаточной ценности продукта относительно стоимости/усилий, либо бизнес пока не приносит достаточно, чтобы содержать отдельный счёт.", "en": "Client doesn't see enough value in the product relative to cost/effort, or the business isn't yet generating enough to justify a separate account.", "es": "El cliente no ve suficiente valor en el producto frente al costo/esfuerzo, o el negocio aún no genera lo suficiente para justificar una cuenta aparte."}, "action": {"ru": "Пересмотреть онбординг-коммуникацию про реальную ценность продукта для только начинающих бизнесов.", "en": "Revisit onboarding messaging about real product value for early-stage businesses.", "es": "Revisar la comunicación de onboarding sobre el valor real del producto para negocios en etapa temprana."}, "ids": ["08bc024d-2b88-4ac0-b3a4-f656388a7dc9", "cdf26e06-7b9d-4a0d-8ed9-30d3594ba33a"], "seg": {"classified": 6, "tenure": {"d30_90": 6, "no_account": 0, "unknown_status": 0, "unutilized": 0, "lt30": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpm": {"PFAE": 6, "PM": 0, "unknown": 0}}}, {"reason": {"ru": "Комиссии/тариф — сюрприз по стоимости", "en": "Pricing surprise", "es": "Sorpresa de precio/comisiones"}, "clients": 3, "positive": false, "quotes": [{"es": "Urge cancelar Plata empresa. Porque en Diciembre quieren hacer un costo excesivo de $2990 por la supuesta tarjeta o cuenta Plata empresa", "ru": "Срочно отменить Plata empresa. В декабре хотят взять чрезмерную плату — $2990 за карту/счёт Plata empresa", "en": "Urgently need to cancel Plata empresa. Because in December they want to charge an excessive $2990 for the supposed Plata empresa card/account", "customerid": "9940bfd9-7d4c-4473-9806-a96d5bf3f2b5"}, {"es": "Pensé que la cuenta empresarial no tenía costo mensual, pero veo que todos los planes tienen una cuota mensual, así que prefiero no continuar con la apertura y quedarme con mi cuenta actual", "ru": "Думал(а), что бизнес-счёт бесплатный, но вижу, что у всех планов есть ежемесячная плата, поэтому лучше не продолжать открытие и остаться с текущим счётом", "en": "I thought the business account had no monthly cost, but I see all the plans have a monthly fee, so I'd rather not continue opening it and keep my current account", "customerid": "df83496d-7afa-465a-8bb5-f915e6a16666"}], "meaning": {"ru": "Клиент не знал/не отследил, когда заканчивается бесплатный период, либо противоречивая информация о стоимости.", "en": "Client didn't know/track when the free period ends, or got conflicting cost information.", "es": "El cliente no sabía/no siguió cuándo termina el periodo gratis, o recibió información de costo contradictoria."}, "action": {"ru": "Явно и заранее показывать дату окончания бесплатного периода и итоговую стоимость плана.", "en": "Show the free-period end date and the plan's real cost clearly and early.", "es": "Mostrar con claridad y con anticipación la fecha de fin del periodo gratis y el costo real del plan."}, "ids": ["9940bfd9-7d4c-4473-9806-a96d5bf3f2b5", "df83496d-7afa-465a-8bb5-f915e6a16666"], "seg": {"classified": 2, "tenure": {"no_account": 2, "unknown_status": 0, "unutilized": 0, "lt30": 0, "d30_90": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpm": {"PFAE": 1, "PM": 0, "unknown": 1}}}, {"reason": {"ru": "Бизнес не пошёл / закрылся / обстоятельства изменились", "en": "Business itself is shutting down / circumstances changed", "es": "El negocio no funcionó / cerró / cambiaron las circunstancias"}, "clients": 3, "positive": false, "quotes": [{"es": "Si ya no cuento con el negocio, es por eso que la quiero cancelar. Pero nomás me quiero quedar con mi crédito Plata", "ru": "Бизнеса больше нет, поэтому хочу отменить. Но хочу оставить только кредитную карту Plata", "en": "I no longer have the business, that's why I want to cancel. But I'd like to keep just my Plata credit card", "customerid": "c55becda-d801-4bba-96cc-90d498740aee"}, {"es": "Quiero cancelar mi cuenta. Cerré mi negocio y ya no la utilizaré", "ru": "Хочу отменить счёт. Закрыл(а) бизнес и больше не буду им пользоваться", "en": "I want to cancel my account. I closed my business and won't use it anymore", "customerid": "7ae469d5-666e-42c6-ad3b-a358cc67f9e6"}], "meaning": {"ru": "Реальная причина закрытия — сам бизнес перестал существовать, не пошёл, либо клиент меняет страну/обстоятельства, а не проблема с продуктом Plata.", "en": "A genuine closure reason — the business itself stopped existing, didn't work out, or the client's circumstances changed (e.g. moving abroad), not a Plata product problem.", "es": "Un motivo de cierre genuino — el negocio en sí dejó de existir, no funcionó, o cambiaron las circunstancias del cliente (p. ej. se muda de país), no un problema del producto de Plata."}, "action": {"ru": "Не наш продуктовый сигнал — реальный отток бизнеса, а не недовольство сервисом.", "en": "Not a product signal for us — real business churn, not service dissatisfaction.", "es": "No es una señal de producto para nosotros — churn real del negocio, no insatisfacción con el servicio."}, "ids": ["c55becda-d801-4bba-96cc-90d498740aee", "7ae469d5-666e-42c6-ad3b-a358cc67f9e6"], "seg": {"classified": 3, "tenure": {"lt30": 1, "d30_90": 1, "no_account": 1, "unknown_status": 0, "unutilized": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpm": {"PFAE": 3, "PM": 0, "unknown": 0}}}, {"reason": {"ru": "Сбой сервиса / не решённая проблема", "en": "Service failure / unresolved issue", "es": "Fallo de servicio / problema no resuelto"}, "clients": 3, "positive": false, "quotes": [{"es": "Ninguna de las tarjetas de empresa se puede activar ya que al dar clic aparecía la leyenda: \"algo salió mal, inténtalo más tarde\"... OK, entonces sí quiero cancelar, espero su llamada", "ru": "Ни одну из бизнес-карт не удаётся активировать — при нажатии появляется «что-то пошло не так, попробуйте позже»... хорошо, тогда хочу отменить, жду звонка", "en": "None of the business cards can be activated — clicking gives \"something went wrong, try again later\"... OK, then I do want to cancel, waiting for your call", "customerid": "ab88b512-e5b7-4eed-b660-5adb185f8ce3"}, {"es": "Es un problema acceder a la cuenta, primero me pide número de teléfono, NIP, reconocimiento facial, otro NIP... y encima nunca me entregaron tarjeta, me mandaban correo de que pronto me entregarían... Por eso deseo cancelar", "ru": "Проблема даже зайти в счёт — сначала номер телефона, NIP, распознавание лица, ещё один NIP... а карту так и не доставили, только письма «скоро доставим»... поэтому хочу отменить", "en": "It's a problem just to access the account — first phone number, PIN, facial recognition, another PIN... and on top of that they never delivered the card, just kept emailing that it would arrive soon... That's why I want to cancel", "customerid": null}], "meaning": {"ru": "Отмена как следствие нерешённой технической проблемы (активация не работает) или недоставленной карты, несмотря на обещания.", "en": "Cancellation as a consequence of an unresolved technical problem (activation doesn't work) or a card never delivered despite promises.", "es": "Cancelación como consecuencia de un problema técnico sin resolver (la activación no funciona) o una tarjeta nunca entregada a pesar de las promesas."}, "action": {"ru": "Приоритизировать эти случаи — потенциально предотвратимый отток.", "en": "Prioritize these — potentially preventable churn.", "es": "Priorizar estos casos — churn potencialmente evitable."}, "ids": ["ab88b512-e5b7-4eed-b660-5adb185f8ce3"], "seg": {"classified": 3, "tenure": {"d30_90": 1, "unknown_status": 1, "lt30": 1, "no_account": 0, "unutilized": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpm": {"PFAE": 2, "PM": 0, "unknown": 1}}}, {"reason": {"ru": "Уже есть альтернатива (другой банк / личный счёт)", "en": "Already has an alternative (another bank / personal account)", "es": "Ya tiene una alternativa (otro banco / cuenta personal)"}, "clients": 3, "positive": false, "quotes": [{"es": "Se supone que la propia tarjeta y la cuenta lo dice CUENTA EMPRESA... Tengo mi cuenta BBVA empresa y llevo 3 años, nunca me han pedido nada", "ru": "На самой карте и счёте написано «бизнес-счёт»... У меня есть бизнес-счёт в BBVA, уже 3 года, там ничего подобного не спрашивали", "en": "The card and account itself say BUSINESS ACCOUNT... I have a BBVA business account, 3 years now, they've never asked me for anything like this", "customerid": "80b3842b-8e38-4b96-8d97-5526a54bcddd"}, {"es": "Quiero cancelar mi cuenta para retirar mis fondos únicamente, ya conseguí otra cuenta de empresa con otro proveedor", "ru": "Хочу отменить счёт только чтобы вывести средства — уже нашёл(ла) другой банк для бизнес-счёта", "en": "I want to cancel my account just to withdraw my funds, I've already gotten another business account with a different provider", "customerid": "e11af881-1233-46bb-a7aa-b51c793d317d"}], "meaning": {"ru": "Клиент уже держит счёт в другом банке или считает достаточным личный счёт и не видит смысла в двух.", "en": "Client already holds an account at another bank or considers a personal account sufficient and doesn't see the point of holding both.", "es": "El cliente ya tiene cuenta en otro banco o considera suficiente su cuenta personal y no le ve sentido a tener ambas."}, "action": {"ru": "Понять, что заставило клиента уйти к альтернативе (KYC-трение в этом случае).", "en": "Understand what pushed the client to the alternative (KYC friction in this case).", "es": "Entender qué empujó al cliente hacia la alternativa (fricción de KYC en este caso)."}, "ids": ["80b3842b-8e38-4b96-8d97-5526a54bcddd", "e11af881-1233-46bb-a7aa-b51c793d317d"], "seg": {"classified": 3, "tenure": {"d30_90": 2, "lt30": 1, "no_account": 0, "unknown_status": 0, "unutilized": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpm": {"PFAE": 3, "PM": 0, "unknown": 0}}}, {"reason": {"ru": "Не используется / причина не названа", "en": "Not in use / no reason given", "es": "Sin uso / sin motivo indicado"}, "clients": 2, "positive": false, "quotes": [{"es": "Hola necesito cancelar plata empresa. Solo la quiero cancelar por favor, no uso la plata empresa así que no la quiero", "ru": "Нужно отменить plata empresa. Просто хочу отменить, не пользуюсь plata empresa — не нужна", "en": "I need to cancel plata empresa. Just want to cancel it please, I don't use plata empresa so I don't want it", "customerid": "4e988a39-1e6e-44ad-8174-4b3dbc999ebd"}, {"es": "Cancelar cuenta empresa... No me interesa ya más, creo que no es necesaria", "ru": "Отменить бизнес-счёт... Уже не интересно, думаю, он не нужен", "en": "Cancel the business account... Not interested anymore, I think it's not necessary", "customerid": "a3d8b3b2-e9d6-4ede-804a-b11acc15dd8e"}], "meaning": {"ru": "Клиент прямо говорит, что не пользуется продуктом, без более глубокой причины.", "en": "Client plainly states they aren't using the product, with no deeper reason given.", "es": "El cliente indica claramente que no usa el producto, sin dar un motivo más profundo."}, "action": {"ru": "Не тревожный сигнал сам по себе — типичная доля неактивных заявок.", "en": "Not alarming by itself — a typical share of unused signups.", "es": "No es una señal preocupante por sí sola — una porción típica de registros sin uso."}, "ids": ["4e988a39-1e6e-44ad-8174-4b3dbc999ebd", "a3d8b3b2-e9d6-4ede-804a-b11acc15dd8e"], "seg": {"classified": 2, "tenure": {"d30_90": 1, "no_account": 1, "unknown_status": 0, "unutilized": 0, "lt30": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpm": {"PFAE": 2, "PM": 0, "unknown": 0}}}, {"reason": {"ru": "Явно отказался объяснять причину", "en": "Explicitly refused to explain", "es": "Se negó explícitamente a explicar"}, "clients": 2, "positive": false, "quotes": [{"es": "Quiero cerrar mi cuenta de empresa. Es motivo personal", "ru": "Хочу закрыть бизнес-счёт. Личная причина", "en": "I want to close my business account. It's a personal reason", "customerid": "62ddc05b-2678-41f9-a14f-8f7b0e392b9b"}, {"es": "Buenas tardes, quiero cancelar la cuenta de empresa por favor. Es otro motivo pero sí me la puede cancelar por favor", "ru": "Добрый день, хочу отменить бизнес-счёт. Причина другая, но, пожалуйста, отмените", "en": "Good afternoon, I want to cancel the business account please. It's a different reason but please just cancel it", "customerid": "7b1a9fe0-f72e-437d-9ab3-87b86b15b1cf"}], "meaning": {"ru": "Клиент прямо заявляет, что не обязан объяснять причину — редкий, но реальный сигнал о том, как воспринимается вопрос «почему вы уходите».", "en": "Client explicitly asserts they aren't obligated to give a reason — rare, but a real signal about how \"why are you leaving\" prompts land.", "es": "El cliente afirma explícitamente que no está obligado a dar un motivo — raro, pero una señal real de cómo caen las preguntas de \"por qué se va\"."}, "action": {"ru": "Не настаивать на причине сверх одной вежливой попытки.", "en": "Don't push for a reason beyond one polite attempt.", "es": "No insistir en el motivo más allá de un intento cortés."}, "ids": ["62ddc05b-2678-41f9-a14f-8f7b0e392b9b", "7b1a9fe0-f72e-437d-9ab3-87b86b15b1cf"], "seg": {"classified": 2, "tenure": {"no_account": 2, "unknown_status": 0, "unutilized": 0, "lt30": 0, "d30_90": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpm": {"PFAE": 2, "PM": 0, "unknown": 0}}}, {"reason": {"ru": "Консолидация — переходит на другой продукт", "en": "Consolidation — switching to another product", "es": "Consolidación — cambia a otro producto"}, "clients": 1, "positive": null, "quotes": [{"es": "Quiero cambiar la cuenta empresarial por de débito. Cancelar no sé si sea lo correcto, porque sí necesito la cuenta de débito", "ru": "Хочу заменить бизнес-счёт на дебетовый. Не уверен(а), что отмена — это правильно, так как дебетовый счёт мне нужен", "en": "I want to switch the business account for a debit one. Not sure canceling is right, since I do need the debit account", "customerid": "ff9ca8ed-e71c-4d73-a1c5-d5a1838ca8ab"}], "meaning": {"ru": "Клиент не уходит совсем, а меняет продукт на более подходящий ему — не полный отток.", "en": "Client isn't leaving entirely, just switching to a product that fits better — not full churn.", "es": "El cliente no se va del todo, solo cambia a un producto que le queda mejor — no es churn total."}, "action": {"ru": "Не считать как полную потерю клиента.", "en": "Don't count as a full client loss.", "es": "No contarlo como pérdida total del cliente."}, "ids": ["ff9ca8ed-e71c-4d73-a1c5-d5a1838ca8ab"], "seg": {"classified": 1, "tenure": {"lt30": 1, "no_account": 0, "unknown_status": 0, "unutilized": 0, "d30_90": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpm": {"PFAE": 1, "PM": 0, "unknown": 0}}}, {"reason": {"ru": "Удержан(а) в разговоре", "en": "Retained mid-conversation", "es": "Retenido durante la conversación"}, "clients": 4, "positive": true, "quotes": [{"es": "No cancélala", "ru": "Не отменяйте", "en": "Don't cancel it", "customerid": "12d613ec-f24a-436c-aa31-5ed5947315a8"}, {"es": "No la quiero cancelar aún, pero quisiera yo saber el procedimiento... Excelente, será un placer seguir usando mi banco preferido PLATA", "ru": "Пока не хочу отменять, но хотел(а) бы узнать процедуру... Отлично, буду рад(а) и дальше пользоваться любимым банком PLATA", "en": "I don't want to cancel it yet, but I'd like to know the procedure... Excellent, it'll be a pleasure to keep using my favorite bank PLATA", "customerid": "d90fd807-4515-44a8-972c-45f2c7b81de0"}, {"es": "No quiero cancelar ninguna de mis cuentas", "ru": "Не хочу отменять ни один из своих счетов", "en": "I don't want to cancel any of my accounts", "customerid": "ef59ece7-cb6e-4883-9699-c6439c2e07ff"}], "meaning": {"ru": "Клиент озвучил намерение отменить (или уточнял процедуру), но в итоге решил остаться.", "en": "Client voiced cancel intent (or asked about the process) but ultimately decided to stay.", "es": "El cliente expresó intención de cancelar (o preguntó sobre el proceso) pero al final decidió quedarse."}, "action": {"ru": "Реальное спасение, не отток.", "en": "A real save, not churn.", "es": "Un salvamento real, no churn."}, "ids": ["12d613ec-f24a-436c-aa31-5ed5947315a8", "d90fd807-4515-44a8-972c-45f2c7b81de0", "ef59ece7-cb6e-4883-9699-c6439c2e07ff"], "seg": {"classified": 3, "tenure": {"d30_90": 1, "no_account": 2, "unknown_status": 0, "unutilized": 0, "lt30": 0, "d90_plus": 0, "soft_attrition": 0}, "pfpm": {"PFAE": 2, "PM": 0, "unknown": 1}}}];
+
+const CLOSURE_BASE = CLOSURES.reduce((s,c)=>s+c.clients,0); // 68: 60 across 11 named closure reasons + 8 across 2 "saved" groups (6 plan-downgrade-miscaptured + 2 retained). Both branches below share this combined base so their two percentages (88.2% + 11.8%) add up to 100%.
+function closureSegCount(c){
+  if(!c.seg || bothSegActive()) return null;
+  if(activeTenureSeg !== "all") return c.seg.tenure[activeTenureSeg];
+  if(activePfpmSeg !== "all") return c.seg.pfpm[activePfpmSeg];
+  return null;
+}
+function renderCloMegaItem(c){
+  const u = UI[currentLang];
+  const pct = c.clients / CLOSURE_BASE * 100;
+  const showSeg = anySegActive();
+  const segN = showSeg ? closureSegCount(c) : null;
+  const metricHtml = !showSeg
+    ? `<span class="v num">${c.clients}</span> ${u.clientsWord} · <span class="v num">${pct.toFixed(1)}%</span>`
+    : bothSegActive()
+      ? `<span class="v num">—</span>`
+      : `<span class="v num">${segN}</span> ${u.clientsWord}`;
+  const segNoteHtml = !showSeg ? "" : `<div class="cat-trend-caveat" style="margin-top:8px;">${
+      bothSegActive()
+        ? u.closuresSegBoth
+        : u.closuresSegNote.replace("{classified}", c.seg.classified).replace("{published}", c.clients)
+    }</div>`;
+  const quotesHtml = c.quotes.map(q => {
+    const secondary = currentLang!=="es" ? `<div class="ru">→ «${esc(t({ru:q.ru,en:q.en,es:""}))}»</div>` : "";
+    const idLine = q.customerid ? `<div class="quote-id num">${u.quoteFrom}: ${esc(q.customerid)}</div>` : "";
+    return `<div class="quote"><div class="tag">${u.clientQuote}</div><div class="es">«${esc(q.es)}»</div>${secondary}${idLine}</div>`;
+  }).join("");
+  return `<details class="mega-item">
+      <summary class="mega-item-head">
+        <span class="name-wrap"><span class="name">${esc(t(c.reason))}</span>${trendBar(pct)}</span>
+        <span class="mega-item-metric">${metricHtml}</span>
+        ${megaChevron}
+      </summary>
+      <div class="mega-item-body">
+        ${segNoteHtml}
+        <div class="quotes">${quotesHtml}</div>
+        <div class="callout"><span>💡</span><span><b>${u.meaningWord}:</b> ${esc(t(c.meaning))} → <b>${u.actionWord}:</b> ${esc(t(c.action))}</span></div>
+        <div class="ids-block"><div class="ids-head"><span class="l">${u.idsLabel}</span>
+          <button class="copy-btn" data-copy="${esc(c.ids.join(', '))}">${u.copyAllBtn}</button></div>
+          <div class="ids-list">${c.ids.map(id=>`<span class="id-chip">${esc(id)}</span>`).join("")}</div></div>
+      </div>
+    </details>`;
+}
+
+function typeLabelKey(type){ return "type"+({Пресейл:"Presale",Обслуживание:"Service",Отмена:"Cancel",Дефект:"Defect",Смешанная:"Mixed"}[type]); }
+function themeLabelKey(theme){ return "theme"+({origination:"Origination",aml_kyb:"AmlKyb",payments:"Payments",product:"Product",vas:"Vas",overdraft:"Overdraft",acquiring:"Acquiring",cancel_active:"CancelActive",misc:"Misc",calls_unresolved:"CallsUnresolved",personal_topic:"PersonalTopic"}[theme]); }
+
+let activeTenureSeg = "all", activePfpmSeg = "all";
+function anySegActive(){ return activeTenureSeg !== "all" || activePfpmSeg !== "all"; }
+function bothSegActive(){ return activeTenureSeg !== "all" && activePfpmSeg !== "all"; }
+function anyFilterActive(){ return anySegActive() || activeChan !== "all"; }
+function segCount(c){
+  if(activeChan !== "all" && c.channel !== activeChan) return 0;
+  const ten = activeTenureSeg, pf = activePfpmSeg;
+  if(ten === "all" && pf === "all") return c.chats + c.calls;
+  if(ten !== "all" && pf !== "all"){
+    const jd = c.jointKey && JOINT_TENURE_PFPM[c.jointKey];
+    return (jd && jd[ten] && jd[ten][pf]) || 0;
+  }
+  if(ten !== "all") return (c.tenureCounts && c.tenureCounts[ten]) || 0;
+  return (c.pfpmCounts && c.pfpmCounts[pf]) || 0;
+}
+function computeThemeGroups(){
+  const groups = {};
+  CATS.forEach(c => { (groups[c.theme] = groups[c.theme] || []).push(c); });
+  const gapRank = {misc:2, calls_unresolved:1, personal_topic:3}; // "we don't have a real topic" (calls_unresolved, misc) plus "real topic but not a PyME one at all" (personal_topic) — always last, personal_topic last of all since it's not even a PyME-team concern
+  const groupThemes = Object.keys(groups).sort((a,b)=>{
+    const ra = gapRank[a]||0, rb = gapRank[b]||0;
+    if(ra || rb) return ra - rb;
+    const totalA = groups[a].reduce((s,c)=>s+c.clients,0);
+    const totalB = groups[b].reduce((s,c)=>s+c.clients,0);
+    return totalB - totalA;
+  });
+  return groupThemes.map(theme => {
+    const rawItems = groups[theme];
+    // collapse pairKey siblings into single render units
+    const seenPairs = new Set();
+    const units = [];
+    rawItems.forEach(c => {
+      if(c.pairKey){
+        if(seenPairs.has(c.pairKey)) return;
+        seenPairs.add(c.pairKey);
+        const partner = CATS.find(x => x.pairKey === c.pairKey && x !== c);
+        units.push(partner ? {kind:"pair", a:c, b:partner, clients:segCount(c)+segCount(partner), tickets:segCount(c)+segCount(partner), isMisc: !!(c.isMisc||partner.isMisc)} : {kind:"solo", cat:c, clients:segCount(c), tickets:segCount(c), isMisc: !!c.isMisc});
+      } else {
+        units.push({kind:"solo", cat:c, clients:segCount(c), tickets:segCount(c), isMisc: !!c.isMisc});
+      }
+    });
+    const subgroupRank = {second_application:1, post_account:2}; // main group (no subgroup) always first; order among the rest is arbitrary but stable
+    units.sort((x,y)=>{
+      if(x.isMisc !== y.isMisc) return x.isMisc ? 1 : -1;
+      const sx = (x.kind==="solo" && x.cat.subgroup) ? (subgroupRank[x.cat.subgroup]||9) : 0;
+      const sy = (y.kind==="solo" && y.cat.subgroup) ? (subgroupRank[y.cat.subgroup]||9) : 0;
+      if(sx !== sy) return sx - sy;
+      return y.clients - x.clients;
+    });
+    const totalClients = units.reduce((s,u)=>s+u.clients,0);
+    const totalTickets = units.reduce((s,u)=>s+u.tickets,0);
+    return {theme, units, totalClients, totalTickets, groupPct: pctOfTotal(totalClients)};
+  });
+}
+function renderThemeChart(){
+  const u = UI[currentLang];
+  const groups = computeThemeGroups();
+  const maxClients = Math.max(...groups.map(g=>g.totalClients));
+  const rows = groups.map(g => `<div class="ov-row">
+      <span class="ov-label">${u[themeLabelKey(g.theme)] || g.theme}</span>
+      <div class="ov-track"><div class="ov-fill theme-${esc(g.theme)}" style="width:${(g.totalClients/maxClients*100).toFixed(1)}%"></div></div>
+      <span class="ov-value"><span class="num">${g.totalClients}</span> · <span class="num">${g.groupPct.toFixed(1)}%</span></span>
+    </div>`).join("");
+  document.getElementById("themeChart").innerHTML = rows;
+}
+function renderCatRows(){
+  const html = computeThemeGroups().map(g => renderMegaCard(g.theme, g.units, g.totalClients, g.groupPct, g.totalTickets)).join("");
+  document.getElementById("catRows").innerHTML = html;
+}
+function renderCloRows(){
+  const u = UI[currentLang];
+  const reasons = CLOSURES.filter(c=>!c.positive).sort((a,b)=>b.clients-a.clients);
+  const saved = CLOSURES.filter(c=>c.positive).sort((a,b)=>b.clients-a.clients);
+  const reasonsTotal = reasons.reduce((s,c)=>s+c.clients,0);
+  const savedTotal = saved.reduce((s,c)=>s+c.clients,0);
+  const block = (items, total, headClass, label) => !items.length ? "" : `<details class="type-group row mega-theme-card ${headClass}">
+      <summary class="mega-theme-summary">
+        <span class="tg-name">${label}</span>
+        <span class="tg-count"><span class="num">${items.length}</span> ${u.reasonsWord} · <span class="num">${total}</span> ${u.clientsWord} · <span class="num">${(total/CLOSURE_BASE*100).toFixed(1)}%</span></span>
+        <svg class="chevron" width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M7.5 4.5L13 10L7.5 15.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="detail"><div class="detail-inner mega-detail">${items.map((it,i) => renderCloMegaItem(it) + (i<items.length-1 ? `<div class="mega-divider"></div>` : "")).join("")}</div></div>
+    </details>`;
+  document.getElementById("cloRows").innerHTML =
+    block(reasons, reasonsTotal, "type-Отмена", u.closureBadge) +
+    block(saved, savedTotal, "type-Позитив", u.savedBadge);
+}
+
+let activeType = "all", activeChan = "all", searchTerm = "";
+function matchesFilters(el){
+  const typeOk = activeType === "all" || el.dataset.type === activeType || el.dataset.pairSecondType === activeType;
+  const chanOk = activeChan === "all" || el.dataset.chan === activeChan || el.dataset.pairSecondChan === activeChan;
+  const searchOk = !searchTerm || el.dataset.name.includes(searchTerm) || el.dataset.desc.includes(searchTerm);
+  const segOk = !anySegActive() || el.dataset.segCount === undefined || Number(el.dataset.segCount) > 0;
+  return typeOk && chanOk && searchOk && segOk;
+}
+function applyFilters(){
+  let visible = 0;
+  document.querySelectorAll("#catRows .type-group").forEach(group=>{
+    if(group.classList.contains("mega-theme-card")){
+      let itemsVisible = 0;
+      group.querySelectorAll(".mega-item").forEach(item=>{
+        const show = matchesFilters(item);
+        item.style.display = show ? "" : "none";
+        if(show) itemsVisible++;
+      });
+      group.style.display = itemsVisible > 0 ? "" : "none";
+      visible += itemsVisible;
+      return;
+    }
+    let groupVisible = 0;
+    group.querySelectorAll(".row").forEach(row=>{
+      const show = matchesFilters(row);
+      row.style.display = show ? "" : "none";
+      if(show) groupVisible++;
+    });
+    group.style.display = groupVisible > 0 ? "" : "none";
+    visible += groupVisible;
+  });
+  document.getElementById("catEmpty").style.display = visible === 0 ? "block" : "none";
+}
+
+document.querySelectorAll(".lang-switch button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{ currentLang = btn.dataset.lang; applyUIStrings(); });
+});
+function updateSegCaveat(){
+  const u = UI[currentLang];
+  const el = document.getElementById("globalSegCaveat");
+  const on = anySegActive();
+  el.style.display = on ? "" : "none";
+  el.textContent = on ? (u.segCaveat + (bothSegActive() ? u.segCaveatBoth : "")) : "";
+}
+document.addEventListener("click", e=>{
+  const chip = e.target.closest(".chip[data-type], .chip[data-chan]");
+  if(chip){
+    if(chip.dataset.type !== undefined){
+      document.querySelectorAll(".chip[data-type]").forEach(c=>c.classList.remove("active"));
+      chip.classList.add("active"); activeType = chip.dataset.type;
+    } else {
+      document.querySelectorAll(".chip[data-chan]").forEach(c=>c.classList.remove("active"));
+      chip.classList.add("active"); activeChan = chip.dataset.chan;
+      renderKpis();
+      renderThemeChart();
+      renderCatRows();
+      renderCsatChart();
+      renderCloRows();
+    }
+    applyFilters();
+  }
+  const segChip = e.target.closest(".chip[data-tenure-seg], .chip[data-pfpm-seg]");
+  if(segChip){
+    if(segChip.dataset.tenureSeg !== undefined){
+      document.querySelectorAll(".chip[data-tenure-seg]").forEach(c=>c.classList.remove("active"));
+      segChip.classList.add("active"); activeTenureSeg = segChip.dataset.tenureSeg;
+    } else {
+      document.querySelectorAll(".chip[data-pfpm-seg]").forEach(c=>c.classList.remove("active"));
+      segChip.classList.add("active"); activePfpmSeg = segChip.dataset.pfpmSeg;
+    }
+    updateSegCaveat();
+    renderThemeChart();
+    renderCatRows();
+    renderKpis();
+    renderCsatChart();
+    renderCloRows();
+    applyFilters();
+  }
+  const jumpBtn = e.target.closest("nav.jump button");
+  if(jumpBtn){
+    document.querySelectorAll("nav.jump button").forEach(b=>b.classList.remove("active"));
+    jumpBtn.classList.add("active");
+    document.getElementById(jumpBtn.dataset.jump).scrollIntoView({behavior:"smooth", block:"start"});
+  }
+  const copyBtn = e.target.closest(".copy-btn");
+  if(copyBtn){
+    navigator.clipboard?.writeText(copyBtn.dataset.copy).then(()=>{
+      const old = copyBtn.textContent; copyBtn.textContent = UI[currentLang].copiedBtn;
+      setTimeout(()=>copyBtn.textContent = old, 1400);
+    }).catch(()=>{});
+  }
+});
+document.getElementById("catSearch").addEventListener("input", e=>{ searchTerm = e.target.value.trim().toLowerCase(); applyFilters(); });
+
+applyUIStrings();
+</script>

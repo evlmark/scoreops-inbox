@@ -637,11 +637,14 @@ def _process_one_conversation(conv_id: str):
 
         # Перевод реплик
         transcript = list(c.transcript)
+                all_translated = True
         for turn in transcript:
             if turn.get("text") and not turn.get("text_en"):
                 t_en = translate_to_english(turn["text"])
                 if t_en:
                     turn["text_en"] = t_en
+                else:
+                                        all_translated = False
         c.transcript = transcript
         flag_modified(c, "transcript")
 
@@ -663,7 +666,7 @@ def _process_one_conversation(conv_id: str):
             c.summary   = result.get("explanation")
             c.evaluation = result
 
-        c.status = "done"
+                c.status = "done" if all_translated else "pending"
         db.commit()
         return True
     except Exception as e:
@@ -1665,7 +1668,8 @@ def list_customers(q: Optional[str] = None, limit: int = 300):
     """Список пользователей (по customer_id) с агрегатами. q — поиск по подстроке id."""
     db = SessionLocal()
     try:
-        query = db.query(DBConversation).filter(DBConversation.customer_id.isnot(None))
+                query = db.query(DBConversation).filter(DBConversation.customer_id.isnot(None),
+                                                                                                          DBConversation.merged_into.is_(None))   # фрагменты-продолжения не считаем
         if q:
             query = query.filter(DBConversation.customer_id.ilike(f"%{q.strip()}%"))
         rows = query.all()

@@ -31,8 +31,6 @@
   .case { border:1px solid #e2e8f0; border-radius:12px; margin-bottom:18px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.04); }
   .case-head { background:#faf9ff; padding:16px 22px; border-bottom:1px solid #ece9fb; }
   .case-head .ticket-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
-  .case-head .ticket-row a.ticket-link { font-weight:700; color:#6d28d9; text-decoration:none; font-size:15px; }
-  .case-head .ticket-row a.ticket-link:hover { text-decoration:underline; }
   .case-head .title { font-size:14px; font-weight:600; color:#374151; }
   .case-head .meta { font-size:12px; color:#6b7280; margin-top:4px; }
   .case-body { padding:18px 22px; }
@@ -41,11 +39,13 @@
   .tl-step.warn { background:#fef3c7; border-color:#fde68a; color:#92400e; font-weight:600; }
   .tl-step.stop { background:#fee2e2; border-color:#fecaca; color:#991b1b; font-weight:600; }
   .tl-arrow { color:#c4b5fd; font-weight:700; }
-  .ticket-box { background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:12px 14px; margin-bottom:14px; font-size:13px; }
-  .ticket-box .row { margin-bottom:6px; }
-  .ticket-box .lbl { color:#6b7280; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.03em; margin-right:6px; }
   .ids { background:#f3f4f6; border:1px solid #e5e7eb; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:12px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:#374151; line-height:1.7; }
   .ids .k { color:#6b7280; font-family:-apple-system,'Segoe UI',sans-serif; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.03em; margin-right:6px; }
+  .summary-box { background:#fff7ed; border:1px solid #fdba74; border-radius:8px; padding:12px 14px; margin-bottom:14px; font-size:13px; color:#7c2d12; }
+  .summary-box h4 { font-size:11px; text-transform:uppercase; letter-spacing:.03em; color:#9a3412; margin:0 0 6px; }
+  .summary-box h4 + ul { margin-bottom:10px; }
+  .summary-box ul { padding-left:18px; }
+  .summary-box li { margin-bottom:3px; }
   .product-box { background:#fdf2f8; border:1px solid #f9a8d4; border-radius:8px; padding:12px 14px; margin-bottom:14px; font-size:13px; color:#831843; }
   .product-box .lbl { color:#9d174d; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.03em; margin-right:6px; }
   .tickets { font-size:13px; margin-bottom:14px; }
@@ -63,16 +63,15 @@
   .chat-session .session-meta { font-size:11px; color:#9ca3af; margin-bottom:8px; }
   .chat-session .session-meta .call-tag { color:#be185d; font-weight:700; }
   .chat-session .session-meta code { font-size:10px; color:#9ca3af; }
-  .msg { display:flex; gap:8px; margin-bottom:8px; align-items:flex-start; }
+  .msg { display:flex; gap:8px; margin-bottom:6px; align-items:flex-start; }
   .msg .who { flex:0 0 60px; font-size:11px; font-weight:700; padding:2px 0; }
   .msg.client .who { color:#1e40af; }
   .msg.agent .who { color:#065f46; }
-  .msg .txt { flex:1; background:#f9fafb; border-radius:8px; padding:7px 11px; font-size:13px; }
+  .msg .txt { flex:1; background:#f9fafb; border-radius:8px; padding:6px 11px; font-size:13px; }
   .msg.client .txt { background:#eff6ff; }
   .msg.agent .txt { background:#ecfdf5; }
   .insight { background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:14px 18px; font-size:13px; color:#78350f; margin-bottom:20px; }
   .insight b { color:#92400e; }
-  .footnote { font-size:12px; color:#9ca3af; margin-top:6px; }
   h2.section-title { font-size:15px; font-weight:700; color:#374151; margin:0 0 12px; }
 </style>
 </head>
@@ -89,43 +88,30 @@
   <div class="card">
     <h2 class="section-title">Что здесь и как собрано</h2>
     <p class="lead">
-      Страница — про случаи, где клиенту не смогли помочь или помогали плохо. <b>Кейс</b> — вся история общения по одному вопросу: от первого сообщения клиента до резолюции, включая все чаты, звонки и все тикеты в саппорт (не только тот, по которому кейс попал в выборку). Отбор: тикеты проекта <code>IT</code>, созданные или активные 14–20 сентября 2026, у которых заполнены поля Jira <b>«Task ID reopen»</b> / <b>«Task ID escalation»</b> — то есть саппорт сам формально переоткрывал или эскалировал обращение. 9 тикетов → 9 кейсов.
+      Страница — про случаи, где клиенту не смогли помочь или помогали плохо. <b>Кейс</b> — вся история общения по одному вопросу от первого сообщения клиента до резолюции: все чаты (перевод ES→RU, пореплично), все звонки, все тикеты в саппорт со статусами. У каждого кейса — мини-саммари «что не так» и экшн-поинты. Отбор: тикеты проекта <code>IT</code>, созданные или активные 14–20 сентября 2026, у которых заполнены поля Jira «Task ID reopen» / «Task ID escalation». 9 тикетов → 9 кейсов.
     </p>
     <p class="lead" style="margin-top:8px;">
-      Чаты и звонки — полная история клиента по <code>customer_id</code> из базы дашборда (<code>/customers/{id}</code>, те же данные, что во вкладке Users), не ограниченная неделей; реплики переведены ES→RU. Тикеты — из Jira по ссылкам. Идентификаторы — <code>customer_id</code> (= <code>identity_id</code>), <code>legal_entity_id</code> из <code>PROD.ODS_PYME_PCM.LEGAL_ENTITY</code> / <code>IDENTITY_MEMBERSHIPS</code>, <code>task_id</code> каждого чата. Темы, не относящиеся к вопросу кейса (например, спор по списанию Uber у того же клиента), исключены и помечены.
-    </p>
-    <p class="lead" style="margin-top:8px;">
-      Тег <span class="badge b-product">🧩 Продукт</span> стоит на кейсах, где ситуацию стоит обсудить с продуктом: что-то добавить в интерфейс, переименовать, изменить процесс. Текст под тегом — конкретный предмет обсуждения.
+      Чаты и звонки — полная история клиента по <code>customer_id</code> из базы дашборда (<code>/customers/{id}</code>), не ограниченная неделей; для кейса 9 — из Snowflake <code>t_cs_bot_chats</code>. Тикеты — Jira. Идентификаторы: <code>customer_id</code> (= <code>identity_id</code>), <code>legal_entity_id</code> из <code>PROD.ODS_PYME_PCM.LEGAL_ENTITY</code> / <code>IDENTITY_MEMBERSHIPS</code>, <code>task_id</code> каждого чата. Чаты не по теме кейса исключены и перечислены отдельно. Тег <span class="badge b-product">🧩 Продукт</span> — есть что обсудить с продуктом (интерфейс, названия, процесс).
     </p>
   </div>
 
-  <div class="insight">
-    <b>1. «Тикет закрыт» ≠ «вопрос клиента решён».</b> В 4 из 9 кейсов (IT-522714, IT-523204, IT-526437, IT-527423) переписка клиента продолжается после даты резолюции тикета с тем же нерешённым вопросом; в IT-523204 — до последнего доступного сообщения (25 сен). Дата «Решено» в Jira фиксирует закрытие обращения агентом, а не получение клиентом счёта/адреса/номера.
-  </div>
-  <div class="insight">
-    <b>2. Заявка на юрлицо создаёт счёт физлица — 3 из 9 кейсов.</b> IT-523204 (PFAE-счёт создан 11 сен при заявке на Persona Moral), IT-527563 (PFAE открыт 30 авг, закрыт по IT-510628 7 сен), IT-495664 (у Víctor отменены две заявки: Empresa от 14 авг и PFAEGolden от 19 авг). Во всех трёх клиент сам замечал подмену и просил закрыть лишний счёт.
-  </div>
-  <div class="insight">
-    <b>3. Ответ специалистов не доходит до клиента.</b> IT-519275: 10 сен специалисты написали в резолюции «адрес в учредительных документах — Chihuahua, операции — Monterrey, запросить у клиента подтверждение адреса». В 16 последующих чатах Лилиане это ни разу не передали; агенты отвечали «ждём ответа отдела». IT-527423: номер счёта в резолюции 24 сен есть, в чате до 23 сен клиенту его так и не назвали.
-  </div>
-  <div class="insight">
-    <b>4. Звонки.</b> В базе дашборда по этим 9 клиентам есть одна запись с типом <code>call</code> (Jesús, 31 авг) — это чат-сообщения агента после телефонного звонка; расшифровок голоса в системе нет. По остальным звонков нет.
-  </div>
+  <div class="insight"><b>1. «Тикет закрыт» ≠ «вопрос решён».</b> В 4 из 9 кейсов (1, 2, 4, 7) переписка продолжается после резолюции с тем же нерешённым вопросом; в кейсе 2 — до последнего доступного сообщения 25 сен.</div>
+  <div class="insight"><b>2. Заявка на юрлицо создаёт счёт физлица — 3 из 9.</b> Кейсы 1 (PFAEGolden-заявка 19 авг отменена вместе с Empresa), 2 (PFAE-счёт создан 11 сен), 8 (PFAE открыт 30 авг, закрыт 7 сен). Везде подмену заметил сам клиент.</div>
+  <div class="insight"><b>3. Ответ специалистов не доходит до клиента.</b> Кейс 2: запрос подтверждения адреса (резолюция IT-519275, 10 сен) не передан за 16 чатов. Кейс 7: номер счёта из резолюции 24 сен клиенту в чате не назван.</div>
+  <div class="insight"><b>4. Звонки.</b> По 9 клиентам в базе одна запись типа <code>call</code> (кейс 8, 31 авг) — чат-сообщения агента после звонка, расшифровки голоса в системе нет. По остальным звонков нет.</div>
 
   <div class="card">
     <h2 class="section-title">Сводка</h2>
     <table class="summary-table">
-      <tr>
-        <th>Кейс</th><th>Клиент</th><th>Вопрос</th><th>История</th><th>Тикеты</th><th>Статус</th><th>Продукт</th>
-      </tr>
+      <tr><th>Кейс</th><th>Клиент</th><th>Вопрос</th><th>История</th><th>Тикеты</th><th>Статус</th><th>Продукт</th></tr>
       <tr><td><a href="#c1">1</a></td><td>Víctor · GRUPO FINTIDE</td><td>Открытие счёта PM</td><td>14 авг – 22 сен (39 дн.)</td><td>IT-495664, IT-522714</td><td><span class="badge b-red">Не решён</span></td><td>🧩 статус заявки / KYB</td></tr>
       <tr><td><a href="#c2">2</a></td><td>Liliana · Auto Industrias Carvi</td><td>Открыт PFAE вместо PM</td><td>9 – 25 сен (16+ дн.)</td><td>IT-519275, IT-523204</td><td><span class="badge b-red">Не решён</span></td><td>🧩 тип заявки / статус</td></tr>
-      <tr><td><a href="#c3">3</a></td><td>Jose</td><td>Привязка карт по QR</td><td>17 – 22 сен (5 дн.)</td><td>IT-526175, IT-526193</td><td><span class="badge b-green">Решён</span></td><td>🧩 выбор раздела активации</td></tr>
+      <tr><td><a href="#c3">3</a></td><td>Jose</td><td>Привязка карт по QR</td><td>17 – 22 сен (5 дн.)</td><td>IT-526175, IT-526193</td><td><span class="badge b-green">Решён</span></td><td>🧩 раздел активации</td></tr>
       <tr><td><a href="#c4">4</a></td><td>Daniel · NUO Integraciones</td><td>Смена налогового адреса</td><td>17 – 25 сен (8+ дн.)</td><td>IT-526437</td><td><span class="badge b-red">Открыт</span></td><td>🧩 самообслуживание</td></tr>
       <tr><td><a href="#c5">5</a></td><td>Enrique</td><td>Подписание договора с телефона</td><td>18 – 25 сен (7 дн.)</td><td>IT-527184</td><td><span class="badge b-yellow">Закрыт без решения</span></td><td>🧩 desktop-only шаг</td></tr>
-      <tr><td><a href="#c6">6</a></td><td>Eloy · LUEREM</td><td>Открытие счёта PM</td><td>6 авг – 22 сен (47 дн.)</td><td>IT-526009</td><td><span class="badge b-yellow">Решён по тикету</span></td><td>🧩 статус заявки / web-only PM</td></tr>
+      <tr><td><a href="#c6">6</a></td><td>Eloy · LUEREM</td><td>Открытие счёта PM</td><td>6 авг – 22 сен (47 дн.)</td><td>IT-526009</td><td><span class="badge b-yellow">Решён по тикету</span></td><td>🧩 статус / web-only PM</td></tr>
       <tr><td><a href="#c7">7</a></td><td>Emiliano</td><td>Номер бизнес-счёта</td><td>18 – 24 сен (6 дн.)</td><td>IT-527423, IT-531845</td><td><span class="badge b-yellow">Решён по тикету</span></td><td>🧩 номер счёта / carátula</td></tr>
-      <tr><td><a href="#c8">8</a></td><td>Jesús</td><td>Открыт PFAE вместо PM</td><td>27 авг – 23 сен (27 дн.)</td><td>IT-510628, IT-527563</td><td><span class="badge b-green">Решён</span></td><td>🧩 тип заявки</td></tr>
+      <tr><td><a href="#c8">8</a></td><td>Jesús</td><td>Открыт PFAE вместо PM</td><td>27 авг – 23 сен (27 дн.)</td><td>IT-510628, IT-527563</td><td><span class="badge b-green">Решён</span></td><td>🧩 тип заявки / UBO</td></tr>
       <tr><td><a href="#c9">9</a></td><td>Brayan</td><td>Отмена заявки PFAE и банера</td><td>15 июл – 22 сен (69 дн.)</td><td>IT-528788</td><td><span class="badge b-green">Решён</span></td><td>🧩 отмена заявки</td></tr>
     </table>
   </div>
@@ -133,12 +119,8 @@
   <!-- ═══════════ CASE 1 ═══════════ -->
   <div class="case" id="c1">
     <div class="case-head">
-      <div class="ticket-row">
-        <span class="title">Кейс 1 · Víctor Hugo Cuevas Castillo (GRUPO FINTIDE S.A.P.I. de C.V.) — счёт Persona Moral не открыт 39 дней</span>
-        <span class="badge b-red">Не решён</span>
-        <span class="badge b-product">🧩 Продукт</span>
-      </div>
-      <div class="meta">7 чатов · 2 тикета · 14 авг – 22 сен</div>
+      <div class="ticket-row"><span class="title">Кейс 1 · Víctor Hugo Cuevas Castillo (GRUPO FINTIDE S.A.P.I. de C.V.) — счёт Persona Moral не открыт 39 дней</span><span class="badge b-red">Не решён</span><span class="badge b-product">🧩 Продукт</span></div>
+      <div class="meta">7 чатов · 0 звонков · 2 тикета · 14 авг – 22 сен</div>
     </div>
     <div class="case-body">
       <div class="ids">
@@ -148,70 +130,97 @@
         <div><span class="k">task_id</span>41151f81-5c36-4f32-9726-86a30962b8c4 · 2182122d-4ce9-4c7f-8b6d-d87129ba151d · 2b1d26c1-2e09-4251-aa3a-38ec9bd7b83d · b04e65d4-07fa-4d73-8577-48c5c4defd60 · f1748f6f-700b-4bb4-9cdf-40ae1902204f · 4db19342-5274-4645-8810-7aec325a196b · 7658eacb-e785-4fda-8ab4-f53fa149f572</div>
       </div>
       <div class="timeline">
-        <div class="tl-step">14 авг — ошибка в RFC, просит отменить заявку (IT-495664)</div><span class="tl-arrow">→</span>
+        <div class="tl-step">14 авг — ошибка в RFC, просит отменить (IT-495664)</div><span class="tl-arrow">→</span>
         <div class="tl-step warn">21 авг — отменены две заявки: Empresa (14 авг) и PFAEGolden (19 авг)</div><span class="tl-arrow">→</span>
-        <div class="tl-step">25 авг — новая заявка PM, документы загружены, банер «заполнить заявку» остаётся</div><span class="tl-arrow">→</span>
-        <div class="tl-step warn">31 авг — отвечает на KYB-вопросы (1-й раз)</div><span class="tl-arrow">→</span>
+        <div class="tl-step">25 авг — новая заявка PM, документы загружены</div><span class="tl-arrow">→</span>
+        <div class="tl-step warn">31 авг — ответы на KYB-вопросы (1-й раз)</div><span class="tl-arrow">→</span>
         <div class="tl-step">14 сен — IT-522714</div><span class="tl-arrow">→</span>
-        <div class="tl-step warn">17 сен — переоткрыт, те же ответы в 3-й раз</div><span class="tl-arrow">→</span>
-        <div class="tl-step stop">22 сен — «месяц без новостей», счёта нет</div>
+        <div class="tl-step warn">17 сен — переоткрыт, ответы в 3-й раз</div><span class="tl-arrow">→</span>
+        <div class="tl-step stop">22 сен — «месяц без новостей»</div>
       </div>
-      <div class="product-box">
-        <span class="lbl">🧩 Обсудить с продуктом</span>
-        Экран статуса заявки PM: на каком этапе проверка, какие вопросы/документы запрошены и получены, ожидаемый срок. Сейчас при полностью загруженных документах интерфейс показывает «заполнить заявку» (25 авг), а KYB-вопросы приходят вне приложения — клиент отправил один и тот же ответ трижды. Второй пункт: PFAEGolden-заявка от 19 авг создалась при подаче на Persona Moral (см. также кейсы 2 и 8).
+      <div class="summary-box">
+        <h4>Что не так</h4>
+        <ul>
+          <li>Исправление ошибки в RFC заняло 7 дней (14→21 авг), и при подаче на PM параллельно создалась PFAEGolden-заявка (19 авг) — обе пришлось отменять.</li>
+          <li>После подачи 25 авг — ни одного проактивного сообщения о статусе за 4 недели; интерфейс показывает «заполнить заявку» при полностью загруженных документах.</li>
+          <li>KYB-вопросы (управление средствами третьих лиц) задавались трижды; клиент трижды отправлял один и тот же ответ (31 авг, ~15 сен, 17 сен) — ответ не фиксируется там, где его видит проверяющий.</li>
+          <li>IT-522714 закрыт 18 сен формулировкой «передали команде» без результата; 22 сен счёт не открыт, срок не назван.</li>
+        </ul>
+        <h4>Экшн-поинты</h4>
+        <ul>
+          <li>KYB/онбординг: найти, где лежат ответы Víctor от 31 авг (ссылка Slack в IT-522714), вынести решение по заявке e14c229c и назвать клиенту срок.</li>
+          <li>CS: при повторном запросе информации сверять с уже полученным в тикете; ответ клиента прикреплять к заявке, а не только к чату.</li>
+          <li>Онбординг/IT: разобрать, почему при подаче на PM 14–19 авг создалась PFAEGolden-заявка (см. кейсы 2 и 8).</li>
+          <li>Продукт: статус заявки PM в приложении (этап, что запрошено/получено, срок).</li>
+        </ul>
       </div>
+      <div class="product-box"><span class="lbl">🧩 Обсудить с продуктом</span>Экран статуса заявки PM и единое место для KYB-вопросов вместо почты/WhatsApp/чата; банер «заполнить заявку» при завершённой загрузке документов.</div>
       <div class="tickets">
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-495664" target="_blank" rel="noopener">IT-495664</a> · Corporate Banking / Lending / Application on hold · создан 14 авг 19:21 → решён 21 авг 13:11. Резолюция: «Заявки отменены» — <code>202608141738_Empresa</code> и <code>202608191802_PFAEGolden</code>, обе <code>CANCEL_RESULT_SUCCESS</code>.</div>
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-522714" target="_blank" rel="noopener">IT-522714</a> · Corporate Banking / Lending / Application on hold · создан 14 сен 16:05 · 15 сен 07:46 резолюция «31 августа мы запросили у клиента пояснение, чтобы исключить управление средствами третьих лиц» · <b>переоткрыт 17 сен 16:13</b> («клиент сообщает, что уже ответил на вопросы в срок и повторяет ответ сегодня») · решён 18 сен 08:44: «Спасибо, передали информацию ответственной команде». Метка <code>KYB_review</code>.</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-495664" target="_blank" rel="noopener">IT-495664</a> · Corporate Banking / Lending / Application on hold · создан 14 авг 19:21 → решён 21 авг 13:11: «Заявки отменены» — <code>202608141738_Empresa</code> и <code>202608191802_PFAEGolden</code>, обе <code>CANCEL_RESULT_SUCCESS</code>.</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-522714" target="_blank" rel="noopener">IT-522714</a> · Corporate Banking / Lending / Application on hold · создан 14 сен 16:05 · 15 сен 07:46: «31 августа мы запросили у клиента пояснение, чтобы исключить управление средствами третьих лиц» · <b>переоткрыт 17 сен 16:13</b> («клиент сообщает, что уже ответил в срок и повторяет ответ сегодня») · решён 18 сен 08:44: «Спасибо, передали информацию ответственной команде». Метка <code>KYB_review</code>.</div>
       </div>
-      <div class="calls-note">Звонки: в базе дашборда по клиенту нет.</div>
-      <details class="chat-toggle">
-        <summary>Полная история чатов (7 диалогов, RU)</summary>
-        <div class="chat-session">
-          <div class="session-meta">14 авг, 13:10 · <code>41151f81</code> — отмена ошибочной заявки</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я ошибся в заявке на счёт PyME в RFC (налоговом номере), как я могу отменить заявку? Спасибо.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте, конечно, дайте мне посмотреть вашу заявку. Когда вы её подали?</div></div>
+      <div class="calls-note">Звонки: записей нет.</div>
+      <details class="chat-toggle"><summary>Полная история чатов (7 диалогов, RU)</summary>
+        <div class="chat-session"><div class="session-meta">14 авг, 13:10–13:21 · <code>41151f81</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я ошибся в заявке на счёт PyME в RFC, как я могу отменить заявку?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте, конечно, дайте мне посмотреть вашу заявку, чтобы взять её в работу.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Когда вы подали заявку?</div></div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Сегодня</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, Виктор, не переживайте, я запрошу отмену. Не могли бы вы прислать справку о налоговом статусе (CSF)?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, Виктор, не переживайте, я запрошу отмену. Дайте мне пару минут, пожалуйста.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Большое спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Не могли бы вы прислать вашу справку о налоговом статусе (CSF)?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Большое спасибо.</div></div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Вот эта верная, я загрузил не ту, вообще другую</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, эскалировал ваш случай. Номер тикета: IT-495664. Ориентировочная дата решения: 17 августа.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, что эскалировал ваш случай в соответствующую команду, специалист IT свяжется с вами, когда проблема будет решена. Номер тикета: IT-495664. Ориентировочная дата решения: 17 августа.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо за обращение, Виктор!</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">25 авг, 21:03 · <code>2182122d</code> — документы загружены, заявка висит</div>
+        <div class="chat-session"><div class="session-meta">25 авг, 21:03 · <code>2182122d</code></div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Я уже загрузил все документы для заявки на счёт PyME, что делать дальше?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Возобновляем работу по вашему обращению, дайте минуту проверить.</div></div>
           <div class="msg agent"><div class="who">Агент</div><div class="txt">Вы подавали заявку как физическое лицо с предпринимательской деятельностью или как юридическое лицо?</div></div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Юридическое лицо</div></div>
           <div class="msg agent"><div class="who">Агент</div><div class="txt">Отлично, у загруженных документов стоит зелёная галочка?</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, уже все. Но у меня всё ещё показывает «заполнить заявку», хотя с моей стороны больше нечего делать?</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, нужно подождать 48 часов, пока система завершит проверку документов. Вы получите СМС или письмо, как только счёт будет создан.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, уже все</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Но у меня всё ещё показывает «заполнить заявку», хотя с моей стороны больше нечего делать?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, Виктор, нужно подождать 48 часов, пока система завершит проверку документов. Вы получите СМС или письмо, как только счёт будет создан.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо, спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо вам, Виктор. Остаюсь на связи, если понадобится помощь.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">31 авг, 17:37 · <code>2b1d26c1</code> — ответы на KYB-вопросы (1-й раз)</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">В ответ на ваш запрос отвечаем по каждому пункту относительно GRUPO FINTIDE S.A.P.I. de C.V. — деятельность: цифровая платформа авансов по заработной плате (B2B, только внутри страны, дооперационная стадия, доходов пока нет). Компания не выставляет счета от имени клиентов, не ведёт взыскание для третьих лиц, не управляет чужими счетами или средствами и не получает средства третьих лиц для распределения — все операции только от своего имени и со своим RFC.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Виктор, спасибо, что поделились информацией по вопросам специализированного отдела — ваша ситуация будет эскалирована для правильного сопровождения. Сопровождение будет через этот чат, почту или СМС.</div></div>
+        <div class="chat-session"><div class="session-meta">31 авг, 17:37 · <code>2b1d26c1</code> — ответы на KYB-вопросы</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">В ответ на ваш запрос отвечаем на каждый из пунктов относительно GRUPO FINTIDE S.A.P.I. de C.V.<br><br><b>Деятельность, бизнес-модель и доля доходов.</b> Grupo Fintide развивает цифровую платформу авансов по заработной плате: компания-работодатель подключает услугу как льготу для сотрудников, возврат — через удержание из зарплаты. Модель B2B, работа цифровая и только на территории страны. Компания на дооперационной стадии, доходов пока нет; при старте 100% доходов — комиссия за услугу. На первом этапе счёт — для обычной операционной деятельности: поставщики, лицензии, сервисы.<br><br><b>Выставляет ли компания счета от имени клиентов?</b> Нет. CFDI только за собственные услуги, от своего имени и со своим RFC.<br><b>Ведёт ли взыскание для третьих лиц?</b> Нет.<br><b>Управляет ли ресурсами, счетами или средствами третьих лиц?</b> Нет: нет мандата, торгового поручения, траста или доверенности на чужие счета; не ведёт концентрирующих счетов, не хранит остатки пользователей.<br><b>Получает ли средства третьих лиц для управления или распределения?</b> Нет, только собственные.<br><br>Остаёмся в вашем распоряжении. С уважением, Víctor Hugo Cuevas Castillo</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо, спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Виктор, возобновляем работу по вашему обращению, чтобы помочь вам.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Виктор, большое спасибо, что поделились информацией по вопросам специализированного отдела. С этим ваша ситуация будет эскалирована для правильного сопровождения.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Напоминаю, что сопровождение будет вестись через этот чат, почту или СМС. Как только будет ответ, мы сразу поделимся им. На этом пока всё с моей стороны.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">1 сен, 12:01 · <code>b04e65d4</code></div>
+        <div class="chat-session"><div class="session-meta">1 сен, 12:01 · <code>b04e65d4</code></div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо, я всё ещё жду решения по заявке</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">14 сен, 09:52 · <code>f1748f6f</code> — создан IT-522714</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Здравствуйте, моя заявка на бизнес-счёт зависла в подвешенном состоянии? Мне больше ничего не сказали.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Задержка при открытии бизнес-счетов — обычное явление. Я создам тикет, чтобы наша команда нашла причину. Вам подходит такой вариант?</div></div>
+        <div class="chat-session"><div class="session-meta">14 сен, 09:52–10:08 · <code>f1748f6f</code> — создан IT-522714</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Здравствуйте, добрый день, моя заявка на бизнес-счёт зависла в подвешенном состоянии? Мне больше ничего не сказали о том, что с этим произошло?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Виктор, возобновляем работу по вашему обращению, чтобы помочь вам.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо, меня оставили в подвешенном состоянии</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">В настоящее время, учитывая характер заявки на открытие бизнес-счетов, задержка при открытии — обычное явление. Тем не менее, если вы позволите, я создам тикет, чтобы наша внутренняя команда рассмотрела случай и нашла причину задержки. Хотя это не решит вопрос открытия немедленно, это поможет нам понять причину и помочь вам, если не хватает данных. Вам подходит такой вариант?</div></div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Продолжайте</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, эскалировал ваш случай. Номер тикета: IT-522714. Ориентировочная дата решения: 15 сентября.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, что я передал ваш случай в соответствующую команду, специалист IT свяжется с вами, когда проблема будет решена. Номер тикета: IT-522714. Ориентировочная дата решения: 15 сентября.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо, остаюсь на связи, спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Отлично, Виктор. Мы на связи. До скорого.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">17 сен, 09:58 · <code>4db19342</code> — переоткрытие, ответы в 3-й раз</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Что происходит. С 31 августа моя заявка застряла.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Вижу, 15 сентября у вас запросили информацию, и вы говорите, что уже отвечали. Передам ваш случай внутренней команде для повторного рассмотрения.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Мне говорят это каждый раз, и меня снова оставляют без ответа, уже 20 дней без решения. <i>[повторно присылает тот же полный ответ на KYB-анкету]</i> Это уже третий раз, когда я отправляю ответы, которые уже давал с первого дня.</div></div>
+        <div class="chat-session"><div class="session-meta">17 сен, 09:58–10:11 · <code>4db19342</code> — переоткрытие</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Что происходит</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">С 31 августа моя заявка застряла</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Виктор, возобновляем работу по вашему обращению от лица команды поддержки клиентов по бизнес-счетам.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Вижу в переписке, что 15 сентября у вас запросили информацию по некоторым вопросам, и вы сообщаете, что уже отвечали на них ранее. Очень благодарен, что вы снова поделились ответами, и я передам ваш случай внутренней команде, которая запросила эту информацию, для повторного рассмотрения.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Мне говорят это каждый раз, и меня снова оставляют без ответа, уже 20 дней без решения</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt"><i>[повторно отправляет тот же полный ответ на KYB-вопросы, что и 31 августа]</i></div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Это уже третий раз, когда я отправляю ответы, которые я уже давал с самого первого дня, когда мне их задали</div></div>
           <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо, Виктор.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">22 сен, 14:01 · <code>7658eacb</code> — последнее сообщение в системе</div>
+        <div class="chat-session"><div class="session-meta">22 сен, 14:01 · <code>7658eacb</code> — последнее сообщение в системе</div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Есть новости по бизнес-счёту? Уже месяц без новостей</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Виктор, понимаю, что задержка может раздражать; заявка в работе у нашей внутренней команды. По соображениям безопасности открытие бизнес-счёта для юридического лица обычно занимает больше времени. При любом обновлении с вами свяжутся.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Виктор, понимаю, что возникшая задержка может вызывать раздражение; тем не менее, заявка находится в работе у нашей внутренней команды. Понимаю ожидания по срокам проверки, но по соображениям безопасности открытие бизнес-счёта для юридического лица обычно занимает больше времени. При любом обновлении или необходимости в дополнительном документе с вами свяжутся тем же способом, что и раньше.</div></div>
         </div>
       </details>
     </div>
@@ -220,12 +229,8 @@
   <!-- ═══════════ CASE 2 ═══════════ -->
   <div class="case" id="c2">
     <div class="case-head">
-      <div class="ticket-row">
-        <span class="title">Кейс 2 · Liliana (Auto Industrias Carvi S.A. de C.V.) — вместо счёта компании открыт PFAE на её имя, счёт PM не открыт</span>
-        <span class="badge b-red">Не решён · приоритет Highest</span>
-        <span class="badge b-product">🧩 Продукт</span>
-      </div>
-      <div class="meta">16 чатов · 2 тикета · 9 – 25 сен</div>
+      <div class="ticket-row"><span class="title">Кейс 2 · Liliana (Auto Industrias Carvi S.A. de C.V.) — вместо счёта компании открыт PFAE на её имя, счёт PM не открыт</span><span class="badge b-red">Не решён · приоритет Highest</span><span class="badge b-product">🧩 Продукт</span></div>
+      <div class="meta">16 чатов · 0 звонков · 2 тикета · 9 – 25 сен</div>
     </div>
     <div class="case-body">
       <div class="ids">
@@ -235,79 +240,146 @@
         <div><span class="k">task_id</span>cc9cdf52-61f8-424c-b944-7341dea316dc · c2d7dfeb-9113-4738-8005-13df29aa7067 · aa24b999-4b5d-49cf-b635-f123795d1edb · 886ea572-373a-4048-bded-3740fc197f73 · 70bc3db5-ef33-458d-8754-814e4eae2535 · 696413d1-8d8f-4c0e-97c9-29de260a389f · 2ec18aff-e51c-4ef0-9489-59a42d662ad1 · 901ea949-79fb-4745-a9f9-6bcd03e81374 · fb414a48-39d1-466a-a2d1-5942ee61f7ca · 6b77650c-8e87-4bc4-a529-e947346209ed · 97e5add5-f374-4d4e-817d-a24a626e5851 · bd97f46d-8131-52a1-a25e-7c278027eef2 · 9f7771db-66a7-435a-805e-74ac0f155787 · 0227d645-6319-4048-9ebd-bc98d2b8dfe3 · 1e886830-1547-4094-b58a-b8a288cc9ea5 · aebdd189-8155-4f83-a213-8bbe4ef55b12</div>
       </div>
       <div class="timeline">
-        <div class="tl-step">1 сен — визит embajador: карта выдана, документы сфотографированы</div><span class="tl-arrow">→</span>
-        <div class="tl-step warn">9 сен — в приложении её имя, а не компания; IT-519275</div><span class="tl-arrow">→</span>
+        <div class="tl-step">1 сен — визит embajador: карта, фото документов</div><span class="tl-arrow">→</span>
+        <div class="tl-step warn">9 сен — в приложении её имя, не компания; IT-519275</div><span class="tl-arrow">→</span>
         <div class="tl-step warn">10 сен — специалисты: «запросить подтверждение адреса» — клиенту не передано</div><span class="tl-arrow">→</span>
         <div class="tl-step">14 сен — IT-523204</div><span class="tl-arrow">→</span>
-        <div class="tl-step warn">17, 18 сен — эскалации «повторное обращение»</div><span class="tl-arrow">→</span>
+        <div class="tl-step warn">17, 18 сен — эскалации</div><span class="tl-arrow">→</span>
         <div class="tl-step warn">22 сен — «техническая проблема, срока нет»</div><span class="tl-arrow">→</span>
         <div class="tl-step stop">25 сен — «не отказ, ждём»</div>
       </div>
-      <div class="product-box">
-        <span class="lbl">🧩 Обсудить с продуктом</span>
-        (1) Заявка на Persona Moral завершилась созданием PFAE-счёта на имя представителя (ACCOUNTS: 11 сен). На каком шаге выбор типа теряется и можно ли валидировать тип по RFC из CSF (12 знаков — юрлицо, 13 — физлицо) до создания счёта. (2) Запрос специалистов (подтверждение адреса) не дошёл до клиента за 16 чатов — нужен канал «запрошено у клиента» в статусе заявки, видимый и клиенту, и агенту.
+      <div class="summary-box">
+        <h4>Что не так</h4>
+        <ul>
+          <li>Заявка на Persona Moral завершилась PFAE-счётом на имя представителя (ACCOUNTS: SAVING_POT создан 11 сен, ACTIVE); счёт компании не открыт.</li>
+          <li>Резолюция IT-519275 от 10 сен требует от клиента пояснение по адресу (учредительные документы — Chihuahua, операции — Monterrey) и подтверждение адреса — за 16 чатов и 2 эскалации клиенту это не сказано ни разу; все ответы — «ждём отдела».</li>
+          <li>IT-523204 закрыт 22 сен шаблоном «рассмотрение занимает больше времени»; в тот же день клиенту сообщили о «технической проблеме» без срока; 25 сен — «не отказ, ждём».</li>
+          <li>9 обращений за 8 рабочих дней без единого нового факта для клиента.</li>
+        </ul>
+        <h4>Экшн-поинты</h4>
+        <ul>
+          <li>CS (сегодня): передать Лилиане запрос из IT-519275 — пояснить операции в Monterrey и прислать подтверждение адреса; вернуть заявку f5d6eaf5 в проверку с этими документами.</li>
+          <li>Онбординг/IT: после открытия PM закрыть ошибочный PFAE-счёт (как в IT-510628), чтобы у клиента не было двух профилей.</li>
+          <li>CS-процесс: резолюция тикета с запросом к клиенту должна порождать сообщение клиенту — проверять «кто и когда передал» перед закрытием.</li>
+          <li>Продукт: валидация типа заявки по RFC (12 знаков — юрлицо) до создания счёта; статус «запрошено у клиента» в приложении.</li>
+        </ul>
       </div>
+      <div class="product-box"><span class="lbl">🧩 Обсудить с продуктом</span>Подмена типа счёта при подаче на PM и отсутствие у клиента и агента видимого статуса заявки с запросами от проверки.</div>
       <div class="tickets">
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-519275" target="_blank" rel="noopener">IT-519275</a> · Corporate Banking / Lending / Application on hold · создан 9 сен 21:06 → решён 10 сен 11:38. Описание: «клиент подавал на PM, открылся PFAE; проверьте статус PM». Резолюция: «По учредительным документам и налоговому адресу компания зарегистрирована в Chihuahua, а основная коммерческая и логистическая деятельность ведётся из Monterrey — запросить у клиента пояснение и подтверждение адреса, если операции в MTY».</div>
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-523204" target="_blank" rel="noopener">IT-523204</a> · Corporate Banking / Lending / Application on hold · создан 14 сен 22:51 · 15 сен внутренняя ссылка на IT-519275 · <b>эскалации 17 сен 15:09 и 18 сен 15:32</b> («повторное обращение») · решён 22 сен 11:44: «К сожалению, рассмотрение заявки Persona Moral занимает больше времени, чем ожидалось». Приоритет Highest, метка <code>KYB_review</code>.</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-519275" target="_blank" rel="noopener">IT-519275</a> · Corporate Banking / Lending / Application on hold · создан 9 сен 21:06 → решён 10 сен 11:38. Описание: «клиент подавал на PM, открылся PFAE; проверьте статус PM; выдача 1 сентября, обновлений нет». Резолюция: «По учредительным документам и налоговому адресу компания зарегистрирована в Chihuahua, а основная коммерческая и логистическая деятельность ведётся из Monterrey — запросить у клиента пояснение и подтверждение адреса, если операции в MTY».</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-523204" target="_blank" rel="noopener">IT-523204</a> · Corporate Banking / Lending / Application on hold · создан 14 сен 22:51 · 15 сен внутренняя ссылка на IT-519275 · <b>эскалации 17 сен 15:09 и 18 сен 15:32</b> («повторное обращение») · решён 22 сен 11:44: «К сожалению, рассмотрение заявки Persona Moral занимает больше времени, чем ожидалось. Просим подождать». Приоритет Highest, метка <code>KYB_review</code>.</div>
       </div>
-      <div class="calls-note">Звонки: в базе дашборда по клиенту нет.</div>
-      <details class="chat-toggle">
-        <summary>Полная история чатов (16 диалогов, RU)</summary>
-        <div class="chat-session">
-          <div class="session-meta">9 сен, 14:54 · <code>cc9cdf52</code> — обнаружен PFAE вместо PM</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я уже активировала бизнес-платформу, но там указано моё имя, а не название компании. Разве не должно отображаться название компании? Компания — Auto Industrias Carvi S.A. de C.V.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Вижу, что счёт открылся как для физического лица с предпринимательской деятельностью (PFAE) — поэтому и показывается ваше имя. Вы подавали заявку именно как юридическое лицо?</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, от имени Auto Industrias Carvi S.A. de C.V. Я законный представитель, уже отправляла всю запрошенную информацию о компании.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">К вам уже приходил представитель (embajador)? Он должен предоставить договор и сфотографировать документы.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, с 1 сентября. Леонардо Патиньо всё сфотографировал и оставил карту. Учредительный акт и справка о налоговом статусе. Он приезжал дважды.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Создам тикет, чтобы проверить, нет ли ошибки, мешающей открытию. Номер тикета: IT-519275. Ориентировочная дата решения: 10 сентября.</div></div>
+      <div class="calls-note">Звонки: записей нет.</div>
+      <details class="chat-toggle"><summary>Полная история чатов (16 диалогов, RU)</summary>
+        <div class="chat-session"><div class="session-meta">9 сен, 14:54 · <code>cc9cdf52</code> — создан IT-519275</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я уже активировала бизнес-платформу, но там указано моё имя, а не название компании</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Разве не должно отображаться название компании?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Компания — Auto Industrias Carvi S.A. de C.V.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, Лилиана. Вижу, что счёт открылся как для физического лица с предпринимательской деятельностью — поэтому и показывается ваше имя. Вы подавали заявку именно как юридическое лицо?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, заявка подавалась от имени Auto Industrias Carvi S.A. de C.V.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я законный представитель, уже отправляла всю запрошенную информацию о компании</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю. Один вопрос — к вам уже приходил представитель (embajador)? Он должен предоставить договор и сфотографировать некоторые документы.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, уже всё сфотографировал и оставил карту</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Отлично. Помните дату? Спрашиваю, чтобы понять, нужно ли создавать тикет.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, с 1 сентября</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Леонардо Патиньо</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Это человек, который всё сфотографировал</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Большое спасибо, Лилиана. Позвольте создать тикет — это поможет проверить, нет ли ошибки, мешающей открытию. Дайте минуту, я вернусь.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Учредительный акт компании, а также справка о налоговом статусе</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Он приезжал дважды</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Мне ждать ответа в этом же чате?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Именно так, Лилиана, ответ придёт сюда же. Заканчиваю оформление тикета.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, что эскалировала ваш случай в соответствующую команду, специалист IT свяжется с вами, когда проблема будет решена. Номер тикета: IT-519275. Ориентировочная дата решения: 10 сентября.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо, буду ждать</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Лилиана, спасибо за обращение. Хорошего дня.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">14 сен, 16:39 · <code>c2d7dfeb</code></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Мне открыли только счёт физического лица. А нам нужен счёт юридического лица.</div></div>
+        <div class="chat-session"><div class="session-meta">14 сен, 16:39 · <code>c2d7dfeb</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Мне открыли только счёт физического лица</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">А нам нужен счёт юридического лица</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">14 сен, 16:40 · <code>aa24b999</code> — создан IT-523204</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Мы так и не смогли решить вопрос с открытием счёта для юридического лица — мне уже выдали карту и сфотографировали документы. Я имею в виду счёт Auto Industrias Carvi.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Вижу в системе, что была создана заявка на проверку. Получали ли вы от нас письмо? Мы отправляем письмо, если нужен дополнительный документ.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, письмо пришло, и я отправила документы. Их даже запрашивали через WhatsApp, и я тоже их отправила — в четверг, 10-го. Уже был создан другой тикет по этому вопросу.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, эскалировала ваш случай. Номер тикета: IT-523204. Ориентировочная дата решения: 15 сентября. Создала ещё один тикет, чтобы проверить, не нужно ли что-то ещё.</div></div>
+        <div class="chat-session"><div class="session-meta">14 сен, 16:40–17:01 · <code>aa24b999</code> — создан IT-523204</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Мы так и не смогли решить вопрос с открытием счёта для юридического лица — мне уже выдали карту и сфотографировали документы</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Возобновляем работу по вашему обращению, дайте минуту проверить.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я имею в виду счёт Auto Industrias Carvi</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, Лилиана, дайте минуту проверить, пожалуйста.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Вижу в системе, что была создана заявка на проверку — не хватает ли ещё чего-либо. Дайте минуту, чтобы эскалировать обращение.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Не могли бы вы проверить — получали ли вы от нас письмо? Мы отправляем письмо, если нужно предоставить дополнительный документ.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, письмо пришло, и я отправила документы</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Их даже запрашивали через WhatsApp, и я тоже их отправила</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, не могли бы вы уточнить, в какой день вы получили письмо?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Вы подавали заявку с этого номера или использовали другой?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да. Использовался этот номер</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">И документы мы загрузили через платформу</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">И также отправила их через WhatsApp человеку, который со мной связался</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо за информацию, дайте минуту, чтобы эскалировать ваше обращение.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">В какой день у вас запросили документы через WhatsApp?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">В прошлый четверг. В четверг, 10-го</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Отлично, спасибо за информацию, дайте несколько минут, пожалуйста.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Конечно</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо за ожидание. Подтверждаю, что эскалировала ваш случай в соответствующую команду; специалист IT свяжется с вами, когда проблема будет решена. Номер тикета: IT-523204. Ориентировочная дата решения: 15 сентября.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">По этому вопросу уже был создан другой тикет, со мной связался человек, и я отправила ему документы</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, да, я проверила это в системе, создала ещё один тикет, чтобы нам помогли проверить, не нужно ли что-то ещё для завершения открытия вашего счёта.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">О любых новостях мы напишем вам в этом же чате.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо. Осталось в ожидании</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Лилиана, большое спасибо за терпение; мы постараемся дать ответ как можно скорее.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо вам, было приятно помочь. Остаюсь на связи.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">17 сен, 09:07–09:34 · <code>886ea572</code>, <code>70bc3db5</code>, <code>696413d1</code>, <code>2ec18aff</code> — 1-я эскалация</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Добрый день. Будет ли у вас ответ по заявке на бизнес-счёт Auto Industrias Carvi?</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">У нас пока нет ответа, эскалирую ваш случай, чтобы как можно скорее запросить обновление.</div></div>
+        <div class="chat-session"><div class="session-meta">17 сен, 09:07 · <code>886ea572</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Добрый день</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">17 сен, 09:07–09:12 · <code>70bc3db5</code> — 1-я эскалация</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Будет ли у вас ответ по заявке на бизнес-счёт Auto Industrias Carvi?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте, Лилиана!</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю ситуацию. У нас пока нет ответа от соответствующего отдела, я эскалирую ваш случай, чтобы как можно скорее запросить обновление.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">17 сен, 09:18–09:24 · <code>696413d1</code></div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Чем вызвана такая большая задержка?</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Мы просто ждём ответа от соответствующего отдела.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я свяжусь позже, чтобы узнать, есть ли ответ.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Мы просто ждём ответа от соответствующего отдела, чтобы проблема была решена.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">18 сен, 09:31 · <code>901ea949</code> — 2-я эскалация</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Добрый день, слежу за вопросом — есть ли обратная связь?</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">У нас пока нет ответа. Уже эскалировала ситуацию в соответствующий отдел.</div></div>
+        <div class="chat-session"><div class="session-meta">17 сен, 09:33–09:34 · <code>2ec18aff</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я свяжусь позже, чтобы узнать, есть ли ответ</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Да, конечно, и если у нас появится ответ раньше, мы вам сообщим</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Лилиана, спасибо за обращение. Хорошего дня.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">21 сен, 09:31–09:44 · <code>fb414a48</code>, <code>6b77650c</code>, <code>97e5add5</code></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Добрый день, можно ли узнать, будет ли возможность открыть счёт? Остаюсь в ожидании.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Поскольку заявка на открытие счёта юридического лица может занимать время, такая задержка — обычное дело. Причина не в том, что счёт не откроют, это процесс проверки.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Поскольку процесс длится уже несколько недель, отсюда моё беспокойство.</div></div>
+        <div class="chat-session"><div class="session-meta">18 сен, 09:31–09:38 · <code>901ea949</code> — 2-я эскалация</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Добрый день, слежу за вопросом — есть ли какая-то обратная связь?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте, Лилиана!</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">У нас пока нет ответа. Я уже эскалировала ситуацию в соответствующий отдел, чтобы получить информацию и как можно скорее поделиться обновлением.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">22 сен, 05:49–11:42 · <code>bd97f46d</code>, <code>9f7771db</code></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">К сожалению, рассмотрение вашей заявки как юридического лица занимает больше времени, чем ожидалось, <b>из-за технической проблемы</b>. У нас нет ориентировочной даты решения.</div></div>
+        <div class="chat-session"><div class="session-meta">21 сен, 09:31 · <code>fb414a48</code></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Чтобы оказать вам более специализированную поддержку, я передам ваш запрос специалисту. Он свяжется с вами в этом же чате в ближайшее время.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">21 сен, 09:31 · <code>6b77650c</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Добрый день, слежу за темой — можно ли узнать, будет ли возможность открыть счёт</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Остаюсь в ожидании</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте, Лилиана, возобновляю работу по вашему обращению от команды поддержки по бизнес-счетам.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Поскольку заявка на открытие счёта юридического лица может занимать время, такая задержка — обычное дело. На данный момент причина задержки не в том, что счёт не откроют. Это просто процесс проверки; понимаю, что ожидание может беспокоить, но нужно подождать ответа по заявке.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">21 сен, 09:44 · <code>97e5add5</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Поскольку процесс длится уже несколько недель, отсюда моё беспокойство</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Прекрасно понимаю ваше беспокойство, Лилиана. Именно поэтому мы и предоставили эту информацию. Остаёмся на связи.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">22 сен, 05:49 · <code>bd97f46d</code></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте. В продолжение вашего обращения сообщаем: к сожалению, рассмотрение вашей заявки как юридического лица занимает больше времени, чем ожидалось, <b>из-за технической проблемы</b>. На данный момент у нас нет ориентировочной даты решения. Приносим извинения и благодарим за терпение. Мы сообщим, как только появится обновление. Команда Plata.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">22 сен, 11:42 · <code>9f7771db</code></div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Процесс длится уже месяц — решится ли вопрос, или мне искать другой способ открыть счёт?</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Да, мы просто ждём ответа от соответствующего отдела.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Да, мы просто ждём ответа от соответствующего отдела, чтобы продолжить работу по вашей заявке на открытие бизнес-счёта.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">23 сен, 16:34 · <code>0227d645</code>, <code>1e886830</code></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Всё ещё без ответа?</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">На данный момент у нас всё ещё нет ответа или обновления. Направлю вашу заявку в специализированный отдел по продуктам для бизнеса.</div></div>
+        <div class="chat-session"><div class="session-meta">23 сен, 16:34 · <code>0227d645</code></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Добрый день, Лилиана.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Я направлю вашу заявку в специализированный отдел по продуктам для бизнеса. С вами свяжутся в ближайшее время. Спасибо, что написали нам.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">25 сен, 11:19 · <code>aebdd189</code> — последнее сообщение в системе</div>
+        <div class="chat-session"><div class="session-meta">23 сен, 16:35 · <code>1e886830</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Добрый день, всё ещё без ответа?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Добрый день, Лилиана. Понимаю. На данный момент у нас всё ещё нет ответа или обновления. Как только появится ответ по вашей заявке, мы свяжемся.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">25 сен, 11:19 · <code>aebdd189</code> — последнее сообщение в системе</div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Есть ли какая-то информация об открытии бизнес-счёта?</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Пока нет ответа. Понимаю, что прошло много времени, но речь <b>не идёт об отказе</b> — мы ждём ответа. Как только будет, свяжемся по почте.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">На данный момент у нас пока нет ответа, Лилиана. Понимаю, что прошло уже много времени и это может раздражать, но пока речь <b>не идёт об отказе</b> — мы ждём ответа. Приношу извинения; как только будет ответ, мы свяжемся с вами по почте.</div></div>
         </div>
       </details>
     </div>
@@ -316,12 +388,8 @@
   <!-- ═══════════ CASE 3 ═══════════ -->
   <div class="case" id="c3">
     <div class="case-head">
-      <div class="ticket-row">
-        <span class="title">Кейс 3 · Jose Iran Villa Arriaga — две карты получены в один день, ни одна не привязывается</span>
-        <span class="badge b-green">Решён</span>
-        <span class="badge b-product">🧩 Продукт</span>
-      </div>
-      <div class="meta">8 чатов · 2 тикета · 17 – 22 сен</div>
+      <div class="ticket-row"><span class="title">Кейс 3 · Jose Iran Villa Arriaga — две карты получены в один день, ни одна не привязывается</span><span class="badge b-green">Решён</span><span class="badge b-product">🧩 Продукт</span></div>
+      <div class="meta">8 чатов · 0 звонков · 2 тикета · 17 – 22 сен</div>
     </div>
     <div class="case-body">
       <div class="ids">
@@ -331,55 +399,102 @@
         <div><span class="k">task_id</span>b0dfe87c-0a2a-4383-a9ed-4601e9170beb · bbce4587-fe4b-4b26-8221-d239d0974c85 · 00a15ef3-c4b1-5032-9029-3db2b0f9a95f · a6fbb2a6-9ef2-5b91-afda-e96fe18476db · be226aea-4bb1-4fb6-8924-bf9c29c8079e · 323364b0-fc79-44b8-a24a-c27afa4dc1c6 · ffed34fa-1471-4043-8a36-59218e97cbda · ce9a9d8b-0961-55ef-bdbe-fb68905170cd</div>
       </div>
       <div class="timeline">
-        <div class="tl-step">17 сен 16:30 — отсканировал кредитную карту в разделе бизнес-карты</div><span class="tl-arrow">→</span>
-        <div class="tl-step">17 сен 16:35 — IT-526175 (бизнес) + IT-526193 (кредитная)</div><span class="tl-arrow">→</span>
+        <div class="tl-step">17 сен 16:30 — кредитная карта отсканирована в разделе бизнес-карты</div><span class="tl-arrow">→</span>
+        <div class="tl-step">17 сен 16:35 — IT-526175 + IT-526193</div><span class="tl-arrow">→</span>
         <div class="tl-step">18 сен 08:34 — кредитная привязана вручную</div><span class="tl-arrow">→</span>
-        <div class="tl-step warn">18–19 сен — бизнес-карта: QR даёт ошибку, переоткрыт 20 сен</div><span class="tl-arrow">→</span>
-        <div class="tl-step">22 сен — «проблема решена, активируйте карту»</div>
+        <div class="tl-step warn">18–19 сен — бизнес-карта: ошибка QR; переоткрыт 20 сен</div><span class="tl-arrow">→</span>
+        <div class="tl-step">22 сен — «решено, активируйте карту»</div>
       </div>
-      <div class="product-box">
-        <span class="lbl">🧩 Обсудить с продуктом</span>
-        Два раздела активации для двух карт, пришедших в один день; бизнес-карта отличается только цветом и словом «Empresa» в углу. Скан не в том разделе создал второй процесс активации на бэкенде (Camunda <code>MismatchingMessageCorrelationException — 'CARD_RESERVATION' ... 2 executions match</code>) и заблокировал обе карты до ручной привязки по PRN. Предмет: определять тип карты по QR и вести в нужный процесс; гасить дубль процесса.
+      <div class="summary-box">
+        <h4>Что не так</h4>
+        <ul>
+          <li>Один скан не в том разделе создал второй процесс активации на бэкенде (Camunda: <code>'CARD_RESERVATION' ... 2 executions match</code>) и заблокировал обе карты; восстановление только ручной привязкой по PRN.</li>
+          <li>Автоответ 18 сен 02:39 «карта привязана корректно» относился к кредитной, но пришёл как ответ по тикету бизнес-карты — клиент снова пришёл в чат через 8 часов.</li>
+          <li>PRN и последние 4 цифры запрашивались трижды (17, 19 сен) в разных чатах; 4 обращения и 2 тикета за 5 дней на одну ошибку клика.</li>
+        </ul>
+        <h4>Экшн-поинты</h4>
+        <ul>
+          <li>Инженерия: завести дефект по дублю процесса <code>CARD_RESERVATION</code> (лог в IT-526175 от 22 сен 11:44); связать с <code>IT-473446 Manual card linking v.2</code>.</li>
+          <li>Продукт: определять тип карты по QR и вести в нужный процесс; защита от повторного запуска активации.</li>
+          <li>CS: не отправлять «привязана корректно», пока не подтверждено по каждой из карт тикета; PRN сохранять в тикете, а не запрашивать повторно.</li>
+        </ul>
       </div>
+      <div class="product-box"><span class="lbl">🧩 Обсудить с продуктом</span>Два раздела активации для двух похожих карт (бизнес отличается цветом и словом «Empresa»); авто-определение карты по QR.</div>
       <div class="tickets">
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-526175" target="_blank" rel="noopener">IT-526175</a> · Business Silver / Cards / cannot link a card · создан 17 сен · <b>переоткрыт 20 сен 03:34</b> (клиент повторил шаги, ошибка та же, запрошена ручная привязка; PRN 800039924140, последние цифры 3584) · 22 сен 11:44 лог ошибки бэкенда · решён 22 сен 13:28: «Проблема решена. Попросите клиента активировать бизнес-карту».</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-526175" target="_blank" rel="noopener">IT-526175</a> · Business Silver / Cards / cannot link a card · создан 17 сен · <b>переоткрыт 20 сен 03:34</b> (клиент повторил шаги, ошибка та же; запрошена ручная привязка; PRN 800039924140, ····3584) · 22 сен 11:44 лог ошибки бэкенда · решён 22 сен 13:28: «Проблема решена. Попросите клиента активировать бизнес-карту».</div>
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-526193" target="_blank" rel="noopener">IT-526193</a> · Plata Crédito / Problems linking the card · создан 17 сен 23:09 → решён 18 сен 08:34: «Карта привязана к счёту» (PRN 800054323558, ····1614). Блокировался задачей <code>IT-473446 Manual card linking v.2</code>.</div>
       </div>
-      <div class="calls-note">Звонки: в базе дашборда по клиенту нет.</div>
-      <details class="chat-toggle">
-        <summary>Полная история чатов (8 диалогов, RU)</summary>
-        <div class="chat-session">
-          <div class="session-meta">17 сен, 16:30 · <code>b0dfe87c</code> — первое обращение</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я отсканировал не ту карту. Что-то пошло не так, попробуйте снова… а при попытке активировать выдаёт, что она уже привязана к моему счёту. Да, кредитная и бизнес-карта, которые я получил сегодня. Но я отсканировал кредитную в разделе бизнес-карты.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю. Направлю ваш запрос в специализированный отдел по бизнес-продуктам.</div></div>
+      <div class="calls-note">Звонки: записей нет.</div>
+      <details class="chat-toggle"><summary>Полная история чатов (8 диалогов, RU)</summary>
+        <div class="chat-session"><div class="session-meta">17 сен, 16:30 · <code>b0dfe87c</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я отсканировал не ту карту</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, какую ошибку показывает?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Что-то пошло не так, попробуйте снова… а когда пытаюсь отсканировать карту для активации, выдаёт, что она уже привязана к моему счёту</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, это ваша физическая кредитная карта?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, кредитная и бизнес-карта, которые я получил сегодня</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Но я отсканировал кредитную карту в разделе бизнес-карты</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю. Направлю ваш запрос в специализированный отдел по бизнес-продуктам. С вами свяжутся в ближайшее время. Спасибо за обращение.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">17 сен, 16:35 · <code>bbce4587</code> — IT-526175 + IT-526193</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">А теперь у меня выдаёт ошибку. [фото] [фото] [фото] Да, я уже получил обе — кредитную и бизнес-карту. 800039924148</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Не могли бы вы предоставить код PRN? Это номер под QR-кодом — не конфиденциальные данные, а ключ для ручной привязки. Номер тикета: IT-526175. Ориентировочная дата решения: 22 сентября.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Когда пытаюсь активировать кредитную карту, выдаёт, что она уже привязана к другому счёту. 800054323558 [фото]</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Пришлите код PRN, создам тикет по кредитной карте. Номер тикета: IT-526193.</div></div>
+        <div class="chat-session"><div class="session-meta">17 сен, 16:35–17:11 · <code>bbce4587</code> — IT-526175, IT-526193</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">А теперь у меня выдаёт ошибку</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Хосе, возобновляем работу по вашему обращению.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Привет, Хуан</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте, Хосе. Не переживайте, на данный момент я не вижу, чтобы физическая карта была активирована на вашем кредитном счёте.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Не могли бы вы прислать скриншот главного экрана? Чтобы увидеть, что раздел для привязки карт — и бизнес-счёта, и кредитного — всё ещё активен.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Большое спасибо. Просто чтобы уточнить — вы ещё не получили бизнес-карту?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">[фото] [фото] [фото] Когда я пытаюсь активировать кредитную карту, выдаёт вот это</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, я уже получил обе — кредитную и бизнес-карту</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Отлично. Не могли бы вы предоставить код PRN? Это номер под QR-кодом на картах. Это не конфиденциальные данные — просто ключ для ручной привязки.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">800039924148. Этот?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Да, Хосе, именно этот номер. Это от бизнес-карты или от кредитной?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Бизнес-карта. Да, конечно. Подождите. [фото] Последняя цифра — 0</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Отлично, дайте минуту. Большое спасибо, Хосе. Подтверждаю, что эскалировал ваш случай в соответствующую команду; специалист IT свяжется с вами. Номер тикета: IT-526175. Ориентировочная дата решения: 22 сентября 2026.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Значит, кредитную карту я тоже не смогу активировать?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">На данный момент у вас не должно быть проблем. Если что-то возникнет, я на связи.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Когда я пытаюсь активировать кредитную карту, выдаёт, что она уже привязана к другому моему счёту</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">800054323558 [фото]</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Не переживайте. Пришлите код PRN, чтобы я создал тикет по кредитной карте.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, что эскалировал ваш случай. Номер тикета: IT-526193. Ориентировочная дата решения: 22 сентября 2026.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Хосе, спасибо за обращение. Хорошего дня.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">18 сен, 02:39 и 10:04 · <code>00a15ef3</code>, <code>a6fbb2a6</code> — автоответы</div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Мы проверили ваш случай и подтверждаем, что карта была привязана корректно.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">На главном экране найдите раздел активации для Plata Empresa и убедитесь, что не выбираете раздел личной дебетовой/кредитной карты. Бизнес-карта — светло-голубого цвета, с надписью «Empresa» в нижнем левом углу.</div></div>
+        <div class="chat-session"><div class="session-meta">18 сен, 02:39 · <code>00a15ef3</code></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте. В продолжение вашего обращения: мы проверили ваш случай и подтверждаем, что карта была привязана корректно. Теперь вы можете использовать её для операций в приложении. Если возникнут проблемы — сообщите детали. С уважением, команда Plata.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">18 сен, 10:11 · <code>be226aea</code></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Кредитная карта теперь работает нормально… а бизнес-карту всё ещё не даёт зарегистрировать. Попросило отсканировать QR-код, и выдало ошибку [фото].</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Я эскалировал информацию по тому же тикету. Как только появится обновление, свяжемся.</div></div>
+        <div class="chat-session"><div class="session-meta">18 сен, 10:04 · <code>a6fbb2a6</code></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте. В продолжение обращения: на главном экране найдите раздел активации для Plata Empresa и убедитесь, что не выбираете раздел личной дебетовой или кредитной карты. Бизнес-карта — светло-голубого цвета, с надписью «Empresa» в нижнем левом углу. Выберите нужный раздел и отсканируйте QR-код именно этой карты. С уважением, команда Plata.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">19 сен, 21:19–21:36 · <code>323364b0</code>, <code>ffed34fa</code> — переоткрытие, ручная привязка</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, но выдаёт ошибку и больше не даёт её отсканировать [фото] [фото]</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Пришлите код PRN и последние четыре цифры — текстом, не фото. После этого создам тикет для ручной привязки специализированным отделом.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">3584. 800039924140.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Ситуация эскалирована по тикету IT-526175.</div></div>
+        <div class="chat-session"><div class="session-meta">18 сен, 10:11–10:26 · <code>be226aea</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Кредитная карта теперь работает нормально… а бизнес-карту всё ещё не даёт зарегистрировать</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, Хосе. У вас всё ещё отображается раздел для привязки бизнес-карты?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, попросило отсканировать QR-код, и выдало ошибку [фото]</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Просто чтобы уточнить и продолжить работу над решением: вы сканируете QR-код бизнес-карты, сообщения о привязке к другому счёту нет, только ошибка — верно?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Верно. Она дала мне отсканировать её, а сейчас выдаёт только эту ошибку, но не пишет, что привязана к другому счёту</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Большое спасибо, дайте минуту. Готово, Хосе. Я эскалировал информацию — по тому же номеру тикета. Сейчас нужно немного подождать ответа. Как только появится обновление, мы свяжемся.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Конечно. Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо вам, Хосе. Хорошего дня, до свидания.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">22 сен, 07:29 · <code>ce9a9d8b</code></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Заявленная проблема уже решена. Пожалуйста, зайдите в приложение, чтобы активировать вашу карту.</div></div>
+        <div class="chat-session"><div class="session-meta">19 сен, 21:19 · <code>323364b0</code></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">С радостью помогу вам; дайте минуту проверить ваш профиль.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Сейчас снова передам вас специалистам; пожалуйста, будьте на связи по телефону.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">19 сен, 21:21–21:36 · <code>ffed34fa</code> — переоткрытие</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да, но выдаёт, что произошла ошибка, и больше не даёт её отсканировать [фото] [фото]</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Хосе, возобновляем работу по вашему обращению.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо за ожидание. Не могли бы вы прислать скриншот ошибки при попытке привязать физическую карту по QR-коду с обратной стороны?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Сожалею об этом, но не переживайте, разберёмся вместе. Мне нужно, чтобы вы прислали код PRN вашей карты и последние четыре цифры. Код — под QR-кодом на обратной стороне карты, рядом с 16 цифрами.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Очень важно не присылать фото карты, тем более обратной стороны — это данные безопасности; напишите эти данные текстом. После этого создам тикет для ручной привязки синей карты специализированным отделом.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Напоминаю: только текстом — последние четыре цифры и код PRN под QR-кодом, тот, что видно на присланном фото.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">3584</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">800039924140</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо. Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Большое спасибо, дайте минуту, пока создаю тикет.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо за ожидание. Ваша ситуация эскалирована; активный тикет — IT-526175, по нему будем вести сопровождение. Я указал, что вы следуете ранее данным инструкциям и что нужна ручная привязка — поэтому и запросил эти данные. Остаётся дождаться специализированного отдела — по почте, СМС или в этом чате.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Хосе, спасибо за обращение. Хорошего вечера.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">22 сен, 07:29 · <code>ce9a9d8b</code></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте. В продолжение обращения: сообщаем, что заявленная проблема уже решена. Пожалуйста, зайдите в приложение, чтобы активировать вашу карту. Благодарим за терпение и сотрудничество. Команда Plata.</div></div>
         </div>
       </details>
     </div>
@@ -388,12 +503,8 @@
   <!-- ═══════════ CASE 4 ═══════════ -->
   <div class="case" id="c4">
     <div class="case-head">
-      <div class="ticket-row">
-        <span class="title">Кейс 4 · Daniel Alonso Nuño Ojeda (NUO INTEGRACIONES Y SERVICIOS) — налоговый адрес компании записан неверно, нельзя пополнить счёт</span>
-        <span class="badge b-red">Открыт</span>
-        <span class="badge b-product">🧩 Продукт</span>
-      </div>
-      <div class="meta">3 чата · 1 тикет · 17 – 25 сен</div>
+      <div class="ticket-row"><span class="title">Кейс 4 · Daniel Alonso Nuño Ojeda (NUO INTEGRACIONES Y SERVICIOS) — налоговый адрес компании записан неверно, нельзя пополнить счёт</span><span class="badge b-red">Открыт</span><span class="badge b-product">🧩 Продукт</span></div>
+      <div class="meta">3 чата · 0 звонков · 1 тикет · 17 – 25 сен</div>
     </div>
     <div class="case-body">
       <div class="ids">
@@ -403,30 +514,53 @@
         <div><span class="k">task_id</span>812c65d7-2709-4a3b-a265-e1d11e36303c · da71f311-2f8c-4cf7-a4f3-c9505362ff91 · 796f5cc6-597a-4d50-9552-d2581b511292</div>
       </div>
       <div class="timeline">
-        <div class="tl-step">17 сен 20:15 — адрес взят из учредительного акта, а не из CSF; IT-526437, срок 24 сен</div><span class="tl-arrow">→</span>
+        <div class="tl-step">17 сен 20:15 — адрес из учредительного акта, не из CSF; IT-526437, срок 24 сен</div><span class="tl-arrow">→</span>
         <div class="tl-step stop">24 сен — срок прошёл без ответа</div><span class="tl-arrow">→</span>
-        <div class="tl-step stop">25 сен — эскалация; клиенту нужно пополнить счёт</div>
+        <div class="tl-step stop">25 сен — эскалация; нужно пополнить счёт</div>
       </div>
-      <div class="product-box">
-        <span class="lbl">🧩 Обсудить с продуктом</span>
-        Самостоятельная смена налогового адреса компании в приложении с загрузкой CSF — сейчас только через тикет в IT. Отдельно: при визите адрес записан из учредительного акта, хотя CSF и физический адрес совпадают — какое поле считается источником истины при онбординге.
+      <div class="summary-box">
+        <h4>Что не так</h4>
+        <ul>
+          <li>При визите адрес записан из учредительного акта, хотя клиент подтверждал адрес по CSF (физический = налоговый); изменить его клиент может только тикетом в IT.</li>
+          <li>Названный срок 24 сен пропущен без уведомления; 25 сен тикет без ответа исполнителя, статус Work in progress.</li>
+          <li>Клиент не может пополнить счёт компании, пока адрес не исправлен.</li>
+        </ul>
+        <h4>Экшн-поинты</h4>
+        <ul>
+          <li>IT (приоритет High, открыт 8+ дней): исправить налоговый адрес по приложенному скрину CSF и сообщить клиенту.</li>
+          <li>CS: при пропуске названного срока писать клиенту до того, как он напишет сам.</li>
+          <li>Онбординг/embajador: источник налогового адреса — CSF, а не учредительный акт.</li>
+          <li>Продукт: самостоятельная смена адреса компании с загрузкой CSF.</li>
+        </ul>
       </div>
+      <div class="product-box"><span class="lbl">🧩 Обсудить с продуктом</span>Самообслуживание по реквизитам компании (адрес) в приложении; поле-источник адреса при онбординге.</div>
       <div class="tickets">
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-526437" target="_blank" rel="noopener">IT-526437</a> · Customer details / Change the company's registered address · создан 18 сен 02:23 · <b>эскалирован 25 сен 15:43</b> («повторное обращение») · статус Work in progress, резолюции нет. Приоритет High.</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-526437" target="_blank" rel="noopener">IT-526437</a> · Customer details / Change the company's registered address · создан 18 сен 02:23 · 18 сен 02:23 автокомментарий с User Hash ID · <b>эскалирован 25 сен 15:43</b> («повторное обращение») · статус Work in progress, резолюции нет. Приоритет High.</div>
       </div>
-      <div class="calls-note">Звонки: в базе дашборда по клиенту нет.</div>
-      <details class="chat-toggle">
-        <summary>Полная история чатов (3 диалога, RU)</summary>
-        <div class="chat-session">
-          <div class="session-meta">17 сен, 20:15 · <code>812c65d7</code>, <code>da71f311</code> — создан IT-526437</div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Направлю ваше обращение напрямую специализированной команде агентов.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Здравствуйте, у меня есть бизнес-счёт, но я хочу обновить юридический (налоговый) адрес. Физический адрес совпадает с адресом в справке (CSF). Визит был проведён по этому адресу, однако адрес, похоже, взяли из учредительного акта. Почему адрес не обновлён? [фото]</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Отличается ли фактический адрес от налогового в CSF? … Спасибо, Даниэль, прошу прощения за путаницу; создам заявку на изменение. Номер тикета: IT-526437. Ориентировочная дата решения: 24 сентября.</div></div>
+      <div class="calls-note">Звонки: записей нет.</div>
+      <details class="chat-toggle"><summary>Полная история чатов (3 диалога, RU)</summary>
+        <div class="chat-session"><div class="session-meta">17 сен, 20:15 · <code>812c65d7</code></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Направлю ваше обращение напрямую специализированной команде агентов, они свяжутся с вами как можно скорее в этом же чате. Спасибо за терпение!</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">25 сен, 09:37 · <code>796f5cc6</code> — эскалация</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">По тикету IT-526437 — хотел бы узнать, всё ли в порядке с моими документами. Дата решения была ещё вчера. Я хочу пополнить счёт, поэтому мне срочно нужно, чтобы всё было в порядке.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">У нас пока нет ответа от специализированного отдела. Сожалею о задержке; я уже эскалировал заявку.</div></div>
+        <div class="chat-session"><div class="session-meta">17 сен, 20:15–20:28 · <code>da71f311</code> — создан IT-526437</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Здравствуйте, у меня есть бизнес-счёт, но я хочу обновить свой юридический (налоговый) адрес</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Возобновляем работу по вашему обращению, дайте минуту проверить.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Физический адрес совпадает с адресом в справке (CSF)</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Визит был проведён по этому адресу, однако адрес, похоже, взяли из учредительного акта</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Почему адрес не обновлён</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Не могли бы вы уточнить, отличается ли фактический адрес компании от налогового адреса, указанного в вашей справке о налоговом статусе (CSF)?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">[фото] Это и есть физический и налоговый адрес</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо за информацию, Даниэль. Прошу прощения за путаницу; я создам заявку на изменение.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, что эскалировал ваш случай в соответствующую команду; специалист IT свяжется с вами, когда проблема будет решена. Номер тикета: IT-526437. Ориентировочная дата решения: 24 сентября 2026.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо. Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо вам, было приятно помочь. Остаюсь на связи.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">25 сен, 09:37 · <code>796f5cc6</code> — эскалация</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Здравствуйте, добрый день, по поводу тикета IT-526437 — хотел бы узнать, всё ли в порядке с моими документами</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">У нас пока нет ответа от специализированного отдела, Даниэль; как только появится обновление, мы сообщим, либо вы можете запросить статус в любой момент.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо, просто дата решения была ещё вчера, поэтому я решил спросить</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я хочу пополнить счёт, поэтому мне срочно нужно, чтобы всё было в порядке</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Полностью понимаю, и сожалею о задержке; я уже эскалировал заявку, чтобы нам помогли как можно скорее, Даниэль.</div></div>
         </div>
       </details>
     </div>
@@ -435,12 +569,8 @@
   <!-- ═══════════ CASE 5 ═══════════ -->
   <div class="case" id="c5">
     <div class="case-head">
-      <div class="ticket-row">
-        <span class="title">Кейс 5 · Enrique Flores Soto — договор можно подписать только с компьютера, у клиента есть только телефон</span>
-        <span class="badge b-yellow">Закрыт без решения</span>
-        <span class="badge b-product">🧩 Продукт</span>
-      </div>
-      <div class="meta">1 чат · 1 тикет · 18 – 25 сен</div>
+      <div class="ticket-row"><span class="title">Кейс 5 · Enrique Flores Soto — договор можно подписать только с компьютера, у клиента есть только телефон</span><span class="badge b-yellow">Закрыт без решения</span><span class="badge b-product">🧩 Продукт</span></div>
+      <div class="meta">1 чат · 0 звонков · 1 тикет · 18 – 25 сен</div>
     </div>
     <div class="case-body">
       <div class="ids">
@@ -450,29 +580,46 @@
         <div><span class="k">task_id</span>10ce0a24-b04f-4512-ae55-7204a44876bb</div>
       </div>
       <div class="timeline">
-        <div class="tl-step">18 сен — письмо «подпишите договор», ссылка с телефона открывает экран «на рассмотрении»</div><span class="tl-arrow">→</span>
+        <div class="tl-step">18 сен — ссылка на подписание с телефона ведёт на экран «на рассмотрении»</div><span class="tl-arrow">→</span>
         <div class="tl-step">22 сен — ответ: ссылки PM/PFAE на сайт</div><span class="tl-arrow">→</span>
-        <div class="tl-step warn">24 сен — переоткрыт: ссылка снова ведёт в приложение на «рассмотрение»</div><span class="tl-arrow">→</span>
+        <div class="tl-step warn">24 сен — переоткрыт: ссылка снова ведёт в приложение</div><span class="tl-arrow">→</span>
         <div class="tl-step stop">25 сен — закрыт: «ожидайте проверки документов»</div>
       </div>
-      <div class="product-box">
-        <span class="lbl">🧩 Обсудить с продуктом</span>
-        Подписание договора в онбординге доступно только в десктоп-браузере; deep-link из письма на телефоне открывает приложение без документа. Для сегмента ИП без компьютера шаг непроходим. Предмет: подписание в приложении или хотя бы рабочая мобильная веб-страница по ссылке.
+      <div class="summary-box">
+        <h4>Что не так</h4>
+        <ul>
+          <li>Шаг подписания договора доступен только в десктоп-браузере; deep-link из письма на телефоне открывает приложение без документа.</li>
+          <li>Агент в чате предложил «с компьютера или с ноутбука» клиенту, который сказал, что компьютера нет; альтернативы не предложено.</li>
+          <li>Резолюция 22 сен (ссылки на сайт) не решает проблему; после переоткрытия тикет закрыт 25 сен формулировкой «ожидайте проверки документов», хотя блокер — невозможность подписать.</li>
+        </ul>
+        <h4>Экшн-поинты</h4>
+        <ul>
+          <li>IT/онбординг: дать клиенту работающий способ подписать с телефона (мобильная веб-страница по ссылке или подписание при визите embajador) и проверить статус заявки PFA 999cbdc1.</li>
+          <li>CS: не закрывать тикет «ожидайте проверки», пока клиент не прошёл блокирующий шаг; при повторном открытии менять решение, а не повторять.</li>
+          <li>Продукт: подписание договора в приложении; корректный deep-link на мобильном.</li>
+        </ul>
       </div>
+      <div class="product-box"><span class="lbl">🧩 Обсудить с продуктом</span>Desktop-only подписание в онбординге PyME для сегмента без компьютера.</div>
       <div class="tickets">
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-527184" target="_blank" rel="noopener">IT-527184</a> · Corporate Banking / Lending / Application on hold · создан 18 сен 21:44 · 22 сен 10:54 резолюция: «используйте ссылку по типу бизнеса: PM bancoplata.mx/en/empresa/pyme, PFAE …/pfae» · <b>переоткрыт 24 сен 17:35</b>: «клиент: при клике по ссылке перенаправляет в приложение, где только сообщение о рассмотрении» · решён 25 сен 08:06: «Клиент ожидает проверки документов, что занимает время; вы получите уведомление по завершении».</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-527184" target="_blank" rel="noopener">IT-527184</a> · Corporate Banking / Lending / Application on hold · создан 18 сен 21:44 · 22 сен 10:54 резолюция: «используйте ссылку по типу бизнеса: PM bancoplata.mx/en/empresa/pyme, PFAE …/pfae» · <b>переоткрыт 24 сен 17:35</b>: «клиент: при клике по ссылке перенаправляет в приложение, где только сообщение о рассмотрении, не показывает, что заявка не завершена» · решён 25 сен 08:06: «Клиент ожидает проверки документов, что занимает время; вы получите уведомление по завершении».</div>
       </div>
-      <div class="calls-note">Звонки: в базе дашборда по клиенту нет. Переоткрытие 24 сен в чатах не отражено — только в Jira.</div>
-      <details class="chat-toggle">
-        <summary>Полная история чатов (1 диалог, RU)</summary>
-        <div class="chat-session">
-          <div class="session-meta">18 сен, 15:35 · <code>10ce0a24</code></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я подал заявку на открытие бизнес-счёта, пришло письмо на подписание документов. Но когда я перехожу через приложение, там только написано, что заявка на рассмотрении, никаких документов не показывает.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Ссылку вы открываете с компьютера или с телефона?</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">У меня нет компьютера. Только телефон — к сожалению, я уже много лет не пользуюсь компьютером.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Для продолжения нужно открыть документы с компьютера. Если его нет, можно с ноутбука. Иначе подписать договор сейчас не получится.</div></div>
+      <div class="calls-note">Звонки: записей нет. Переоткрытие 24 сен в чатах не отражено — только в Jira.</div>
+      <details class="chat-toggle"><summary>Полная история чатов (1 диалог, RU)</summary>
+        <div class="chat-session"><div class="session-meta">18 сен, 15:35–15:45 · <code>10ce0a24</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я подал заявку на открытие бизнес-счёта, мне пришло письмо на подписание документов. Но когда я перехожу через приложение, там только написано, что заявка на рассмотрении, никаких документов не показывает</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Энрике, возобновляем работу по вашему обращению.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Ссылку, которую вам прислали, вы открываете с компьютера или с мобильного телефона?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо. Телефон</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, помогите мне, пожалуйста, открыть её с компьютера.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">У меня нет компьютера</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, для продолжения этого процесса нужно открыть документы с компьютера. Если нет компьютера — можно с ноутбука.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Нет, у меня только телефон для выхода в интернет или оформления обращений, так удобнее — к сожалению, я уже много лет не пользуюсь компьютером</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, иначе подписать договор на данный момент не получится.</div></div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">О, печально это слышать, значит заявка не сможет быть оформлена?</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Направлю запрос, чтобы посмотреть, сможем ли мы помочь подписать договор. Номер тикета: IT-527184. Ориентировочная дата решения: 21 сентября.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Я направлю запрос, чтобы посмотреть, сможем ли мы помочь вам подписать договор как можно скорее.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо. Спасибо. Остаётся в ожидании</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, что эскалировал ваш случай в соответствующую команду, специалист IT свяжется с вами. Номер тикета: IT-527184. Ориентировочная дата решения: 21 сентября 2026.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Энрике, спасибо за обращение. Хорошего дня.</div></div>
         </div>
       </details>
     </div>
@@ -481,12 +628,8 @@
   <!-- ═══════════ CASE 6 ═══════════ -->
   <div class="case" id="c6">
     <div class="case-head">
-      <div class="ticket-row">
-        <span class="title">Кейс 6 · Eloy Garza Niño (LUEREM) — карта выдана 26 августа, счёт не появился, спор о виде деятельности в CSF</span>
-        <span class="badge b-yellow">Решён по тикету</span>
-        <span class="badge b-product">🧩 Продукт</span>
-      </div>
-      <div class="meta">8 чатов · 1 тикет · 6 авг – 22 сен</div>
+      <div class="ticket-row"><span class="title">Кейс 6 · Eloy Garza Niño (LUEREM) — карта выдана 26 августа, счёт не появился, спор о виде деятельности в CSF</span><span class="badge b-yellow">Решён по тикету</span><span class="badge b-product">🧩 Продукт</span></div>
+      <div class="meta">8 чатов · 0 звонков · 1 тикет · 6 авг – 22 сен</div>
     </div>
     <div class="case-body">
       <div class="ids">
@@ -496,51 +639,93 @@
         <div><span class="k">task_id</span>1e2e33e0-aa9d-4408-a36c-49768a09b286 · 4790ba2b-3da7-4b7f-851b-ec72f4542a80 · 0bdaa1ef-a2b8-449d-bc54-5b54e7cc4f17 · f0a15e05-9c18-4b2f-9592-19cf1eeed9b0 · 381bade8-559e-4c07-b783-f1b53939dfcd · 11f3062e-6e0f-480c-ba0a-2a741795e292 · df3718bc-6534-423a-b9ac-0c60299fcaad · 0401e544-9f06-43ca-90f0-e679655b3d2a</div>
       </div>
       <div class="timeline">
-        <div class="tl-step">6 авг — опция PM пропала из приложения, направлен на сайт</div><span class="tl-arrow">→</span>
+        <div class="tl-step">6 авг — опция PM пропала из приложения</div><span class="tl-arrow">→</span>
         <div class="tl-step">27 авг — повторный запрос документов</div><span class="tl-arrow">→</span>
-        <div class="tl-step warn">29 авг — embajador выдал карту, «счёт появится через минуты» — не появился</div><span class="tl-arrow">→</span>
+        <div class="tl-step warn">29 авг — карта выдана, «счёт через минуты» — не появился</div><span class="tl-arrow">→</span>
         <div class="tl-step">17 сен — IT-526009</div><span class="tl-arrow">→</span>
-        <div class="tl-step warn">18 сен — «обновите giro в CSF»; 20 сен переоткрыт — клиент оспаривает</div><span class="tl-arrow">→</span>
-        <div class="tl-step">22 сен — закрыт шаблоном «рассмотрение занимает больше времени»</div>
+        <div class="tl-step warn">18 сен — «обновите giro в CSF»; 20 сен переоткрыт</div><span class="tl-arrow">→</span>
+        <div class="tl-step">22 сен — закрыт шаблоном</div>
       </div>
-      <div class="product-box">
-        <span class="lbl">🧩 Обсудить с продуктом</span>
-        (1) Заявка Persona Moral доступна только на сайте («оформляйте с компьютера, чтобы избежать автоматических переадресаций в приложение»), опция в приложении исчезает. (2) Нет статуса заявки: после визита и выдачи карты клиент 3 недели не знал, что проверка продолжается; требование «обновить вид деятельности в CSF» пришло без указания, что именно не совпадает.
+      <div class="summary-box">
+        <h4>Что не так</h4>
+        <ul>
+          <li>Embajador при визите 26 авг обещал активацию «через несколько минут»; агент 29 авг сначала сказал, что карта «пока не будет работать» — противоречивые ожидания.</li>
+          <li>3 недели (29 авг – 17 сен) без сообщений о статусе; тикет создан только после обращения клиента.</li>
+          <li>Резолюция 18 сен «обновить вид деятельности в CSF» без указания, что именно не совпадает; клиент оспорил с цитатой из CSF и учредительного акта — ответ 22 сен шаблонный, без конкретики.</li>
+          <li>Последнее сообщение в чатах — 19 сен; подтверждения резолюции клиентом нет.</li>
+        </ul>
+        <h4>Экшн-поинты</h4>
+        <ul>
+          <li>KYB: назвать клиенту конкретное расхождение (giro на сайте vs CSF) или снять требование; дать статус по LUEREM (9ed2e711) и срок.</li>
+          <li>Онбординг/embajador: единый скрипт о сроках проверки после визита — визит не равен активации.</li>
+          <li>CS: при переоткрытии с аргументами клиента не закрывать шаблоном «занимает больше времени».</li>
+          <li>Продукт: заявка PM в приложении (сейчас только сайт/десктоп) и статус заявки.</li>
+        </ul>
       </div>
+      <div class="product-box"><span class="lbl">🧩 Обсудить с продуктом</span>Исчезающая опция PM в приложении и редирект на сайт; видимый статус проверки документов после визита.</div>
       <div class="tickets">
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-526009" target="_blank" rel="noopener">IT-526009</a> · Corporate Banking / Lending / Application on hold · создан 17 сен 20:27 · 18 сен 18:49 резолюция: «обновить giro (вид деятельности) в CSF — не соответствует сайту и данным компании» · <b>переоткрыт 20 сен 00:45</b> (клиент: CSF и учредительный акт совпадают, просит указать конкретное расхождение) · решён 22 сен 11:46: «К сожалению, рассмотрение заявки Persona Moral занимает больше времени, чем ожидалось».</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-526009" target="_blank" rel="noopener">IT-526009</a> · Corporate Banking / Lending / Application on hold · создан 17 сен 20:27 · 18 сен 18:49 резолюция: «обновить giro (вид деятельности) в CSF — не соответствует сайту и данным компании» · <b>переоткрыт 20 сен 00:45</b> (клиент: CSF и учредительный акт совпадают, просит указать расхождение) · решён 22 сен 11:46: «К сожалению, рассмотрение заявки Persona Moral занимает больше времени, чем ожидалось».</div>
       </div>
-      <div class="calls-note">Звонки: в базе дашборда по клиенту нет. Чаты заканчиваются 19 сен — подтверждения резолюции клиентом в системе нет.</div>
-      <details class="chat-toggle">
-        <summary>Полная история чатов (8 диалогов, RU)</summary>
-        <div class="chat-session">
-          <div class="session-meta">6 авг, 17:59–18:16 · <code>1e2e33e0</code>, <code>4790ba2b</code></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Несколько дней назад я видел опцию открытия бизнес-счёта для юридического лица, но сейчас её не вижу, есть только для физического лица.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Начните заявку с посадочной страницы для бизнеса (bancoplata.mx/es/empresa), выбрав тип счёта. Рекомендуем оформлять с компьютера, чтобы избежать автоматических переадресаций в приложение.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Объединены ли личный и бизнес-счета в одном приложении?</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Всё объединено в одном приложении; когда счёт откроется, вы увидите его там же.</div></div>
+      <div class="calls-note">Звонки: записей нет.</div>
+      <details class="chat-toggle"><summary>Полная история чатов (8 диалогов, RU)</summary>
+        <div class="chat-session"><div class="session-meta">6 авг, 17:59 · <code>1e2e33e0</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Здравствуйте, извините, несколько дней назад я видел опцию открытия бизнес-счёта для юридического лица, но сейчас её не вижу, есть только для физического лица</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Вы можете начать заявку на открытие бизнес-счёта прямо с посадочной страницы для бизнеса (bancoplata.mx/es/empresa), выбрав нужный тип счёта (PFAE или юридическое лицо).</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Для лучшего опыта и во избежание автоматических переадресаций в приложение Plata рекомендуем оформлять новую регистрацию с компьютера через наш сайт.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">27 авг, 13:35–14:10 · <code>0bdaa1ef</code>, <code>f0a15e05</code>, <code>381bade8</code></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Кажется, это уже было добавлено к запрошенным документам. Поищу и отправлю снова. … Вообще-то это вы запросили у меня справку.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, не переживайте. Последнее сообщение было автоматическим.</div></div>
+        <div class="chat-session"><div class="session-meta">6 авг, 18:16 · <code>4790ba2b</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Мне нужно заходить в мой счёт через сайт? Я никогда этого не делал, хотя не думаю, что это сложно</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Не знаю только, объединены ли личный и бизнес-счета в одном приложении? Или это другое приложение?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте! Дайте минуту проверить вашу информацию. 🧡☺️</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо большое за ожидание, Элой. Процесс довольно простой. Всё объединено в одном приложении, не переживайте; когда счёт откроется, вы увидите его там же.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Отлично, большое спасибо</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">29 авг, 16:18 · <code>11f3062e</code> — карта выдана, счёт не появился</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">В прошлую среду приезжал представитель и передал бизнес-карту. Он сказал, что через несколько минут бизнес-счёт появится в приложении, но до сих пор ничего не изменилось.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Перейдите по ссылке, введите номер телефона… Спасибо за скриншот — все документы в порядке. Проверка ещё может занять несколько дней.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Но тогда зачем была встреча с представителем, чтобы он передал карту? Значит, она пока не работает? Он объяснил, что уже всё готово и счёт активируется через несколько минут.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Передача карты была нужна для проверки оригиналов документов; осталось завершить проверку. Пока карта ещё не будет работать. Приношу извинения, что не дал чёткую информацию сразу.</div></div>
+        <div class="chat-session"><div class="session-meta">27 авг, 13:35 · <code>0bdaa1ef</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Здравствуйте, извините, кажется, в своё время это уже было добавлено к запрошенным документам. Но я поищу и отправлю снова попозже</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо, Элой. Ждём.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">17 сен, 14:23 · <code>df3718bc</code> — создан IT-526009</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Всё ли в порядке с открытием бизнес-счёта — он уже долго в одном статусе. Физическую карту привезли и документы проверили ещё 26 августа.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">С момента вашего последнего обращения прошло более 17 дней, и вы не получили ответа. Номер тикета: IT-526009. Ориентировочная дата решения: 18 сентября.</div></div>
+        <div class="chat-session"><div class="session-meta">27 авг, 13:56 · <code>f0a15e05</code></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо, Элой.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">19 сен, 18:43 · <code>0401e544</code> — переоткрытие</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Справка о налоговом статусе и текущая деятельность компании идентичны, не понимаю, в чём путаница. Деятельность Luerem в учредительном акте и в CSF: оптовая торговля через средства массовой коммуникации (почту, интернет) и другие каналы.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Повторно открою ваш тикет, чтобы нам дали больше информации по виду деятельности в CSF. Не могу дать точную дату — это ведут напрямую они, но попросил отдать приоритет.</div></div>
+        <div class="chat-session"><div class="session-meta">27 авг, 14:10 · <code>381bade8</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Здравствуйте, вообще-то это вы запросили у меня справку</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, Элой. Не переживайте. Последнее сообщение было автоматическим, на случай если у вас появится дополнительный вопрос. 😊</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">29 авг, 16:18 · <code>11f3062e</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Здравствуйте, извините, в прошлую среду ко мне приезжал представитель и передал бизнес-карту. Он сказал, что через несколько минут бизнес-счёт появится в приложении, но до сих пор ничего не изменилось. Представитель попросил связаться с вами, чтобы узнать, в чём дело</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Возобновляем работу по вашему обращению, дайте минуту проверить.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Элой, подскажите, вы подавали заявку на открытие счёта как юридическое лицо?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Верно</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо. Не могли бы вы перейти по ссылке: bancoplata.mx/es/empresa/pyme/…</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Просит ввести мой номер телефона</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Да, пожалуйста, введите его.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо. Готово</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подскажите, что у вас отображается?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо за скриншот, Элой. Это показывает, что все документы в порядке. Приношу извинения за предыдущую информацию — проверка документов всё ещё может занять несколько дней. Как только счёт откроется, вы получите письмо или СМС.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Но тогда зачем была встреча с представителем, чтобы он передал карту? Значит, она пока не работает?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Он объяснил мне, что уже всё готово и счёт активируется через несколько минут, поэтому я запутался</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Передача физической карты была нужна для проверки оригиналов документов; осталось только завершить проверку. Пока карта ещё не будет работать, Элой. По присланному скриншоту подтверждаю, что счёт уже в процессе открытия.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">А, хорошо, значит я неправильно понял. Ладно, большое спасибо, буду ждать</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Не переживайте, приношу извинения, что не дал чёткую информацию сразу. Открытие ещё может занять время, но как только счёт будет доступен, мы сообщим, чтобы вы могли им воспользоваться как можно скорее.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">17 сен, 14:23–14:31 · <code>df3718bc</code> — создан IT-526009</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Здравствуйте, хотел спросить, всё ли в порядке с открытием бизнес-счёта — он уже долго находится в одном и том же статусе</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте, Элой, добрый день. Вижу, что действительно уже прошло много времени. Я создам тикет, дайте минуту, и я вернусь к вам.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Готово, Элой. Подтверждаю, что эскалировал ваш случай в соответствующую команду; специалист IT свяжется с вами. Номер тикета: IT-526009. Ориентировочная дата решения: 18 сентября 2026.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Большое спасибо. Кстати, физическую карту привезли и документы проверили ещё 26 августа</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Именно, Элой, это как раз то, что я указал в заявке. С момента вашего последнего обращения прошло более 17 дней, и вы не получили от нас ответа. Не переживайте, уже эскалировано.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо :)</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Остаюсь на связи, если понадобится помощь, Элой.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">19 сен, 18:43–18:49 · <code>0401e544</code> — переоткрытие</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Здравствуйте, справка о налоговом статусе и текущая деятельность компании идентичны, не понимаю, в чём путаница. Деятельность компании Luerem, описанная как в учредительном акте, так и в последующих актах и в CSF, указана как: оптовая торговля через средства массовой коммуникации (например, почту и интернет) и другие каналы</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо за ожидание, Элой. Я эскалирую эту ситуацию в специализированный отдел, чтобы нам дали ответ. Вижу, что вам отправили сообщение в 15:00, поэтому я повторно открою ваш тикет по заявке на бизнес-счёт, чтобы нам помогли и дали больше информации по виду деятельности в CSF, и чтобы всё было оформлено правильно. С вами свяжутся через этот чат, почту или СМС.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Очень благодарен за помощь, Эрик</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Не переживайте, я здесь, чтобы помочь. В любом случае ситуация уже эскалирована; будем ждать ответа специализированного отдела. Не могу дать точную дату, так как это ведут напрямую они, но я попросил отдать этому приоритет.</div></div>
         </div>
       </details>
     </div>
@@ -549,62 +734,101 @@
   <!-- ═══════════ CASE 7 ═══════════ -->
   <div class="case" id="c7">
     <div class="case-head">
-      <div class="ticket-row">
-        <span class="title">Кейс 7 · Emiliano Villanueva Rabotnikof — нужен номер бизнес-счёта для договора аренды; у продукта есть только CLABE</span>
-        <span class="badge b-yellow">Решён по тикету</span>
-        <span class="badge b-product">🧩 Продукт</span>
-      </div>
-      <div class="meta">10 чатов по вопросу (2 исключены как не по теме) · 2 тикета · 18 – 24 сен</div>
+      <div class="ticket-row"><span class="title">Кейс 7 · Emiliano Villanueva Rabotnikof — нужен номер бизнес-счёта для договора аренды; клиенту дают CLABE и номер дела</span><span class="badge b-yellow">Решён по тикету</span><span class="badge b-product">🧩 Продукт</span></div>
+      <div class="meta">7 чатов по вопросу (5 не по теме исключены) · 0 звонков · 2 тикета · 18 – 24 сен</div>
     </div>
     <div class="case-body">
       <div class="ids">
         <div><span class="k">customer_id</span>4d3c7304-6f94-4eb3-9d66-0fde08b19909</div>
         <div><span class="k">legal_entity_id</span>3f667377-8f3c-435b-9710-a58ce4076abf (PFA)</div>
         <div><span class="k">счёт в ACCOUNTS</span>INDIVIDUAL_ENTREPRENEUR_SAVING_POT, создан 4 сен, ACTIVE · тариф Independiente</div>
-        <div><span class="k">task_id</span>cab113d1-71bb-4fdb-9f68-ac3c26491e1b · 851303bd-9a05-4a0a-81f2-d7c29aa54b7e · a9acfcb2-d8b6-4ce0-aad3-629e07ebdaa9 · 01467a1b-4e8b-4cf2-bf32-706094b5ff83 · 8b2aa4c2-e6c3-4e0f-aaba-dd70c55938db · 2bfbd61b-c619-562b-9328-c7d2d8b16912 · 79a9f286-ced2-4524-9146-69a67368a426 · (не по теме: 982068ee, b055c920, 29c04bc4 — спор по списанию Uber и вопрос о страховании вкладов, 5 сен; 750011ea, 14c77b2c — отклонённая покупка в кино, 13–15 сен)</div>
+        <div><span class="k">task_id</span>cab113d1-71bb-4fdb-9f68-ac3c26491e1b · 851303bd-9a05-4a0a-81f2-d7c29aa54b7e · a9acfcb2-d8b6-4ce0-aad3-629e07ebdaa9 · 01467a1b-4e8b-4cf2-bf32-706094b5ff83 · 8b2aa4c2-e6c3-4e0f-aaba-dd70c55938db · 2bfbd61b-c619-562b-9328-c7d2d8b16912 · 79a9f286-ced2-4524-9146-69a67368a426 · не по теме: 982068ee, b055c920, 29c04bc4 (спор по списанию Uber, страхование вкладов, 5 сен), 750011ea, 14c77b2c (отклонённая покупка, 13–15 сен)</div>
       </div>
       <div class="timeline">
         <div class="tl-step">18 сен — просит номер счёта для договора; получает CLABE</div><span class="tl-arrow">→</span>
         <div class="tl-step">18 сен — IT-527423</div><span class="tl-arrow">→</span>
-        <div class="tl-step warn">22 сен — ответ специалистов: «номер зарегистрирован в деле: 70738342206166»</div><span class="tl-arrow">→</span>
-        <div class="tl-step warn">23 сен — переоткрыт: «это номер дела, не счёта»; агент: «у бизнес-счёта только CLABE»; IT-531845</div><span class="tl-arrow">→</span>
-        <div class="tl-step">24 сен — тикеты закрыты: номер счёта 70738342206166; выписки — 1-го числа месяца</div>
+        <div class="tl-step warn">22 сен — «номер зарегистрирован в деле: 70738342206166»</div><span class="tl-arrow">→</span>
+        <div class="tl-step warn">23 сен — переоткрыт; агент: «только CLABE»; IT-531845, срок 7 окт</div><span class="tl-arrow">→</span>
+        <div class="tl-step">24 сен — тикеты закрыты: номер счёта 70738342206166</div>
       </div>
-      <div class="product-box">
-        <span class="lbl">🧩 Обсудить с продуктом</span>
-        Где клиент видит номер счёта: в carátula на тарифе Independiente поля нет, выписка формируется 1-го числа месяца (а не «через 10–15 дней после первой операции», как говорил агент), на сайте carátula для этого тарифа недоступна. Формулировка ответа специалистов «зарегистрирован в деле (expediente)» прочитана клиентом как номер дела. Предмет: показать номер счёта в карточке счёта в приложении для всех тарифов и назвать поле так же, как в договорах.
+      <div class="summary-box">
+        <h4>Что не так</h4>
+        <ul>
+          <li>Три разных ответа агентов на один вопрос: «номер в carátula/выписке» (18 сен), «номер в деле» (22 сен), «у бизнес-счёта номера нет, только CLABE» (23 сен); резолюция 24 сен — номер есть: 70738342206166.</li>
+          <li>Неверная информация о выписке: «через 10–15 дней после первой операции» — по IT-531845 выписки формируются 1-го числа месяца.</li>
+          <li>Формулировка специалистов «зарегистрирован в деле (expediente)» прочитана как номер дела; клиенту в чате так и не сказано, что это и есть номер счёта; названный срок 7 октября — при фактическом закрытии 24 сен.</li>
+          <li>Клиент не смог подписать договор аренды в срок — цель открытия счёта.</li>
+        </ul>
+        <h4>Экшн-поинты</h4>
+        <ul>
+          <li>CS (сегодня): написать клиенту прямо: номер счёта 70738342206166, CLABE 646180405600478416, выписка 1 октября — и подтвердить получение.</li>
+          <li>База знаний: где номер счёта и когда выписка; формулировка ответа специалистов без слова «expediente».</li>
+          <li>Продукт: показывать номер счёта в карточке счёта/carátula для всех тарифов (на Independiente поля нет).</li>
+        </ul>
       </div>
+      <div class="product-box"><span class="lbl">🧩 Обсудить с продуктом</span>Номер счёта в интерфейсе до первой выписки; название поля как в договорах; carátula на тарифе Independiente.</div>
       <div class="tickets">
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-527423" target="_blank" rel="noopener">IT-527423</a> · Silver Business / Account access and management · создан 19 сен 01:08 · 22 сен 16:38 резолюция: «Номер расчётного счёта PFAE — 70738342206166» · <b>переоткрыт 23 сен 21:30</b> («клиент говорит, что просил номер счёта, а ему прислали номер дела; CLABE не нужна») · решён 24 сен 07:30: «Мы отправили клиенту номер счёта. CLABE — другой номер, он виден в приложении. Номер счёта: 70738342206166; CLABE: 646180405600478416».</div>
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-531845" target="_blank" rel="noopener">IT-531845</a> · Business Account / Account statements · создан 23 сен 21:50 → решён 24 сен 13:23: «Все выписки формируются и отправляются 1-го числа каждого месяца». Ответственная команда BackOffice.</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-527423" target="_blank" rel="noopener">IT-527423</a> · Silver Business / Account access and management · создан 19 сен 01:08 · 22 сен 16:38: «Номер расчётного счёта PFAE — 70738342206166» · <b>переоткрыт 23 сен 21:30</b> («клиент просил номер счёта, а ему прислали номер дела; CLABE не нужна») · решён 24 сен 07:30: «Мы отправили клиенту номер счёта. CLABE — другой номер, виден в приложении. Номер счёта: 70738342206166; CLABE: 646180405600478416».</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-531845" target="_blank" rel="noopener">IT-531845</a> · Business Account / Account statements · создан 23 сен 21:50 → решён 24 сен 13:23: «Все выписки формируются и отправляются 1-го числа каждого месяца». Команда BackOffice.</div>
       </div>
-      <div class="calls-note">Звонки: в базе дашборда по клиенту нет. Чаты заканчиваются 23 сен — получил ли клиент номер счёта после резолюции 24 сен, в системе не видно.</div>
-      <details class="chat-toggle">
-        <summary>Полная история чатов по вопросу (7 диалогов, RU)</summary>
-        <div class="chat-session">
-          <div class="session-meta">18 сен, 16:30–17:54 · <code>cab113d1</code>, <code>851303bd</code>, <code>a9acfcb2</code></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Не могли бы вы предоставить недостающие данные моего бизнес-счёта? Мне нужны, помимо CLABE, номер счёта, отделение и название банка. И номер карты.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">У вас тариф «Независимый» — без доступа к титульной странице (carátula) на сайте. Делюсь данными: CLABE 646180405600478416, банк STP, владелец Эмилиано Вильянуэва Работникоф. 16 цифр карты предоставить не могу по соображениям безопасности.</div></div>
+      <div class="calls-note">Звонки: записей нет. Чаты заканчиваются 23 сен — получил ли клиент номер после резолюции 24 сен, в системе не видно.</div>
+      <details class="chat-toggle"><summary>Полная история чатов по вопросу (7 диалогов, RU)</summary>
+        <div class="chat-session"><div class="session-meta">18 сен, 16:30 · <code>cab113d1</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Не могли бы вы предоставить недостающие данные моего бизнес-счёта?</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">18 сен, 18:39–19:14 · <code>01467a1b</code>, <code>8b2aa4c2</code> — создан IT-527423</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">У меня запрашивают номер счёта. Это для коммерческого договора аренды помещения.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Номер счёта указан в выписке или на титульной странице. Первая выписка формируется через 10–15 дней после первой операции (у вас была 7 сентября). Вариант — титульная страница: раздел «Бизнес» → детали счёта → «О счёте» → «Титульная страница».</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">На «Титульной странице» номер счёта не отображается. В письме та же страница с теми же данными. [фото][фото][фото] Мне нужно предоставить номер счёта сегодня, чтобы закрыть сделку. Единственная причина открытия счёта «Бизнес» — депонировать туда доходы от этой сделки.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Я не смогу предоставить его сам — эскалирую в специализированный отдел. Номер тикета: IT-527423. Ориентировочная дата решения: 23 сентября.</div></div>
+        <div class="chat-session"><div class="session-meta">18 сен, 16:32–16:37 · <code>851303bd</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Добрый день</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо за ожидание, Эмилиано. Сообщаю, что у вас сейчас тариф «Независимый», который бесплатный, но не даёт доступа к титульной странице (carátula) на сайте. Однако мы можем проверить эти данные в выписке по счёту и в титульной странице внутри приложения. Скриншот, который вы присылаете, — это когда вы открываете титульную страницу в приложении?</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">22 сен, 10:39 · <code>2bfbd61b</code> — ответ специалистов</div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаем получение данных. Номер расчётного счёта, присвоенный PFAE, зарегистрирован в деле: <b>70738342206166</b>.</div></div>
+        <div class="chat-session"><div class="session-meta">18 сен, 17:47–17:54 · <code>a9acfcb2</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Нет, это данные, которые у меня запрашивают для перевода на мой счёт</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Мне нужны, помимо CLABE, номер счёта, отделение и название банка</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">И номер карты</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Эмилиано, возобновляем работу по вашему обращению.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, не переживайте. Делюсь данными: CLABE 646180405600478416, банк STP, владелец Эмилиано Вильянуэва Работникоф. Что касается 16 цифр карты — пока не могу их предоставить, по соображениям безопасности я их не вижу; для этого нужно заказать физическую карту. Но данных, которые я предоставил, более чем достаточно для перевода.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">23 сен, 15:05 · <code>79a9f286</code> — переоткрытие</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Но какой номер моего СЧЁТА БИЗНЕС? Мой вопрос — номер счёта, а не CLABE. Нужен срочно для договора, по которому мне будут переводить платежи.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Нажмите на раздел «Бизнес-счёт» — там увидите CLABE.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Ещё раз: мне не нужен номер CLABE, он у меня есть. Мне нужен НОМЕР СЧЁТА, обычно 10 цифр.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt"><b>В Plata для бизнес-счёта мы не используем номер счёта, только CLABE.</b> Если нужен документ, он указан в выписке. 18 сентября вы подавали этот же запрос, 22 сентября вам предоставили номер дела.</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">В чём смысл продукта под названием СЧЁТ БИЗНЕС, если им нельзя пользоваться в повседневной деятельности компании? Обычно последние 11 цифр CLABE — номер счёта, это верно? А номер дела — это и есть номер счёта?? Вы прислали номер дела… Пришлите, пожалуйста, НОМЕР СЧЁТА!</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Сейчас невозможно подтвердить эти данные ни в системе, ни в выписке — она ещё не сформирована. Запрошу выписку за этот период. Номер тикета: IT-531845. Ориентировочная дата решения: 7 октября.</div></div>
+        <div class="chat-session"><div class="session-meta">18 сен, 18:39–18:44 · <code>01467a1b</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">У меня запрашивают номер счёта</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Эмилиано, возобновляем работу по вашему обращению.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Это для коммерческого договора аренды помещения</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю. Номер счёта указан в выписке или на титульной странице. Пока вы не сможете проверить его в выписке — счёт открыт недавно; первая выписка формируется через 10–15 дней после первой операции, а она у вас была 7 сентября. Вариант — титульная страница: раздел «Бизнес» → детали счёта → «О счёте» → «Титульная страница» (может называться «Юридические документы»).</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">18 сен, 18:56–19:14 · <code>8b2aa4c2</code> — создан IT-527423</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">На «Титульной странице» номер счёта не отображается</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю. Другой вариант — проверить почту, в разделе спам; скорее всего, туда пришёл договор по вашему бизнес-счёту в день открытия, и в нём тоже указан номер счёта.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Почему вы не можете дать мне номер счёта? В чём сложность? В письме у меня та же «Титульная страница» с теми же данными, что и в приложении</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Номер счёта не отображается…</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Нет, это не должно быть сложно, Эмилиано; это должно отображаться в документах, которые я указал. Если не отображается, пришлите скриншот обоих документов, и я создам тикет, так как эта информация должна быть там.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">[фото] [фото] [фото] Хорошо. Теперь не могли бы вы предоставить мне номер моего счёта?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Нет, Эмилиано, я не смогу предоставить его сам — эскалирую вашу ситуацию в специализированный отдел, чтобы они связались с вами через этот чат или по почте. Я создам тикет, дам ориентировочную дату, и специализированный отдел свяжется с вами.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо… Я открыл счёт «Бизнес», чтобы использовать его для дел моей компании… Похоже, у вас вызывает сложность что-то, что должно быть очень простым и базовым для любой финансовой операции… Мне непонятно, почему возникает сложность с чем-то настолько элементарным для банка. Мне нужно предоставить номер счёта сегодня, чтобы закрыть сделку. Единственная причина открытия счёта «Бизнес» — депонировать туда доходы от этой сделки…</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, что эскалировал ваш случай в соответствующую команду, специалист IT свяжется с вами. Номер тикета: IT-527423. Ориентировочная дата решения: 23 сентября 2026.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Приношу извинения за это ограничение, Эмилиано. Это не в моих руках; я понимаю вашу точку зрения, но эта информация должна отображаться в файлах, которые вы просматриваете. Третий вариант — выписка, но так как она ещё не сформирована, придётся подождать. Пока будем ждать ответа специализированного отдела.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">22 сен, 10:39 · <code>2bfbd61b</code> — ответ специалистов</div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте. Подтверждаем получение данных. Номер расчётного счёта, присвоенный физическому лицу с предпринимательской деятельностью (PFAE), зарегистрирован в деле: <b>70738342206166</b>. С уважением, команда Plata.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">23 сен, 15:05 · <code>79a9f286</code> — переоткрытие, IT-531845</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Но какой номер моего СЧЁТА БИЗНЕС?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Эмилиано, возобновляем работу по вашему обращению.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Если посмотреть историю этого чата, видно, что мой вопрос — какой номер СЧЁТА БИЗНЕС, а не CLABE. Мне срочно нужен этот номер для договора, по которому мне будут переводить платежи</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Вы можете найти это, нажав на раздел «Бизнес-счёт», после чего сможете увидеть CLABE.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Ещё раз: мне не нужен номер CLABE, он у меня уже есть. Мне нужен НОМЕР СЧЁТА, который обычно состоит из 10 цифр</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt"><b>Понимаю, в Plata для бизнес-счёта мы не используем номер счёта, только CLABE.</b> Если нужен документ, он указан в вашей выписке.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">У меня требуют, помимо CLABE, номер счёта для подписания договора</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">В чём смысл продукта под названием СЧЁТ БИЗНЕС, если им нельзя пользоваться в повседневной деятельности КОМПАНИИ?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">18 сентября вы уже подавали этот же запрос, соответствующий отдел дал ответ 22 сентября, в котором вам предоставили номер дела.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">…Обычно последние 11 цифр CLABE соответствуют номеру счёта. Это верно в данном случае?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">А номер дела — это и есть номер счёта?? Можете прислать это «дело», где якобы зарегистрирован мой НОМЕР СЧЁТА?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Не понимаю, почему вы усложняете то, что должно быть очень простым и является первым, что дают при открытии счёта в любом другом банке…</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt"><i>(повторяет ответ от 22 сен)</i> Подтверждаем получение данных. Номер расчётного счёта PFAE зарегистрирован в деле: 70738342206166.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Вы прислали номер дела…. Пришлите, пожалуйста, НОМЕР СЧЁТА!</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Снова запрашиваю у соответствующего отдела скорейший ответ.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Как только будет ответ, мы сообщим вам в этом же чате.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">А разве это не предпоследние 11 цифр CLABE?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю ситуацию. На данный момент невозможно подтвердить эти данные ни в системе, ни в выписке, так как она ещё не сформирована. Запрошу выписку за этот период, чтобы отправить вам, как только будет готова.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, что эскалировал ваш случай. Номер тикета: IT-531845. Ориентировочная дата решения: 7 октября 2026.</div></div>
         </div>
       </details>
     </div>
@@ -613,12 +837,8 @@
   <!-- ═══════════ CASE 8 ═══════════ -->
   <div class="case" id="c8">
     <div class="case-head">
-      <div class="ticket-row">
-        <span class="title">Кейс 8 · Jesús Rojas Cerero — заявка на Persona Moral открылась как PFAE; закрытие, повторная подача, документы UBO</span>
-        <span class="badge b-green">Решён</span>
-        <span class="badge b-product">🧩 Продукт</span>
-      </div>
-      <div class="meta">11 чатов (1 помечен как звонок) · 2 тикета · 27 авг – 23 сен</div>
+      <div class="ticket-row"><span class="title">Кейс 8 · Jesús Rojas Cerero — заявка на Persona Moral открылась как PFAE; закрытие, повторная подача, документы UBO</span><span class="badge b-green">Решён</span><span class="badge b-product">🧩 Продукт</span></div>
+      <div class="meta">10 чатов + 1 запись после звонка · 2 тикета · 27 авг – 23 сен</div>
     </div>
     <div class="case-body">
       <div class="ids">
@@ -628,49 +848,96 @@
         <div><span class="k">task_id</span>9541526f-3ea2-47f2-b734-eeba8c2740fc · 16c28a05-463a-452b-ad98-ddb8e23a8736 (call) · b37712ee-af98-4d9f-a393-042e374fa149 · eebb3074-6ff2-4ba1-85bb-10a96410251f · 9e98ef30-e699-4e61-9e95-f94658896843 · e074a18f-695c-438b-a332-5b4ef304d52e · d475c32a-2f39-490d-86c6-99bdea78cf7d · f1607c3d-97c7-43d1-b32f-e1c1a43ac17a · cbb3b8c5-1327-468b-be73-64fac4e682d3 · 63500c78-36ac-4ca9-a9b5-fcbbda151d2c · ac86c075-6ed2-4a99-af44-88ba4480e597</div>
       </div>
       <div class="timeline">
-        <div class="tl-step">27 авг — хочет открыть счёт юрлица</div><span class="tl-arrow">→</span>
-        <div class="tl-step warn">30 авг — создан PFAE-счёт; 31 авг звонок, IT-510628 на закрытие</div><span class="tl-arrow">→</span>
+        <div class="tl-step">27 авг — хочет счёт юрлица</div><span class="tl-arrow">→</span>
+        <div class="tl-step warn">30 авг — создан PFAE; 31 авг звонок, IT-510628</div><span class="tl-arrow">→</span>
         <div class="tl-step">7 сен — PFAE-профиль закрыт</div><span class="tl-arrow">→</span>
-        <div class="tl-step">11 сен — список документов PM, .cer</div><span class="tl-arrow">→</span>
+        <div class="tl-step">11 сен — чек-лист документов PM</div><span class="tl-arrow">→</span>
         <div class="tl-step">18 сен — загрузил CSF, процесс встал; IT-527563</div><span class="tl-arrow">→</span>
         <div class="tl-step warn">22 сен — переоткрыт: документы отправлены</div><span class="tl-arrow">→</span>
         <div class="tl-step">23 сен — резолюция: нужны данные UBO</div>
       </div>
-      <div class="product-box">
-        <span class="lbl">🧩 Обсудить с продуктом</span>
-        Тот же сценарий, что в кейсе 2: выбранная заявка Persona Moral создала PFAE-счёт, закрытие заняло 8 дней («до 60 дней»), повторная подача — ещё 2 недели. Второе: требование по UBO (удостоверения всех бенефициаров ≥25%) всплыло только после переоткрытия тикета, хотя в чек-листе 11 сен оно было — в интерфейсе загрузки оно не обязательное.
+      <div class="summary-box">
+        <h4>Что не так</h4>
+        <ul>
+          <li>При подаче на Persona Moral создан PFAE-счёт (ACCOUNTS 30 авг); закрытие профиля заняло 8 дней с формулировкой «до 60 дней».</li>
+          <li>Повторная подача: 18 сен агент в 5 отдельных чатах собирал базовые данные (муниципалитет, дата, канал) и перепутал PM/PFAE в пересказе клиенту.</li>
+          <li>Требование по бенефициарам (удостоверения совладельцев ≥25%) было в чек-листе 11 сен, но всплыло как блокер только после переоткрытия 22 сен — в форме загрузки оно не обязательное.</li>
+          <li>27 дней от первой подачи до резолюции с новым запросом документов.</li>
+        </ul>
+        <h4>Экшн-поинты</h4>
+        <ul>
+          <li>CS: помочь получить удостоверения двух совладелиц (María Norma Juárez Ibarra, Jessica Miriam Ramirez Ortiz) и указать долю участия; довести заявку a00448b6 до открытия.</li>
+          <li>Онбординг: обязательные поля UBO в форме загрузки документов PM; проверка на этапе загрузки, а не в KYB.</li>
+          <li>IT/онбординг: причина создания PFAE при выборе PM (общая с кейсами 1 и 2).</li>
+          <li>CS: данные, уже видимые в заявке (город, дата, канал), не переспрашивать.</li>
+        </ul>
       </div>
+      <div class="product-box"><span class="lbl">🧩 Обсудить с продуктом</span>Тип заявки PM→PFAE; обязательность UBO-полей в форме; срок закрытия ошибочного профиля.</div>
       <div class="tickets">
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-510628" target="_blank" rel="noopener">IT-510628</a> · Plata Business / Account access / Close account · создан 31 авг 19:56 · 1 сен: «закрытие бизнес-счетов и профиля может занять до 60 дней» · решён 7 сен 14:24: «Бизнес-профиль закрыт, все счета и карты закрыты». Описание: «клиент запросил PM, открыт PFAE; просим закрыть».</div>
-        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-527563" target="_blank" rel="noopener">IT-527563</a> · Corporate Banking / Loan Origination / Application on hold · создан 19 сен 03:29 · 21–22 сен ответ со ссылками PM/PFAE на сайт · <b>переоткрыт 22 сен 18:53</b> («клиент отправил запрошенные документы») · решён 23 сен 11:22: «Заполните данные всех UBO и загрузите цветные копии удостоверений María Norma Juárez Ibarra и Jessica Miriam Ramirez Ortiz (доля не указана)».</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-510628" target="_blank" rel="noopener">IT-510628</a> · Plata Business / Account access / Close account · создан 31 авг 19:56 · 1 сен 11:27: «закрытие бизнес-счетов и профиля может занять до 60 дней» · решён 7 сен 14:24: «Бизнес-профиль закрыт, все счета и карты закрыты». Описание: «клиент запросил PM, открыт PFAE; просим закрыть, приложены доказательства, что процесс был пройден правильно».</div>
+        <div class="t"><a href="https://platacard.atlassian.net/browse/IT-527563" target="_blank" rel="noopener">IT-527563</a> · Corporate Banking / Loan Origination / Application on hold · создан 19 сен 03:29 · 21 сен 13:59 и 22 сен 11:04: ссылки PM/PFAE на сайт, «проверка документов занимает время» · <b>переоткрыт 22 сен 18:53</b> («клиент отправил запрошенные документы») · решён 23 сен 11:22: «Заполните данные всех UBO и загрузите цветные копии удостоверений María Norma Juárez Ibarra и Jessica Miriam Ramirez Ortiz (доля участия не указана)».</div>
       </div>
-      <div class="calls-note">Звонок 31 авг: единственная запись типа <code>call</code> среди 9 кейсов; в системе — чат-сообщения агента после звонка, расшифровки нет.</div>
-      <details class="chat-toggle">
-        <summary>Полная история чатов (11 диалогов, RU)</summary>
-        <div class="chat-session">
-          <div class="session-meta">27 авг, 17:23 · <code>9541526f</code></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я хотел бы открыть счёт юридического лица, я генеральный представитель с широкими полномочиями.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Преимущества бизнес-счёта для юрлица: корпоративные карты с лимитами, доходность на остаток (Impulsa 8% / Expande 9%), роли (владелец, администратор, бухгалтер), массовые платежи по CSV, персональный менеджер (Expande).</div></div>
+      <div class="calls-note">Звонок 31 авг: единственная запись типа <code>call</code> среди 9 кейсов — в системе чат-сообщения агента после звонка, расшифровки голоса нет.</div>
+      <details class="chat-toggle"><summary>Полная история чатов (11 записей, RU)</summary>
+        <div class="chat-session"><div class="session-meta">27 авг, 17:23 · <code>9541526f</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я хотел бы открыть счёт юридического лица, в котором я генеральный представитель с широкими полномочиями</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Возобновляем работу по вашему обращению, дайте минуту проверить.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Хесус, делюсь преимуществами бизнес-счёта для юридического лица. Корпоративные карты: несколько карт для сотрудников с индивидуальными лимитами под контролем администратора. Доходность на остаток: тарифы Impulsa и Expande — 8% и 9% годовых. Модель ролей: владелец, администратор, бухгалтер. Массовые платежи: зарплата и поставщики через CSV. Менеджер счёта: тариф Expande включает персонального менеджера.</div></div>
         </div>
-        <div class="chat-session call-session">
-          <div class="session-meta"><span class="call-tag">☎ после звонка</span> · 31 авг, 13:30 · <code>16c28a05</code> — IT-510628</div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте, Хесус, меня зовут Лаура. Здесь вы можете прислать информацию, которую я запросила по телефону. Подтверждаю, эскалировала ваш случай. Номер тикета: IT-510628, срок 3 сентября. Ссылка для заявки на юрлицо: bancoplata.mx/es/empresa/pyme/…</div></div>
+        <div class="chat-session call-session"><div class="session-meta"><span class="call-tag">☎ после звонка</span> · 31 авг, 13:30 · <code>16c28a05</code> — IT-510628</div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте, Хесус, меня зовут Лаура. Добро пожаловать в чат поддержки. Здесь вы можете прислать информацию, которую я запросила по телефону.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Хесус, подтверждаю, что эскалировала ваш случай в соответствующую команду, специалист IT свяжется с вами. Номер тикета: IT-510628. Ориентировочная дата решения: 3 сентября.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Делюсь ссылкой для подачи заявки на юридическое лицо: bancoplata.mx/es/empresa/pyme/…</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">11 сен, 10:16–10:33 · <code>b37712ee</code>, <code>eebb3074</code> — чек-лист документов</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хочу открыть бизнес-счёт как юридическое лицо. Какие требования? Файл .cer — как его получить? Я был в офисе SAT и сохранил на флешку. Как загрузить документы?</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Нужны: CSF (не старше 12 мес.), учредительный акт, выписка из торгового реестра, .cer е.firma компании (не CSD), доверенность представителя (если нужна), подтверждение адреса (если отличается от CSF), удостоверение представителя, удостоверения всех бенефициаров с долей от 25%. Заявка — по ссылке, лучше с компьютера.</div></div>
+        <div class="chat-session"><div class="session-meta">11 сен, 10:16 · <code>b37712ee</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хочу открыть бизнес-счёт, но как юридическое лицо, поможете?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">???</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Добрый день, Хесус. С радостью поможем.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">С какой информацией помочь сегодня?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Какие требования?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Для открытия счёта юридического лица нужны. Документы компании: справка о налоговом статусе (CSF) не старше 12 месяцев; учредительный акт; выписка из торгового реестра (или справка нотариуса, если регистрация в процессе); файл .cer сертификата SAT компании; доверенность представителя, если полномочия не указаны в уставе; подтверждение адреса компании, если фактический адрес отличается от CSF. Удостоверения: действующее удостоверение представителя (INE или паспорт); INE или паспорт каждого бенефициарного владельца с долей от 25%.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Файл .cer — как его получить?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Нужен .cer е.firma вашей компании, не CSD (который используется для счетов). Чтобы понять, какой у вас: его получали в офисе SAT или сгенерировали онлайн? Онлайн выдаётся только CSD. По имени файла: CSD начинаются с «CSD_», е.firma — нет. .cer е.firma обычно на компьютере, где оформляли, или у бухгалтера; можно скачать заново на портале SAT.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Собрав все документы, как их загрузить?</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Я был в офисе SAT и сохранил их на флешку</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Заявку на счёт PM можно оформить по этой ссылке. Рекомендуем веб-версию — удобнее загружать документы с компьютера.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">18 сен, 16:59–21:31 · <code>9e98ef30</code>, <code>e074a18f</code>, <code>d475c32a</code>, <code>f1607c3d</code>, <code>cbb3b8c5</code> — создан IT-527563</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Не получается загрузить информацию для открытия счёта юридического лица. Мехико, Коякан. Начал 27 августа, но открылось как физическое лицо с предпринимательской деятельностью, запросил отмену и возобновил только 8-го; сегодня загрузил CSF через сайт по присланной ссылке.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, сначала была заявка как юридического лица, а сейчас хотите как физическое лицо. Верно?</div></div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Нет, наоборот — счёт открыли как физическое лицо, а мне нужен именно ЮРИДИЧЕСКОГО ЛИЦА.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Открытие счёта юрлица в Мехико не должно занимать так много времени, максимум от минуты до двух часов. Номер тикета: IT-527563. Ориентировочная дата решения: 21 сентября.</div></div>
+        <div class="chat-session"><div class="session-meta">11 сен, 10:33 · <code>eebb3074</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Какой именно файл нужен?</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Тот, в конце названия которого «.cer».</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Если навести курсор на файл, появится полное название.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">22 сен, 12:15–12:49 · <code>63500c78</code>, <code>ac86c075</code> — переоткрытие</div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо, но нужна отдельная фотография с физического удостоверения (INE). … Уже направил в соответствующий отдел для ответа.</div></div>
+        <div class="chat-session"><div class="session-meta">18 сен, 16:59 · <code>9e98ef30</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Можете помочь? Не получается загрузить информацию для открытия счёта юридического лица</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Хесус, возобновляем работу по вашему обращению.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо за ожидание. Прежде чем разбираться в ситуации, хотел бы задать несколько вопросов. У вас есть время?</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">18 сен, 20:40 · <code>e074a18f</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Хесус, не могли бы вы подсказать, в каком муниципалитете или городе зарегистрирован адрес вашей компании? С этими данными мы сразу проверим покрытие в вашем регионе.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">18 сен, 21:14 · <code>d475c32a</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Мехико, муниципалитет Коякан</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Большое спасибо за подтверждение. Когда вы подали заявку на счёт юридического лица — только сегодня или уже несколько дней назад? И через сайт или через приложение?</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">18 сен, 21:20 · <code>f1607c3d</code></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Начал 27 августа, но открылось как физическое лицо с предпринимательской деятельностью, я запросил отмену и возобновил процесс только 8-го, так как ждал, пока отменят предыдущую заявку; сегодня загрузил CSF и надеюсь, что теперь всё пройдёт</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Начал в приложении, а сегодня загрузил CSF через сайт, потому что мне прислали ссылку</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, в таком случае сначала у вас была заявка как у юридического лица, а сейчас вы хотите открыть как физическое лицо с предпринимательской деятельностью. Верно, или я что-то перепутал?</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">18 сен, 21:26–21:31 · <code>cbb3b8c5</code> — создан IT-527563</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Нет, было наоборот — счёт открыли как физическое лицо с предпринимательской деятельностью, а мне нужен именно счёт ЮРИДИЧЕСКОГО ЛИЦА</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо, Хесус, дайте минуту — открытие счёта юридического лица в Мехико на самом деле не должно занимать так много времени; максимум от минуты до двух часов. Я создам тикет, чтобы вам помочь.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо, спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, что эскалировал ваш случай в соответствующую команду, специалист IT свяжется с вами. Номер тикета: IT-527563. Ориентировочная дата решения: 21 сентября 2026.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Спасибо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Хесус, спасибо за обращение. Хорошего вечера.</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">22 сен, 12:15 · <code>63500c78</code></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо, Хесус, но нужна отдельная фотография с физического удостоверения (INE).</div></div>
+        </div>
+        <div class="chat-session"><div class="session-meta">22 сен, 12:49 · <code>ac86c075</code> — переоткрытие</div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо, уже направил в соответствующий отдел для ответа.</div></div>
         </div>
       </details>
     </div>
@@ -679,49 +946,64 @@
   <!-- ═══════════ CASE 9 ═══════════ -->
   <div class="case" id="c9">
     <div class="case-head">
-      <div class="ticket-row">
-        <span class="title">Кейс 9 · Brayan Arturo Guerrero Gonzalez — незавершённая заявка PFAE от 15 июля: банер «заполните заявку» нельзя убрать самому</span>
-        <span class="badge b-green">Решён</span>
-        <span class="badge b-product">🧩 Продукт</span>
-      </div>
-      <div class="meta">3 чата по вопросу · 1 тикет · заявка 15 июл → 20 – 22 сен</div>
+      <div class="ticket-row"><span class="title">Кейс 9 · Brayan Arturo Guerrero Gonzalez — незавершённая заявка PFAE от 15 июля: банер «заполните заявку» нельзя убрать самому</span><span class="badge b-green">Решён</span><span class="badge b-product">🧩 Продукт</span></div>
+      <div class="meta">3 чата по вопросу · 0 звонков · 1 тикет · заявка 15 июл → 20 – 22 сен</div>
     </div>
     <div class="case-body">
       <div class="ids">
         <div><span class="k">customer_id</span>509b879b-2775-4637-adf5-84aebbb20e37</div>
         <div><span class="k">legal_entity_id</span>6c1a90bf-c419-4ebc-8711-0242ee193af9 (PFA)</div>
-        <div><span class="k">счёт в ACCOUNTS</span>нет · клиент — держатель кредитной карты (Individual), 87 обращений с мая, в основном по спорам по списаниям</div>
+        <div><span class="k">счёт в ACCOUNTS</span>нет · держатель кредитной карты (Individual), 87 обращений с мая — споры по списаниям</div>
         <div><span class="k">task_id</span>6eabae56-972a-40d3-acf1-05b4db766abf (Inbound PyME Chats) · 44ddd6e7-78af-40b2-99e7-ef38dcee431f (эскалация) · 68d6bdee-23bc-56f3-8e36-d4bd8f08faef (it_support_communications) · заявка <code>202607151545_PFAEGolden_GBlouPXEK</code></div>
       </div>
       <div class="timeline">
-        <div class="tl-step">15 июл — начата заявка PFAE, не завершена; банер «complete your application» в приложении</div><span class="tl-arrow">→</span>
-        <div class="tl-step">20 сен 22:38 — просит убрать банер и отменить заявку; IT-528788</div><span class="tl-arrow">→</span>
+        <div class="tl-step">15 июл — начата заявка PFAE, не завершена; банер в приложении</div><span class="tl-arrow">→</span>
+        <div class="tl-step">20 сен 22:38 — просит убрать банер и отменить; IT-528788</div><span class="tl-arrow">→</span>
         <div class="tl-step warn">21 сен 13:50 — повторное обращение, эскалация</div><span class="tl-arrow">→</span>
-        <div class="tl-step">22 сен 13:53 — <code>CANCEL_RESULT_SUCCESS</code>; 15:30 клиенту: «счёт PFAE отменён»</div>
+        <div class="tl-step">22 сен — <code>CANCEL_RESULT_SUCCESS</code>, клиенту сообщено</div>
       </div>
-      <div class="product-box">
-        <span class="lbl">🧩 Обсудить с продуктом</span>
-        Незавершённую заявку на бизнес-счёт нельзя отменить из приложения — только через тикет в IT; банер «заполните заявку» висел два месяца. Предмет: кнопка «отменить заявку» / «скрыть» на банере и автозакрытие заявок без активности N дней.
+      <div class="summary-box">
+        <h4>Что не так</h4>
+        <ul>
+          <li>Незавершённую заявку на бизнес-счёт клиент не может отменить из приложения — только через тикет в IT; банер висел 2 месяца.</li>
+          <li>Клиент — физлицо с кредитной картой, бизнес-счёт ему не нужен; 21 сен в чате по спору по карте он ещё раз просил закрыть «физическую карту и бизнес-счёт» — агент другой очереди не видел открытого IT-528788.</li>
+          <li>Срок «21 сен» назван на тикет, созданный в ночь на 21-е; эскалация «повторное обращение» в тот же день.</li>
+        </ul>
+        <h4>Экшн-поинты</h4>
+        <ul>
+          <li>Продукт: кнопка «отменить заявку» / «скрыть» на банере; автоархив заявок без активности N дней.</li>
+          <li>CS: при первом обращении сразу запускать отмену по процедуре (как в IT-495664), не ждать повторного; видимость открытых IT-тикетов клиента для агентов других очередей.</li>
+        </ul>
       </div>
+      <div class="product-box"><span class="lbl">🧩 Обсудить с продуктом</span>Самостоятельная отмена незавершённой заявки и поведение банера «complete your application».</div>
       <div class="tickets">
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-528788" target="_blank" rel="noopener">IT-528788</a> · Corporate Banking / Lending · создан 21 сен 04:43 · <b>эскалирован 21 сен 20:01</b> («повторное обращение») · 22 сен 13:53: <code>applicationId 202607151545_PFAEGolden_GBlouPXEK — CANCEL_RESULT_SUCCESS</code> · решён 22 сен 13:54: «Процесс PFAE отменён». Приоритет High.</div>
       </div>
-      <div class="calls-note">Звонки: нет. Чаты из Snowflake (<code>t_cs_bot_chats</code>): остальные обращения клиента 20–22 сен — споры по списаниям TikTok/Apple по кредитной карте, не по теме кейса.</div>
-      <details class="chat-toggle">
-        <summary>Полная история чатов по вопросу (3 диалога, RU)</summary>
-        <div class="chat-session">
-          <div class="session-meta">20 сен, 22:38 · <code>6eabae56</code> · очередь Inbound PyME Chats — создан IT-528788</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хочу убрать это «заполните заявку». Не хочу, чтобы это показывалось. Отмените заявку, пожалуйста.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Это потому, что вы начали заявку на бизнес-счёт. Дайте пять минут, оформлю отчёт. Номер тикета: IT-528788. Ориентировочная дата решения: 21 сентября.</div></div>
+      <div class="calls-note">Звонки: записей нет. Остальные обращения клиента 20–22 сен (споры по списаниям TikTok/Apple по кредитной карте) — не по теме кейса; источник чатов — Snowflake <code>t_cs_bot_chats</code>.</div>
+      <details class="chat-toggle"><summary>Полная история чатов по вопросу (3 диалога, RU)</summary>
+        <div class="chat-session"><div class="session-meta">20 сен, 22:38 · <code>6eabae56</code> · Inbound PyME Chats — создан IT-528788</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хочу, чтобы мне убрали это «заполнить заявку»</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Не хочу, чтобы это показывалось</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Отмените заявку, пожалуйста</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Брайан, возобновляем работу по вашему обращению.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Это потому, что вы начали заявку на бизнес-счёт.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Дайте пять минут, пожалуйста. Оформлю соответствующий отчёт.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хорошо</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Подтверждаю, что эскалировала ваш случай в соответствующую команду, специалист IT свяжется с вами. Номер тикета: IT-528788. Ориентировочная дата решения: 21 сентября 2026.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Брайан, спасибо за обращение. Хорошего дня.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">21 сен, 13:50 · <code>44ddd6e7</code> — повторное обращение (эскалация)</div>
-          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хочу, чтобы убрали это «заполните заявку». Говорят, что решат быстро.</div></div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">Вижу, что тикет по этой причине уже создан и открыт. Подождите, пока специализированный отдел свяжется с вами.</div></div>
+        <div class="chat-session"><div class="session-meta">21 сен, 13:50 · <code>44ddd6e7</code> — повторное обращение (эскалация)</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Да</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хочу, чтобы убрали это «заполните заявку»</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Ну смотрите, у меня есть защита покупок и что там ещё</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Говорят, что решат быстро</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Дайте минуту проверить информацию.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Спасибо за ожидание. Вижу, что вы уже создали тикет по этой причине, он открыт. Прошу подождать, пока специализированный отдел свяжется с вами для решения.</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю и вижу, что тикет уже создан; нужно подождать, пока специализированный отдел его решит.</div></div>
         </div>
-        <div class="chat-session">
-          <div class="session-meta">22 сен, 07:59 · <code>68d6bdee</code> · it_support_communications</div>
-          <div class="msg agent"><div class="who">Агент</div><div class="txt">В продолжение вашего обращения подтверждаем: коммерческий счёт PFAE успешно отменён.</div></div>
+        <div class="chat-session"><div class="session-meta">22 сен, 07:59 · <code>68d6bdee</code> · it_support_communications</div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Здравствуйте. В продолжение вашего обращения подтверждаем: коммерческий счёт PFAE успешно отменён. Остаёмся на связи по любым вопросам. Команда Plata.</div></div>
         </div>
       </details>
     </div>

@@ -638,13 +638,20 @@ def _process_one_conversation(conv_id: str):
         # Перевод реплик
         transcript = list(c.transcript)
         all_translated = True
+        attempted = translated = 0
         for turn in transcript:
             if turn.get("text") and not turn.get("text_en"):
+                attempted += 1
                 t_en = translate_to_english(turn["text"])
                 if t_en:
                     turn["text_en"] = t_en
+                    translated += 1
                 else:
                     all_translated = False
+        if attempted and not translated:
+            # сервис перевода не отвечает: ничего не коммитим, диалог остаётся pending,
+            # воркер/батч получают False и делают паузу вместо бесконечного перебора
+            return False
         c.transcript = transcript
         flag_modified(c, "transcript")
 
@@ -1398,8 +1405,11 @@ def _pending_worker_loop():
                 if c.created_at:
                     dirty_days.add(c.created_at.date().isoformat())
             gdb.close()
-            for cid in ids:
-                _process_one_conversation(cid)
+            progressed = [_process_one_conversation(cid) for cid in ids]
+            if not any(progressed):
+                print("[pending-worker] перевод не идёт ни по одному диалогу (API недоступен?) — пауза 5 мин")
+                time.sleep(300)
+                continue
             time.sleep(1)
         except Exception as e:
             print(f"[pending-worker] {e}")

@@ -6,7 +6,7 @@ import time
 import threading
 import warnings
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List
 import httpx
 from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -736,6 +736,83 @@ def requeue_incomplete_translations(dry_run: bool = True, limit: int = 0):
             db.commit()
         return {"scanned_done": len(rows), "affected": len(affected),
                 "requeued": requeued, "dry_run": dry_run}
+    finally:
+        db.close()
+
+
+@app.get("/admin/untranslated-turns")
+def untranslated_turns(limit: int = 0, offset: int = 0, status: Optional[str] = None):
+    """Реплики без перевода (text есть, text_en нет) для внешнего перевода.
+    limit=0 — только статистика (сколько диалогов/реплик/символов).
+    limit>0 — первые `limit` диалогов начиная с `offset` (порядок по id),
+    каждый как {id, status, turns:[{i, role, text}]} — только непереведённые реплики.
+    status=done|pending — ограничить статусом (по умолчанию оба)."""
+    db = SessionLocal()
+    try:
+        q = db.query(DBConversation).filter(DBConversation.transcript.isnot(None))
+        if status:
+            q = q.filter(DBConversation.status == status)
+        convs = 0; turns = 0; chars = 0; items = []
+        skipped = 0
+        for c in q.order_by(DBConversation.id).yield_per(500):
+            missing = [(i, t) for i, t in enumerate(c.transcript or [])
+                       if t.get("text") and not t.get("text_en")]
+            if not missing:
+                continue
+            convs += 1
+            turns += len(missing)
+            chars += sum(len(t["text"]) for _, t in missing)
+            if limit:
+                if skipped < offset:
+                    skipped += 1
+                    continue
+                if len(items) < limit:
+                    items.append({"id": c.id, "status": c.status,
+                                  "turns": [{"i": i, "role": t.get("role"), "text": t["text"]}
+                                            for i, t in missing]})
+        return {"conversations": convs, "turns": turns, "chars": chars, "items": items}
+    finally:
+        db.close()
+
+
+class TranslationItem(BaseModel):
+    id: str
+    turns: dict   # {"<index>": "<english text>"}
+
+
+@app.post("/admin/translations")
+def upload_translations(items: List[TranslationItem]):
+    """Заливка готовых переводов: [{id, turns:{"3":"...", "7":"..."}}].
+    Пишет text_en только в реплики, где его ещё нет (существующий перевод не трогает).
+    Статус не меняет: done остаётся done; pending дальше обработает воркер
+    (перевод уже на месте, останется классификация)."""
+    db = SessionLocal()
+    try:
+        updated_convs = 0; updated_turns = 0; missing_ids = []
+        for item in items:
+            c = db.query(DBConversation).filter_by(id=item.id).first()
+            if not c:
+                missing_ids.append(item.id)
+                continue
+            transcript = list(c.transcript or [])
+            changed = 0
+            for k, en in item.turns.items():
+                try:
+                    i = int(k)
+                except (TypeError, ValueError):
+                    continue
+                if 0 <= i < len(transcript) and transcript[i].get("text") \
+                        and not transcript[i].get("text_en") and isinstance(en, str) and en.strip():
+                    transcript[i] = dict(transcript[i], text_en=en.strip())
+                    changed += 1
+            if changed:
+                c.transcript = transcript
+                flag_modified(c, "transcript")
+                updated_convs += 1
+                updated_turns += changed
+        db.commit()
+        return {"received": len(items), "updated_conversations": updated_convs,
+                "updated_turns": updated_turns, "missing_ids": missing_ids}
     finally:
         db.close()
 

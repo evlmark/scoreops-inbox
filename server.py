@@ -708,6 +708,31 @@ def process_conversations(batch: int = 5):
     return {"processed_this_batch": processed, "remaining_pending": remaining, "done": remaining == 0}
 
 
+@app.post("/admin/requeue-incomplete-translations")
+def requeue_incomplete_translations(dry_run: bool = True, limit: int = 0):
+    """Находит done-диалоги, где перевод какой-то реплики так и не прошёл (text есть,
+    text_en нет) — последствие старого поведения _process_one_conversation, которое
+    закрывало диалог как done даже при ошибке translate_to_english() на части реплик.
+    dry_run=True (по умолчанию) — только считает, ничего не меняет.
+    dry_run=false — возвращает их в pending (не больше `limit`, 0 = все), чтобы
+    /admin/process-conversations доперевёл только недостающие реплики."""
+    db = SessionLocal()
+    try:
+        rows = db.query(DBConversation).filter_by(status="done").all()
+        affected = [c for c in rows
+                    if any(t.get("text") and not t.get("text_en") for t in (c.transcript or []))]
+        requeued = 0
+        if not dry_run:
+            for c in (affected[:limit] if limit else affected):
+                c.status = "pending"
+                requeued += 1
+            db.commit()
+        return {"scanned_done": len(rows), "affected": len(affected),
+                "requeued": requeued, "dry_run": dry_run}
+    finally:
+        db.close()
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  ТОПИКИ (управляемый словарь)
 # ══════════════════════════════════════════════════════════════════════════════

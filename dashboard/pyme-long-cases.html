@@ -77,6 +77,8 @@
   .call-box .call-meta { font-size:11px; color:#be185d; font-weight:700; margin-bottom:6px; }
   .call-box .tr { color:#374151; line-height:1.55; }
   .excluded { font-size:12px; color:#9ca3af; margin:6px 0 10px; }
+  .csmeta { font-size:12px; color:#4b5563; background:#f9fafb; border-left:3px solid #c7d2fe; padding:6px 10px; margin-bottom:14px; }
+  .csmeta b { color:#3730a3; }
   .insight { background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:14px 18px; font-size:13px; color:#78350f; margin-bottom:20px; }
   .insight b { color:#92400e; }
   h2.section-title { font-size:15px; font-weight:700; color:#374151; margin:0 0 12px; }
@@ -109,7 +111,8 @@
   <div class="insight"><b>2. Заявка на юрлицо создаёт счёт физлица — 3 из 9.</b> Кейсы 1, 2, 8. В звонке 31 авг (кейс 8) агент видит в заявке Jesús поля «бенефициары ≥ 25 %» (только для PM) при уже открытом PFAE-счёте с планом Emprendedor и называет это «технической ошибкой».</div>
   <div class="insight"><b>3. Письма специалистов (<code>it_support_communications</code>) не всегда совпадают с тем, что говорят в чате.</b> Víctor 15 сен получает письмо «31 августа мы запросили у вас пояснение» — вопрос, на который он ответил 31 августа. Emiliano 24 сен получает письмом номер счёта, а 23 сен агент в чате утверждал «номера счёта нет, только CLABE».</div>
   <div class="insight"><b>4. Тариф «Emprendedor» включается по ошибке/«пробный период», а отключить можно только по телефону.</b> Кейсы 10, 11, 12, 15 + ещё 5 клиентов за ту же неделю. Клиенты без телефонной связи (Jean, кейс 10) остаются с платным планом; Yony закрыл весь бизнес-профиль, потому что не нашёл, как отменить план.</div>
-  <div class="insight"><b>5. Звонки.</b> Расшифровки есть только у звонков Jesús 31 авг (кейс 8: 72 с и 27 мин). У Daniel (11 и 25 сен), Yony (22 сен), Talina (24 сен), Enrique B. (31 авг) — записи mp3 без расшифровки; длительности указаны в кейсах.</div>
+  <div class="insight"><b>5. Сверка с «[CS] Tasks Raw Data» (Superset #453, <code>t_task_act_extra_data</code>).</b> Списки тасок совпадают. По оценке агентов <b>101 из 139</b> тасок с оценкой в кейсах — «Not solved»; «Solved» в основном — автоматические письма специалистов. CSAT оставлен в 27 тасках: 👍 22, 👎 5 (Víctor ×3, Liliana 29 сен, Daniel — звонок 25 сен). QA-оценка есть только у одной таски (Oscar, 12 сен, Debit-очередь, 2 балла). В каждом кейсе — строка «CS Tasks Raw Data».</div>
+  <div class="insight"><b>6. Звонки.</b> Расшифровки есть только у звонков Jesús 31 авг (кейс 8: 72 с и 27 мин). У Daniel (11 и 25 сен), Yony (22 сен), Talina (24 сен), Enrique B. (31 авг) — записи mp3 без расшифровки; длительности указаны в кейсах.</div>
 
   <div class="card">
     <h2 class="section-title">Сводка</h2>
@@ -180,6 +183,7 @@
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-522714" target="_blank" rel="noopener">IT-522714</a> · Corporate Banking / Lending / Application on hold · создан 14 сен 16:05 · 15 сен 07:46: «31 августа мы запросили у клиента пояснение, чтобы исключить управление средствами третьих лиц» · <b>переоткрыт 17 сен 16:13</b> («клиент сообщает, что уже ответил в срок и повторяет ответ сегодня») · решён 18 сен 08:44: «Спасибо, передали информацию ответственной команде». Метка <code>KYB_review</code>.</div>
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-535873" target="_blank" rel="noopener">IT-535873</a> · создан 28 сен в чате (срок назван «29 сен»); 29 сен письмо специалистов: «рассмотрение заявки Persona Moral занимает больше времени из-за технической проблемы, срока нет».</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b> (Superset #453 / <code>t_task_act_extra_data</code>): 14 тасок с оценкой агента — <b>8 «Not solved»</b>, 6 «Solved» (из них 4 — автоматические письма специалистов); CSAT: 👍 14 авг, 25 авг, 31 авг, 14 сен · <b>👎 17 авг, 18 сен, 28 сен</b>; QA-оценок нет. Описания агентов при переводе: «Cancelar solicitud por RFC incorrecto», «Envía respuestas», «Estatus de su solicitud», «Info de su cuenta PYME».</div>
       <div class="calls-note">Звонки: записей нет.</div>
       <details class="chat-toggle"><summary>Полная история чатов (16 диалогов, RU)</summary>
         <div class="excluded">Исключено как не по теме: 27 авг — 3 чата про открытие счёта Plata Inversiones (ошибка «обратитесь в поддержку» в анкете, IT-507746, ответ 28 авг: выбрать «не аффилирован»).</div>
@@ -334,8 +338,9 @@
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-519275" target="_blank" rel="noopener">IT-519275</a> · Corporate Banking / Lending / Application on hold · создан 9 сен 21:06 → решён 10 сен 11:38. Описание: «клиент подавал на PM, открылся PFAE; проверьте статус PM; выдача 1 сентября, обновлений нет». Резолюция: «По учредительным документам и налоговому адресу компания зарегистрирована в Chihuahua, а основная коммерческая и логистическая деятельность ведётся из Monterrey — запросить у клиента пояснение и подтверждение адреса, если операции в MTY».</div>
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-523204" target="_blank" rel="noopener">IT-523204</a> · Corporate Banking / Lending / Application on hold · создан 14 сен 22:51 · 15 сен внутренняя ссылка на IT-519275 · <b>эскалации 17 сен 15:09 и 18 сен 15:32</b> («повторное обращение») · решён 22 сен 11:44: «К сожалению, рассмотрение заявки Persona Moral занимает больше времени, чем ожидалось. Просим подождать». Приоритет Highest, метка <code>KYB_review</code>.</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: 17 тасок с оценкой — <b>14 «Not solved»</b>, 3 «Solved» (письмо специалистов + 2 системные); CSAT: 👍 9 сен, 14 сен · <b>👎 29 сен</b>; QA нет. Описания агентов: «consulta cuenta empresa», «Duda PYME», «Respuesta cuenta de empresa», «apertura de cuenta pyme», «Quiere saber si hay respuesta…», «duda de su cuenta pyme» (1 окт).</div>
       <div class="calls-note">Звонки: записей нет.</div>
-      <details class="chat-toggle"><summary>Полная история чатов (19 диалогов, RU)</summary>
+      <details class="chat-toggle"><summary>Полная история чатов (20 диалогов, RU)</summary>
         <div class="chat-session"><div class="session-meta">9 сен, 14:54 · <code>cc9cdf52-61f8-424c-b944-7341dea316dc</code> — создан IT-519275</div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Я уже активировала бизнес-платформу, но там указано моё имя, а не название компании</div></div>
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Разве не должно отображаться название компании?</div></div>
@@ -462,6 +467,13 @@
           <div class="msg client"><div class="who">Клиент</div><div class="txt">Подтверждение адреса</div></div>
           <div class="msg agent"><div class="who">Агент</div><div class="txt">Понимаю, как важно уже получить ответ, Лилиана. Сожалею о происходящем и о неудобствах. К сожалению, на данный момент мы ничего не можем с этим сделать — только ждать. Я также не могу назвать ориентировочный срок ответа, так как процессы в целом задерживаются. Мы делаем всё возможное, чтобы дать вам ответ; ваш случай находится на контроле.</div></div>
         </div>
+        <div class="chat-session"><div class="session-meta">1 окт, 10:22–10:27 · <code>4c9cdfbd-08c6-4461-a3e8-9dae915890a3</code> (перед этим <code>eaaa69da</code>, Inbound Chats: «Мне пришло сообщение загрузить документы для открытия счёта компании» — бот переводит в спец. отдел) — последнее сообщение в системе</div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Что мы уже делали дважды</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Лилиана, возобновляем работу по вашему обращению. Пришлите, пожалуйста, скриншот запроса информации.</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt"><span class="file-chip">📎 скриншот</span> Мы снова загрузили эту информацию</div></div>
+          <div class="msg client"><div class="who">Клиент</div><div class="txt">Хотя с этим разом её запрашивают уже 3 раза</div></div>
+          <div class="msg agent"><div class="who">Агент</div><div class="txt">Сообщаем, что процесс рассмотрения вашей заявки на открытие счёта Persona Moral занимает больше времени, чем ожидалось, из-за технических неполадок. На данный момент мы не можем назвать ориентировочную дату решения. Благодарим за терпение; уведомим вас через приложение, как только появится обновление.</div></div>
+        </div>
       </details>
     </div>
   </div>
@@ -505,6 +517,7 @@
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-526175" target="_blank" rel="noopener">IT-526175</a> · Business Silver / Cards / cannot link a card · создан 17 сен · <b>переоткрыт 20 сен 03:34</b> (клиент повторил шаги, ошибка та же; запрошена ручная привязка; PRN 800039924140, ····3584) · 22 сен 11:44 лог ошибки бэкенда · решён 22 сен 13:28: «Проблема решена. Попросите клиента активировать бизнес-карту».</div>
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-526193" target="_blank" rel="noopener">IT-526193</a> · Plata Crédito / Problems linking the card · создан 17 сен 23:09 → решён 18 сен 08:34: «Карта привязана к счёту» (PRN 800054323558, ····1614). Блокировался задачей <code>IT-473446 Manual card linking v.2</code>.</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: 7 тасок с оценкой — 4 «Not solved», 3 «Solved» (все три — письма специалистов); CSAT: 👍 17 сен; QA нет. Описание агента 17 сен: «cliente vinculó la tarjeta de crédito en la de empresa por error».</div>
       <div class="calls-note">Звонки: записей нет.</div>
       <details class="chat-toggle"><summary>Полная история чатов (8 диалогов, RU)</summary>
         <div class="chat-session"><div class="session-meta">17 сен, 16:30 · <code>b0dfe87c</code></div>
@@ -618,6 +631,7 @@
       <div class="tickets">
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-526437" target="_blank" rel="noopener">IT-526437</a> · Customer details / Change the company's registered address · создан 18 сен 02:23 · 18 сен 02:23 автокомментарий с User Hash ID · <b>эскалирован 25 сен 15:43</b> («повторное обращение») · статус Work in progress, резолюции нет. Приоритет High.</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: 5 тасок с оценкой — 3 «Not solved», 2 «Solved»; CSAT: 👍 11 сен (звонок), 17 сен · <b>👎 25 сен (звонок после чата)</b>; QA нет. Описание агента 17 сен: «actualización de datos»; теги 25 сен: «Tickets - Status», «Profile - Document requests».</div>
       <div class="calls-note">Звонки: <b>11 сен 13:58</b> — входящий в Inbound PyME Calls (1 с, сорвался), агент Rocío Sánchez перезвонила: исходящий 10 мин 2 с (<code>765e9691-12ed-4ba7-a243-cd851c866ca0</code>, статус resolved) — за 6 дней до чата про адрес; расшифровки нет, только запись. <b>25 сен 09:43</b> — входящий 71 с (<code>135cbf89-499f-4ed0-927d-aeffaffff031</code>, агент Pedro López, пометка «после чата»), сразу после чата об эскалации; расшифровки нет.</div>
       <details class="chat-toggle"><summary>Полная история чатов (3 диалога, RU)</summary>
         <div class="chat-session"><div class="session-meta">17 сен, 20:14–20:15 · <code>812c65d7-2709-4a3b-a265-e1d11e36303c</code> · Inbound Chats</div>
@@ -685,6 +699,7 @@
       <div class="tickets">
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-527184" target="_blank" rel="noopener">IT-527184</a> · Corporate Banking / Lending / Application on hold · создан 18 сен 21:44 · 22 сен 10:54 резолюция: «используйте ссылку по типу бизнеса: PM bancoplata.mx/en/empresa/pyme, PFAE …/pfae» · <b>переоткрыт 24 сен 17:35</b>: «клиент: при клике по ссылке перенаправляет в приложение, где только сообщение о рассмотрении, не показывает, что заявка не завершена» · решён 25 сен 08:06: «Клиент ожидает проверки документов, что занимает время; вы получите уведомление по завершении».</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: 6 тасок с оценкой — 4 «Not solved», 2 «Solved» (оба — письма специалистов); CSAT нет; QA нет. Описания агентов: «Solicita informes de empresas», «cliente tiene dudas».</div>
       <div class="calls-note">Звонки: записей нет.</div>
       <details class="chat-toggle"><summary>Полная история чатов (7 диалогов, RU)</summary>
         <div class="chat-session"><div class="session-meta">18 сен, 15:35–15:45 · <code>10ce0a24-b04f-4512-ae55-7204a44876bb</code></div>
@@ -770,6 +785,7 @@
       <div class="tickets">
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-526009" target="_blank" rel="noopener">IT-526009</a> · Corporate Banking / Lending / Application on hold · создан 17 сен 20:27 · 18 сен 18:49 резолюция: «обновить giro (вид деятельности) в CSF — не соответствует сайту и данным компании» · <b>переоткрыт 20 сен 00:45</b> (клиент: CSF и учредительный акт совпадают, просит указать расхождение) · решён 22 сен 11:46: «К сожалению, рассмотрение заявки Persona Moral занимает больше времени, чем ожидалось».</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: 11 тасок с оценкой — 6 «Not solved», 5 «Solved» (2 письма специалистов, чаты 6 авг и 29 авг, системная 21 сен); CSAT нет; QA нет. Описания агентов: «desea abrir una cuenta empresarial», «información de cuenta empresarial», «seguimiento de apertura de cuenta empresarial», «dudas de Plata Empresa»; тег 19 сен: «PyMe - Application - Issues with documents».</div>
       <div class="calls-note">Звонки: записей нет.</div>
       <details class="chat-toggle"><summary>Полная история чатов (12 диалогов, RU)</summary>
         <div class="excluded">Исключено как не по теме: 27 июл — чат про 10 % кэшбэка Prixz (IT-477767, пересчёт выполнен 31 июл).</div>
@@ -888,6 +904,7 @@
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-527423" target="_blank" rel="noopener">IT-527423</a> · Silver Business / Account access and management · создан 19 сен 01:08 · 22 сен 16:38: «Номер расчётного счёта PFAE — 70738342206166» · <b>переоткрыт 23 сен 21:30</b> («клиент просил номер счёта, а ему прислали номер дела; CLABE не нужна») · решён 24 сен 07:30: «Мы отправили клиенту номер счёта. CLABE — другой номер, виден в приложении. Номер счёта: 70738342206166; CLABE: 646180405600478416».</div>
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-531845" target="_blank" rel="noopener">IT-531845</a> · Business Account / Account statements · создан 23 сен 21:50 → решён 24 сен 13:23: «Все выписки формируются и отправляются 1-го числа каждого месяца». Команда BackOffice.</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: 9 тасок с оценкой — 5 «Not solved», 4 «Solved» (3 письма специалистов + системная); CSAT: 👍 18 сен (чат с CLABE); QA нет. Описания агентов: «Solicita informes de empresa», «Dudas» (23 сен).</div>
       <div class="calls-note">Звонки по теме: нет (2 звонка 31 авг — про сбой приложения при оплате кредитной карты, не по теме). После писем 24 сен клиент в чат не возвращался.</div>
       <details class="chat-toggle"><summary>Полная история чатов по вопросу (9 диалогов, RU)</summary>
         <div class="chat-session"><div class="session-meta">18 сен, 16:29–16:30 · <code>cab113d1-71bb-4fdb-9f68-ac3c26491e1b</code> · Inbound Chats</div>
@@ -1003,6 +1020,7 @@
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-510628" target="_blank" rel="noopener">IT-510628</a> · Plata Business / Account access / Close account · создан 31 авг 19:56 · 1 сен 11:27: «закрытие бизнес-счетов и профиля может занять до 60 дней» · решён 7 сен 14:24: «Бизнес-профиль закрыт, все счета и карты закрыты». Описание: «клиент запросил PM, открыт PFAE; просим закрыть, приложены доказательства, что процесс был пройден правильно».</div>
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-527563" target="_blank" rel="noopener">IT-527563</a> · Corporate Banking / Loan Origination / Application on hold · создан 19 сен 03:29 · 21 сен 13:59 и 22 сен 11:04: ссылки PM/PFAE на сайт, «проверка документов занимает время» · <b>переоткрыт 22 сен 18:53</b> («клиент отправил запрошенные документы») · решён 23 сен 11:22: «Заполните данные всех UBO и загрузите цветные копии удостоверений María Norma Juárez Ibarra и Jessica Miriam Ramirez Ortiz (доля участия не указана)».</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: 19 тасок с оценкой — <b>14 «Not solved»</b>, 5 «Solved» (3 письма специалистов, чат 27 авг, системная); CSAT: 👍 31 авг (звонок с Laura), 18 сен; QA нет. Описание 4-го звонка 31 авг (<code>e47256c7</code>): «TH solicita informes sobre la apertura de su cuenta empresarial ya que le piden documentos adicionales»; 22 сен тег «App - Selfie».</div>
       <div class="calls-note">Звонки 31 авг (все входящие, с номера клиента): 12:58 <code>9c65b0c2</code> — не отвечен (101 с ожидания); 13:00 <code>8146d9da</code> — 1 с; 13:08 <code>95f6737b</code> (Inbound Calls, 68 с, расшифровка ниже) — переведён; 13:30 <code>16c28a05</code> (Inbound PyME Calls, 27 мин 43 с, агент Laura Álvarez, расшифровка ниже).</div>
       <details class="chat-toggle"><summary>Полная история чатов и звонков (18 чатов + 2 расшифровки, RU)</summary>
         <div class="chat-session"><div class="session-meta">27 авг, 17:17–17:20 · <code>ac71f7b3-99da-4be7-ad25-4dd6b3a76bf2</code> · Inbound Chats</div>
@@ -1147,6 +1165,7 @@
       <div class="tickets">
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-528788" target="_blank" rel="noopener">IT-528788</a> · Corporate Banking / Lending · создан 21 сен 04:43 · <b>эскалирован 21 сен 20:01</b> («повторное обращение») · 22 сен 13:53: <code>applicationId 202607151545_PFAEGolden_GBlouPXEK — CANCEL_RESULT_SUCCESS</code> · решён 22 сен 13:54: «Процесс PFAE отменён». Приоритет High.</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: по теме 4 таски — 2 «Not solved» (20 и 21 сен), 2 «Solved» (чат 21 сен 23:24 и письмо 22 сен); CSAT нет; QA нет. Описания агентов: «Quiere cancelar la solicitud de empresa», «Solicita cierre de cuenta».</div>
       <div class="calls-note">Звонки: записей нет. Не по теме: 3–29 июл — спор по списанию 500 ₱ (AN-491402) и отклонённое повышение кредитного лимита; 20–27 сен — 6 оспариваний покупок TikTok/MercadoLibre по дебетовой карте (AN-622639…649, AN-623623/625, карта заморожена, 2 отказа 25 сен), в т.ч. чат в PyME-очереди 21 сен 23:24 <code>fb358352</code> про те же покупки.</div>
       <details class="chat-toggle"><summary>Полная история чатов по вопросу (3 диалога, RU)</summary>
         <div class="chat-session"><div class="session-meta">20 сен, 22:35–22:44 · <code>6eabae56-972a-40d3-acf1-05b4db766abf</code> · Inbound PyME Chats — создан IT-528788</div>
@@ -1218,6 +1237,7 @@
       <div class="tickets">
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-530827" target="_blank" rel="noopener">IT-530827</a> · Plata Business / Account access and management / Close account · создан 22 сен 23:24 → решён 25 сен 12:11: «Профиль компании закрыт, все счета и карты закрыты». Описание: «клиент просит закрыть бизнес-счёт, больше не хочет его; на счёт поставлен холд».</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: Yony — 4 таски с оценкой: 3 «Not solved», 1 «Solved» (письмо о закрытии); CSAT 👍 22 сен (после звонков); теги звонка: «PyMe - Plans - Plan change», «Plan info &amp; Billing»; описания агентов: «Solicita cierre de cuenta empresarial», «Solicita cancelar el producto emprendedor». Jose Miguel — 22 сен «Solved» 👍, 29 сен «Not solved», описание «Información de cuenta empresarial no solicitada». Jean — «Not solved», 12 сообщений агента.</div>
       <div class="calls-note">Звонки 22 сен: 17:17 входящий на общую линию Inbound Calls (<code>54afd9cd</code>, 220 с, агент Alejandra Ventura, was_successful = false, расшифровки нет); 17:21 два исходящих из Inbound PyME Calls (<code>abee8b8a</code>, Yuletzy Luque, 0 с — не соединились).</div>
       <details class="chat-toggle"><summary>Полная история чатов (Yony — 5, Jose Miguel — 4, Jean — 1; RU)</summary>
         <div class="chat-session"><div class="session-meta">22 сен, 16:37–16:41 · <code>354550a0</code> · Inbound Chats (Yony)</div>
@@ -1352,6 +1372,7 @@
       </div>
       <div class="product-box"><span class="lbl">🧩 Обсудить с продуктом</span>Промо «$50 000» воспринимается как кредитная линия/бонус; платный план по умолчанию; смена плана только по телефону.</div>
       <div class="tickets"><div class="t">Тикетов нет — вопрос закрыт в чате.</div></div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: чат 22 сен — «Solved», CSAT 👍, 19 сообщений агента; описание: «cierre de cuenta PyME»; теги 28 авг: «Cash loan - Application - Rejected».</div>
       <div class="calls-note">Звонки: записей нет.</div>
       <details class="chat-toggle"><summary>Полная история чатов (3 диалога, RU)</summary>
         <div class="chat-session"><div class="session-meta">28 авг, 01:05–01:07 · <code>a74ac706</code> · Inbound Chats</div>
@@ -1423,6 +1444,7 @@
       <div class="tickets">
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-520490" target="_blank" rel="noopener">IT-520490</a> · Customer details / Updating Company details / Change of tax address · создан 11 сен 02:29 → решён 11 сен 11:59: «счёт Telmex выписан на физлицо и не подтверждает налоговый адрес компании; просим актуальную CSF LA SONA с новым адресом».</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: Ramón — 10 тасок с оценкой: <b>8 «Not solved»</b>, 2 «Solved» (чат 10 сен про промо и письмо об адресе); CSAT нет; описания: «Información sobre empresas», «No relacionado con AML PyME», «Seguimiento del registro de su empresa». Antelmo — 2 «Solved», CSAT 👍 10 сен.</div>
       <div class="calls-note">Звонки: записей нет.</div>
       <details class="chat-toggle"><summary>Полная история чатов (Ramón — 12, Antelmo — 2; RU)</summary>
         <div class="chat-session"><div class="session-meta">3 авг, 16:37–17:14 · <code>fb5ccee7</code> → <code>2f85a55e</code> (Ramón)</div>
@@ -1516,6 +1538,7 @@
       </div>
       <div class="product-box"><span class="lbl">🧩 Обсудить с продуктом</span>Apartado 2,5 % не срабатывает для поступлений через агрегаторы (Mercado Pago → свой счёт) — а это основной поток денег у микробизнеса; видимость и объяснение в интерфейсе.</div>
       <div class="tickets"><div class="t">Тикетов нет — вопрос закрыт в чате.</div></div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: 6 тасок с оценкой — 5 «Not solved», 1 «Solved» (12 сен); CSAT: 👍 12 сен, 18 сен; <b>единственная QA-оценка во всех 15 кейсах: 2 (чат 12 сен в Debit-очереди)</b>. Теги 18 сен: «PyMe - Apartado», «PyMe - How it works»; описания: «Solicita información sobre los pagos a su empresa», «duda».</div>
       <div class="calls-note">Звонки: записей нет.</div>
       <details class="chat-toggle"><summary>Полная история чатов (8 диалогов, RU)</summary>
         <div class="chat-session"><div class="session-meta">12 сен, 15:36–16:03 · <code>c4343434</code>, <code>4d1b1b49</code> (Inbound Debit Chats) → <code>0ad5b64c</code> (Inbound PyME Chats)</div>
@@ -1605,6 +1628,7 @@
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-533119" target="_blank" rel="noopener">IT-533119</a> · Plata Crédito / Fees and rewards · создан 24 сен 23:30 → решён 28 сен 22:35: «Возвращаем комиссию однократно». Описание: «клиент сделал перевод по ошибке, но вернул сумму; можно ли списать комиссию 1 125,20?» — о мошенничестве в тикете не сказано.</div>
         <div class="t">Customer Care Back Office · 24 сен — отдельная задача по мошенничеству (текста в выгрузке нет).</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: 4 таски с оценкой — 2 «Not solved» (звонок 16:25, Back Office 28 сен), 2 «Solved» (PyME-чат 24 сен — 16 сообщений агента — и письмо 29 сен); CSAT нет. Теги 24 сен: «PyMe - Account management - Cancellation», «Transactions - Disputes»; описание: «cancelar cuenta pyme».</div>
       <div class="calls-note">Звонки 24 сен: 16:25 входящий 1 с (<code>f66aaab4</code>); 16:27 входящий 125 с (<code>68e1c08b</code>, агент Jessica Avendaño, was_successful = false) — расшифровок нет.</div>
       <details class="chat-toggle"><summary>Полная история чатов (5 диалогов, RU)</summary>
         <div class="chat-session"><div class="session-meta">24 сен, 16:20–16:28 · <code>f75ca478</code>, <code>68e1c08b</code></div>
@@ -1693,6 +1717,7 @@
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-507248" target="_blank" rel="noopener">IT-507248</a> · Silver Business / Account access and management · создан 27 авг 01:18 → решён 17 сен 09:23: «Виджет удалён». Комментарий 27 авг (Volha Mazharouskaya): «первая заявка PFAE была отклонена, поэтому виджет виден, хотя по второй заявке счёт открыт; известная проблема, работаем над исправлением».</div>
         <div class="t"><a href="https://platacard.atlassian.net/browse/IT-534494" target="_blank" rel="noopener">IT-534494</a> · Plata Business / Account access and management / Close account · создан 26 сен 05:04 · <b>Work in progress</b> на 1 окт (в ACCOUNTS счета уже CLOSED). Описание: «клиент хочет закрыть счёт: не выставляет счета, личных счетов достаточно; предложен Independiente — отказался».</div>
       </div>
+      <div class="csmeta"><b>CS Tasks Raw Data</b>: все 5 оценённых тасок по теме — «Solved» (в т.ч. чат 25 сен о закрытии счёта); CSAT: 👍 9 авг, 26 авг. Описания агентов: «Cliente con dudas para afiliar su empresa», «Problema no podemos ingresar a tu cuenta empresarial», «dudas sobre el formato nuevo de empresa»; теги 26 авг: «MSI - Cancellation», «PyMe - How it works».</div>
       <div class="calls-note">Звонки по теме: нет. 31 авг — 2 входящих (26 с и 76 с, расшифровка есть): сбой приложения, платёж на кредитку не отражается — не по теме.</div>
       <details class="chat-toggle"><summary>Полная история чатов по теме (10 диалогов, RU)</summary>
         <div class="chat-session"><div class="session-meta">9 авг, 00:03–00:56 · <code>c8f36924</code> → <code>a39eb17c</code> (Inbound PyME Chats)</div>

@@ -1821,10 +1821,14 @@ document.addEventListener('keydown', e => {
 // ── Topic dictionary (cached) + per-conversation topic editor ──
 let TOPICS = null;
 async function ensureTopics(force) {
-  if (TOPICS && !force) return TOPICS;
-  try { TOPICS = await fetch(`${API}/topics`).then(r => r.json()); }
-  catch (e) { TOPICS = []; }
-  return TOPICS;
+  if (Array.isArray(TOPICS) && !force) return TOPICS;
+  // /topics при истёкшей сессии отдаёт {"error":...}: не кэшируем не-массив, иначе
+  // каждая модалка падает на `for (const t of topics)` ещё до рендера реплик
+  try {
+    const r = await fetch(`${API}/topics`).then(r => r.json());
+    TOPICS = Array.isArray(r) ? r : null;
+  } catch (e) { TOPICS = null; }
+  return TOPICS || [];
 }
 
 const SOURCE_BADGE = {
@@ -1868,7 +1872,7 @@ function topicTagBadges(c) {
 function renderTopicEditor(c) {
   const el = document.getElementById('conv-topic-editor');
   if (!el) return;
-  const topics = TOPICS || [];
+  const topics = Array.isArray(TOPICS) ? TOPICS : [];
   // group by category for optgroups
   const byCat = {};
   for (const t of topics) (byCat[t.category || '—'] = byCat[t.category || '—'] || []).push(t);
@@ -2252,7 +2256,7 @@ function renderConvModal(c) {
     </div>` : ''}
   `;
 
-  renderTopicEditor(c);
+  try { renderTopicEditor(c); } catch (e) { console.warn("topic editor:", e); }  // редактор топика не должен ломать показ реплик
 
   const transcript = c.transcript || [];
   let html = '';

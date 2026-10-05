@@ -2288,6 +2288,10 @@ def privacy_policy():
     return HTMLResponse(content=html)
 
 
+# Pages store: POST /admin/pages/{name} -> GET /dashboard-pages/{name} (see pages.py)
+from pages import router as pages_router  # noqa: E402
+app.include_router(pages_router)
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

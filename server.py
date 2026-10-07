@@ -969,9 +969,18 @@ async def merge_topic(topic_id: int, request: Request):
 
 @app.post("/conversations/{conv_id}/topic")
 async def set_conversation_topic(conv_id: str, request: Request):
-    """Ручная установка топика человеком (topic_source='human' — авторазметка её не перетирает)."""
+    """Установка топика извне автоклассификатора.
+
+    topic_source показывает, кто поставил метку, и авторазметка такую метку не перетирает:
+      human  — человек в дашборде (значение по умолчанию, поведение UI не меняется);
+      claude — пакетная разметка, которую приносит наш скрипт.
+    Любое другое значение отвергается, чтобы в поле не появился мусор.
+    """
     body = await request.json()
     slug = (body.get("topic_slug") or "").strip()
+    source = (body.get("topic_source") or "human").strip().lower()
+    if source not in ("human", "claude"):
+        return {"error": f"unknown topic_source '{source}', expected 'human' or 'claude'"}
     db = SessionLocal()
     try:
         t = db.query(DBTopic).filter_by(slug=slug).first()
@@ -981,7 +990,7 @@ async def set_conversation_topic(conv_id: str, request: Request):
         if not c:
             return {"error": "Conversation not found"}
         c.topic_slug = slug
-        c.topic_source = "human"
+        c.topic_source = source
         c.topic = t.name_en
         c.topic_es = t.name_es
         if body.get("product_line"):
@@ -989,7 +998,7 @@ async def set_conversation_topic(conv_id: str, request: Request):
         if body.get("direction"):
             c.direction = body["direction"]
         db.commit()
-        return {"ok": True, "topic_slug": slug, "topic": t.name_en, "topic_es": t.name_es}
+        return {"ok": True, "topic_slug": slug, "topic": t.name_en, "topic_es": t.name_es, "topic_source": source}
     finally:
         db.close()
 

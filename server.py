@@ -359,12 +359,27 @@ def translate_test(text: str = "Hola, ¿cómo estás?"):
     has_key = bool(os.getenv("DEEPSEEK_API_KEY"))
     try:
         result = translate_to_english(text)
-        return {
+        out = {
             "has_deepseek_key": has_key,
             "input": text,
             "output": result,
             "success": result is not None,
         }
+        if result is None and has_key:
+            # translate_to_english глотает исключение и возвращает None — повторяем вызов
+            # напрямую, чтобы в ответе была настоящая причина (баланс, ключ, лимит).
+            from translate import _client, MODEL
+            try:
+                _client.chat.completions.create(
+                    model=MODEL,
+                    messages=[{"role": "user", "content": text}],
+                    max_tokens=16,
+                )
+                out["diagnosis"] = "direct call succeeded — проблема не в провайдере"
+            except Exception as de:
+                out["diagnosis"] = f"{type(de).__name__}: {de}"
+                out["status_code"] = getattr(de, "status_code", None)
+        return out
     except Exception as e:
         return {
             "has_deepseek_key": has_key,

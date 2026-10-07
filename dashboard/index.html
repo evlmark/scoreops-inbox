@@ -392,9 +392,9 @@
     <div class="tab"        data-tab="users"     onclick="switchTab('users')">👥 Users</div>
     <div class="tab"        data-tab="knowledge" onclick="switchTab('knowledge')">🧠 Knowledge Base</div>
     <div class="tab"        data-tab="questions" onclick="switchTab('questions')">❓ Questions</div>
-    <a class="tab" href="/dashboard-pages/types-of-inquiries-live" style="text-decoration:none;">Types of Inquiries</a>
-    <a class="tab" href="/dashboard-pages/pyme-long-cases" style="text-decoration:none;">🔎 Long Cases</a>
-    <a class="tab" href="/dashboard-pages/cst-roadmap" style="text-decoration:none;">🗺 CST Roadmap</a>
+    <div class="tab"        data-tab="inquiries" onclick="switchTab('inquiries')">Types of Inquiries</div>
+    <div class="tab"        data-tab="longcases" onclick="switchTab('longcases')">🔎 Long Cases</div>
+    <div class="tab"        data-tab="roadmap" onclick="switchTab('roadmap')">🗺 CST Roadmap</div>
   </div>
 
   <!-- Real Inbox -->
@@ -516,6 +516,19 @@
       <div class="card" id="q-themes" style="flex:0 0 320px;max-height:70vh;overflow:auto;padding:6px"><div class="loading">Loading…</div></div>
       <div class="card" id="q-list" style="flex:1;max-height:70vh;overflow:auto"><div class="loading" style="padding:16px">Select a theme →</div></div>
     </div>
+  </div>
+
+  <div class="tab-panel" id="tab-inquiries">
+    <iframe id="frame-inquiries" data-src="/dashboard-pages/types-of-inquiries-live" title="Types of Inquiries"
+            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:#fff"></iframe>
+  </div>
+  <div class="tab-panel" id="tab-longcases">
+    <iframe id="frame-longcases" data-src="/dashboard-pages/pyme-long-cases" title="Long Cases"
+            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:#fff"></iframe>
+  </div>
+  <div class="tab-panel" id="tab-roadmap">
+    <iframe id="frame-roadmap" data-src="/dashboard-pages/cst-roadmap" title="CST Roadmap"
+            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:#fff"></iframe>
   </div>
  </div><!-- /pyme-view -->
 
@@ -903,6 +916,10 @@ let inboxTabInited = false;
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-'+name));
+  // Отчёты живут отдельными страницами: грузим их в iframe при первом открытии вкладки,
+  // чтобы вести себя так же, как остальные вкладки, и не тянуть мегабайты на старте.
+  const frame = document.getElementById('frame-'+name);
+  if (frame && !frame.src && frame.dataset.src) frame.src = frame.dataset.src;
   if (name === 'inbox' && !inboxTabInited) {
     inboxTabInited = true;
     loadInbox();

@@ -470,6 +470,56 @@ def kb_documents():
         db.close()
 
 
+class KBDoc(BaseModel):
+    url: str
+    slug: Optional[str] = None
+    title: Optional[str] = None
+    markdown: str = ""
+
+
+class KBUpload(BaseModel):
+    documents: List[KBDoc]
+    apply_removals: bool = False
+    min_pages: int = 33
+
+
+@app.post("/admin/kb-documents")
+def kb_documents_upload(payload: KBUpload):
+    """Заливка страниц базы знаний, спарсенных на стороне клиента.
+
+    Нужна потому, что сайт КБ (Google Sites на домене dif.tech) закрыт корпоративной
+    авторизацией: серверный краул туда не пускают и собирает 0 страниц, а клиент
+    с живой сессией — собирает. Семантика та же, что у ночного краула: upsert по url
+    через kb_import.apply_documents, апдейт только при смене content_hash.
+
+    apply_removals=True помечает пропавшие страницы removed — но лишь если пришло
+    не меньше min_pages страниц, чтобы неполная выгрузка не обнулила базу.
+    """
+    from kb_import import apply_documents, filter_records
+
+    records = [d.dict() for d in payload.documents]
+    kept = filter_records(records)
+    apply_removals = bool(payload.apply_removals) and len(kept) >= int(payload.min_pages)
+
+    db = SessionLocal()
+    try:
+        res = apply_documents(db, records, apply_removals=apply_removals)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return JSONResponse({"error": f"{type(e).__name__}: {e}"}, status_code=500)
+    finally:
+        db.close()
+
+    res["received"] = len(records)
+    res["kept_after_filter"] = len(kept)
+    res["removals_applied"] = apply_removals
+    if payload.apply_removals and not apply_removals:
+        res["note"] = f"removals skipped: {len(kept)} pages < min_pages={payload.min_pages}"
+    res["changes"] = res.get("changes", [])[:200]
+    return res
+
+
 @app.post("/admin/reload-knowledge")
 def reload_knowledge():
     """Перечитывает базу знаний из БД (зовётся после успешного ночного краула)."""

@@ -542,7 +542,7 @@ class AckIn(BaseModel):
     acked_by: Optional[str] = None
 
 
-@app.get("/admin/case-acks")
+@app.get("/case-acks")
 def case_acks_list():
     """Отметки «разобрано» со страницы Long Cases — общие на команду."""
     db = SessionLocal()
@@ -555,7 +555,7 @@ def case_acks_list():
         db.close()
 
 
-@app.post("/admin/case-acks")
+@app.post("/case-acks")
 def case_acks_set(payload: AckIn):
     """Поставить или снять отметку. Ключ — идентификатор клиента, он переживает пересборку."""
     db = SessionLocal()

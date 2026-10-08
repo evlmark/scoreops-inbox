@@ -134,6 +134,20 @@ class Document(Base):
     internal = Column(Integer, default=0)  # bool: внутренняя агентская инструкция (исключать из KB для оценки)
 
 
+class CaseAck(Base):
+    """Отметка «разобрано» на кейсе страницы Long Cases.
+
+    Нужна общая на команду: страница пересобирается каждую среду, а отметки ставятся
+    после встречи и должны быть видны всем, а не только тому, кто их поставил.
+    Ключ — идентификатор клиента: он при пересборке страницы не меняется.
+    """
+    __tablename__ = "case_acks"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    case_key = Column(String, unique=True, index=True)
+    acked_by = Column(String, nullable=True)
+    acked_at = Column(DateTime, default=datetime.utcnow)
+
+
 class Topic(Base):
     """Управляемый словарь топиков обращений (таксономия v1.2)."""
     __tablename__ = "topics"

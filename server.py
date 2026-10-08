@@ -26,6 +26,7 @@ from db import (
     Topic as DBTopic, TopicSuggestion as DBTopicSuggestion,
     IndividualDialogue as DBIndividual, UserAccess as DBUserAccess,
     Question as DBQuestion, QuestionTheme as DBQuestionTheme,
+    CaseAck as DBCaseAck,
 )
 
 warnings.filterwarnings("ignore")
@@ -533,6 +534,79 @@ def kb_documents_upload(payload: KBUpload):
         res["note"] = f"removals skipped: {len(kept)} pages < min_pages={payload.min_pages}"
     res["changes"] = res.get("changes", [])[:200]
     return res
+
+
+class AckIn(BaseModel):
+    case_key: str
+    acked: bool = True
+    acked_by: Optional[str] = None
+
+
+@app.get("/admin/case-acks")
+def case_acks_list():
+    """Отметки «разобрано» со страницы Long Cases — общие на команду."""
+    db = SessionLocal()
+    try:
+        rows = db.query(DBCaseAck).all()
+        return {"acks": {r.case_key: {"by": r.acked_by,
+                                      "at": r.acked_at.isoformat() if r.acked_at else None}
+                         for r in rows}}
+    finally:
+        db.close()
+
+
+@app.post("/admin/case-acks")
+def case_acks_set(payload: AckIn):
+    """Поставить или снять отметку. Ключ — идентификатор клиента, он переживает пересборку."""
+    db = SessionLocal()
+    try:
+        row = db.query(DBCaseAck).filter_by(case_key=payload.case_key).first()
+        if payload.acked:
+            if row:
+                row.acked_by = payload.acked_by or row.acked_by
+                row.acked_at = datetime.utcnow()
+            else:
+                db.add(DBCaseAck(case_key=payload.case_key, acked_by=payload.acked_by))
+        elif row:
+            db.delete(row)
+        db.commit()
+        return {"ok": True, "case_key": payload.case_key, "acked": payload.acked}
+    except Exception as e:
+        db.rollback()
+        return JSONResponse({"error": f"{type(e).__name__}: {e}"}, status_code=500)
+    finally:
+        db.close()
+
+
+@app.post("/admin/kb-documents/purge-removed")
+def kb_purge_removed(older_than_days: int = 0, dry_run: int = 1):
+    """Физически удаляет документы, помеченные removed.
+
+    Нужна после разовой заливки, где адреса пришли в процентной кодировке: исходные
+    записи остались помеченными removed и дублируют активные. Мягкая пометка их не
+    прячет из выгрузки, а API удаления у базы знаний не было.
+    По умолчанию только считает: удаление требует dry_run=0.
+    """
+    from datetime import timedelta as _td
+    db = SessionLocal()
+    try:
+        q = db.query(DBDocument).filter(DBDocument.removed_at.isnot(None))
+        if older_than_days:
+            q = q.filter(DBDocument.removed_at < datetime.utcnow() - _td(days=older_than_days))
+        rows = q.all()
+        sample = [{"url": r.url, "removed_at": r.removed_at.isoformat() if r.removed_at else None}
+                  for r in rows[:20]]
+        if dry_run:
+            return {"dry_run": True, "would_delete": len(rows), "sample": sample}
+        for r in rows:
+            db.delete(r)
+        db.commit()
+        return {"dry_run": False, "deleted": len(rows), "sample": sample}
+    except Exception as e:
+        db.rollback()
+        return JSONResponse({"error": f"{type(e).__name__}: {e}"}, status_code=500)
+    finally:
+        db.close()
 
 
 @app.post("/admin/reload-knowledge")

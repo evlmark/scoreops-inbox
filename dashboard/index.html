@@ -364,9 +364,9 @@
   <span style="font-size:22px">🔍</span>
   <h1>ScoreOPS</h1>
   <span class="sub">QA Dashboard · Plata Bank</span>
-  <div style="display:flex;gap:0;margin-left:16px;border:1px solid #d1d5db;border-radius:9px;overflow:hidden">
-    <button id="line-pyme" onclick="setLine('pyme')" style="cursor:pointer;border:none;background:#7c3aed;color:#fff;padding:6px 16px;font-size:13px;font-weight:700">PyME</button>
-    <button id="line-individuals" onclick="setLine('individuals')" style="cursor:pointer;border:none;background:#fff;color:#374151;padding:6px 16px;font-size:13px;font-weight:700">Individuals</button>
+  <div style="display:flex;gap:0;margin-left:16px;border:1px solid var(--line);border-radius:9px;overflow:hidden">
+    <button id="line-pyme" onclick="setLine('pyme')" style="cursor:pointer;border:none;background:var(--blue);color:#fff;padding:6px 16px;font-size:13px;font-weight:700">PyME</button>
+    <button id="line-individuals" onclick="setLine('individuals')" style="cursor:pointer;border:none;background:var(--card-2);color:var(--tx);padding:6px 16px;font-size:13px;font-weight:700">Individuals</button>
   </div>
   <div class="header-right">
     <span class="badge-live" id="live-badge">● Live</span>
@@ -382,16 +382,16 @@
   <!-- Weekly KPIs -->
   <div id="weekly-kpis" style="margin-bottom:20px">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
-      <div style="font-size:12px;color:#6b7280;font-weight:600">📅 <span id="wk-title">This week</span> <span id="wk-range" style="color:#7c3aed">—</span> <span style="color:#9ca3af;font-weight:500">(vs previous period)</span></div>
+      <div style="font-size:12px;color:var(--mut);font-weight:600">📅 <span id="wk-title">This week</span> <span id="wk-range" style="color:var(--blue)">—</span> <span style="color:var(--faint);font-weight:500">(vs previous period)</span></div>
       <div style="display:flex;align-items:center;gap:6px">
-        <button class="wk-nav" onclick="shiftWeek(1)"  title="Previous week" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600">◀</button>
-        <button class="wk-nav" onclick="thisWeek()"    title="Back to this week" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600">This week</button>
-        <button class="wk-nav" id="wk-next" onclick="shiftWeek(-1)" title="Next week" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600">▶</button>
-        <span style="color:#d1d5db;margin:0 2px">|</span>
-        <input type="date" id="wk-from" style="font-size:12px;padding:2px 6px;border:1px solid #d1d5db;border-radius:6px">
-        <span style="color:#9ca3af;font-size:12px">→</span>
-        <input type="date" id="wk-to" style="font-size:12px;padding:2px 6px;border:1px solid #d1d5db;border-radius:6px">
-        <button onclick="applyWeekCustom()" style="cursor:pointer;border:1px solid #7c3aed;background:#7c3aed;color:#fff;border-radius:6px;padding:3px 12px;font-size:12px;font-weight:600">Apply</button>
+        <button class="wk-nav" onclick="shiftWeek(1)"  title="Previous week" style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600">◀</button>
+        <button class="wk-nav" onclick="thisWeek()"    title="Back to this week" style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600">This week</button>
+        <button class="wk-nav" id="wk-next" onclick="shiftWeek(-1)" title="Next week" style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600">▶</button>
+        <span style="color:var(--faint);margin:0 2px">|</span>
+        <input type="date" id="wk-from" style="font-size:12px;padding:2px 6px;border:1px solid var(--line);border-radius:6px">
+        <span style="color:var(--faint);font-size:12px">→</span>
+        <input type="date" id="wk-to" style="font-size:12px;padding:2px 6px;border:1px solid var(--line);border-radius:6px">
+        <button onclick="applyWeekCustom()" style="cursor:pointer;border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:6px;padding:3px 12px;font-size:12px;font-weight:600">Apply</button>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px">
@@ -430,14 +430,14 @@
     <div class="card" style="padding:16px 20px;margin-bottom:24px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <div class="section-title" style="margin:0">Conversations per day</div>
-        <div style="font-size:11px;color:#9ca3af"><span style="color:#a78bfa">●</span> chats &nbsp;<span style="color:#60a5fa">●</span> calls</div>
+        <div style="font-size:11px;color:var(--faint)"><span style="color:#a78bfa">●</span> chats &nbsp;<span style="color:#60a5fa">●</span> calls</div>
       </div>
       <div id="inbox-daychart"><div class="loading">Loading...</div></div>
     </div>
 
     <!-- Nightly pull log -->
     <div class="section-title" onclick="togglePullRuns()" style="cursor:pointer;user-select:none">
-      <span id="pull-runs-caret" style="color:#9ca3af;font-size:12px;margin-right:6px">▸</span>Nightly chat pulls (Snowflake → Inbox)
+      <span id="pull-runs-caret" style="color:var(--faint);font-size:12px;margin-right:6px">▸</span>Nightly chat pulls (Snowflake → Inbox)
     </div>
     <div class="card" id="pull-runs-wrap" style="margin-bottom:24px;display:none"><div class="loading">Loading...</div></div>
 
@@ -473,26 +473,26 @@
       <div class="section-title" style="margin:0">Topic trends</div>
       <div style="display:flex;gap:6px;align-items:center">
         <div style="display:flex;gap:6px;margin-right:10px">
-          <button class="tp-seg" data-s="all"  onclick="setTopicSegment('all')"  style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">All</button>
-          <button class="tp-seg" data-s="none" onclick="setTopicSegment('none')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">None Empresa</button>
-          <button class="tp-seg" data-s="pfae" onclick="setTopicSegment('pfae')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">PFAE</button>
-          <button class="tp-seg" data-s="pm"   onclick="setTopicSegment('pm')"   style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">PM</button>
+          <button class="tp-seg" data-s="all"  onclick="setTopicSegment('all')"  style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">All</button>
+          <button class="tp-seg" data-s="none" onclick="setTopicSegment('none')" style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">None Empresa</button>
+          <button class="tp-seg" data-s="pfae" onclick="setTopicSegment('pfae')" style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">PFAE</button>
+          <button class="tp-seg" data-s="pm"   onclick="setTopicSegment('pm')"   style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">PM</button>
         </div>
         <div style="display:flex;gap:6px;margin-right:10px">
-          <button class="tp-mode" data-m="topic" onclick="setTrendMode('topic')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Topics</button>
-          <button class="tp-mode" data-m="group" onclick="setTrendMode('group')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Groups</button>
+          <button class="tp-mode" data-m="topic" onclick="setTrendMode('topic')" style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Topics</button>
+          <button class="tp-mode" data-m="group" onclick="setTrendMode('group')" style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Groups</button>
         </div>
-        <label style="font-size:11px;color:#6b7280;display:flex;align-items:center;gap:4px;margin-right:8px">
+        <label style="font-size:11px;color:var(--mut);display:flex;align-items:center;gap:4px;margin-right:8px">
           <input type="checkbox" id="topic-exclude-out" onchange="loadTopicTrends()"> exclude outbound
         </label>
-        <button class="tp-period" data-p="day"   onclick="setTopicPeriod('day')"   style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Day</button>
-        <button class="tp-period" data-p="week"  onclick="setTopicPeriod('week')"  style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Week</button>
-        <button class="tp-period" data-p="month" onclick="setTopicPeriod('month')" style="cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Month</button>
-        <span style="color:#d1d5db;margin:0 2px">|</span>
-        <input type="date" id="tp-from" style="font-size:12px;padding:3px 6px;border:1px solid #d1d5db;border-radius:6px">
-        <span style="color:#9ca3af;font-size:12px">→</span>
-        <input type="date" id="tp-to" style="font-size:12px;padding:3px 6px;border:1px solid #d1d5db;border-radius:6px">
-        <button class="tp-period" data-p="custom" onclick="applyTopicCustom()" style="cursor:pointer;border:1px solid #7c3aed;background:#7c3aed;color:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Apply</button>
+        <button class="tp-period" data-p="day"   onclick="setTopicPeriod('day')"   style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Day</button>
+        <button class="tp-period" data-p="week"  onclick="setTopicPeriod('week')"  style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Week</button>
+        <button class="tp-period" data-p="month" onclick="setTopicPeriod('month')" style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Month</button>
+        <span style="color:var(--faint);margin:0 2px">|</span>
+        <input type="date" id="tp-from" style="font-size:12px;padding:3px 6px;border:1px solid var(--line);border-radius:6px">
+        <span style="color:var(--faint);font-size:12px">→</span>
+        <input type="date" id="tp-to" style="font-size:12px;padding:3px 6px;border:1px solid var(--line);border-radius:6px">
+        <button class="tp-period" data-p="custom" onclick="applyTopicCustom()" style="cursor:pointer;border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">Apply</button>
       </div>
     </div>
     <div class="card" id="topic-trends" style="padding:16px 20px;margin-bottom:24px"><div class="loading">Loading...</div></div>
@@ -500,14 +500,14 @@
     <!-- Emerging topic suggestions -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <div class="section-title" style="margin:0">Emerging topic suggestions</div>
-      <button onclick="detectEmerging()" style="cursor:pointer;border:1px solid #7c3aed;color:#7c3aed;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">🔍 Detect now</button>
+      <button onclick="detectEmerging()" style="cursor:pointer;border:1px solid var(--blue);color:var(--blue);background:var(--card-2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">🔍 Detect now</button>
     </div>
     <div class="card" id="topic-suggestions" style="padding:12px 20px;margin-bottom:24px"><div class="loading">Loading...</div></div>
 
     <!-- Topic bank -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <div class="section-title" style="margin:0">Topic bank</div>
-      <button onclick="addTopic()" style="cursor:pointer;border:1px solid #16a34a;color:#16a34a;background:#fff;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">+ Add topic</button>
+      <button onclick="addTopic()" style="cursor:pointer;border:1px solid var(--ok);color:var(--ok);background:var(--card-2);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600">+ Add topic</button>
     </div>
     <div class="card" id="topic-bank"><div class="loading">Loading...</div></div>
   </div>
@@ -515,9 +515,9 @@
   <!-- Users -->
   <div class="tab-panel" id="tab-users">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:16px">
-      <div class="section-title" style="margin:0">Users <span id="users-count" style="color:#9ca3af;font-weight:500;font-size:13px"></span></div>
+      <div class="section-title" style="margin:0">Users <span id="users-count" style="color:var(--faint);font-weight:500;font-size:13px"></span></div>
       <input id="users-search" type="text" placeholder="Search by customer ID…" oninput="onUsersSearch()"
-             style="flex:0 0 320px;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+             style="flex:0 0 320px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px">
     </div>
     <div class="card" id="users-wrap"><div class="loading">Loading...</div></div>
   </div>
@@ -525,11 +525,11 @@
   <!-- Questions (банк вопросов для базы знаний) -->
   <div class="tab-panel" id="tab-questions">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:16px">
-      <div class="section-title" style="margin:0">User questions <span id="q-total" style="color:#9ca3af;font-weight:500;font-size:13px"></span></div>
+      <div class="section-title" style="margin:0">User questions <span id="q-total" style="color:var(--faint);font-weight:500;font-size:13px"></span></div>
       <input id="q-search" type="text" placeholder="Search question text…" oninput="onQSearch()"
-             style="flex:0 0 340px;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+             style="flex:0 0 340px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px">
     </div>
-    <div style="font-size:12px;color:#9ca3af;margin-bottom:12px">Questions extracted from real chats, grouped into themes. Click a theme → read how customers actually phrase it; each question links to its chat.</div>
+    <div style="font-size:12px;color:var(--faint);margin-bottom:12px">Questions extracted from real chats, grouped into themes. Click a theme → read how customers actually phrase it; each question links to its chat.</div>
     <div style="display:flex;gap:16px;align-items:flex-start">
       <div class="card" id="q-themes" style="flex:0 0 320px;max-height:70vh;overflow:auto;padding:6px"><div class="loading">Loading…</div></div>
       <div class="card" id="q-list" style="flex:1;max-height:70vh;overflow:auto"><div class="loading" style="padding:16px">Select a theme →</div></div>
@@ -538,15 +538,15 @@
 
   <div class="tab-panel" id="tab-inquiries">
     <iframe id="frame-inquiries" data-src="/dashboard-pages/types-of-inquiries-live" title="Types of Inquiries"
-            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:#fff"></iframe>
+            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:var(--bg)"></iframe>
   </div>
   <div class="tab-panel" id="tab-longcases">
     <iframe id="frame-longcases" data-src="/dashboard-pages/pyme-long-cases" title="Long Cases"
-            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:#fff"></iframe>
+            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:var(--bg)"></iframe>
   </div>
   <div class="tab-panel" id="tab-roadmap">
     <iframe id="frame-roadmap" data-src="/dashboard-pages/cst-roadmap" title="CST Roadmap"
-            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:#fff"></iframe>
+            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:var(--bg)"></iframe>
   </div>
  </div><!-- /pyme-view -->
 
@@ -557,17 +557,17 @@
   </div>
   <div class="tab-panel active" id="itab-inbox">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <div class="section-title" style="margin:0">Real conversations <span id="ind-inbox-count" style="color:#9ca3af;font-weight:500;font-size:13px"></span></div>
-      <button id="ind-filters-clear" onclick="clearIndFilters()" style="display:none;cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:7px;padding:5px 12px;font-size:12px;font-weight:600;color:#374151">✕ Clear filters</button>
+      <div class="section-title" style="margin:0">Real conversations <span id="ind-inbox-count" style="color:var(--faint);font-weight:500;font-size:13px"></span></div>
+      <button id="ind-filters-clear" onclick="clearIndFilters()" style="display:none;cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:7px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--tx)">✕ Clear filters</button>
     </div>
     <div id="ind-filters" style="margin-bottom:14px"></div>
     <div class="card" id="ind-inbox-wrap"><div class="loading">Loading…</div></div>
   </div>
   <div class="tab-panel" id="itab-users">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:16px">
-      <div class="section-title" style="margin:0">Users <span id="ind-users-count" style="color:#9ca3af;font-weight:500;font-size:13px"></span></div>
+      <div class="section-title" style="margin:0">Users <span id="ind-users-count" style="color:var(--faint);font-weight:500;font-size:13px"></span></div>
       <input id="ind-users-search" type="text" placeholder="Search by customer ID…" oninput="onIndUsersSearch()"
-             style="flex:0 0 320px;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+             style="flex:0 0 320px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px">
     </div>
     <div class="card" id="ind-users-wrap"><div class="loading">Loading…</div></div>
   </div>
@@ -598,7 +598,7 @@
   <div class="modal" onclick="event.stopPropagation()" style="width:720px;position:relative">
     <div class="modal-header">
       <div class="modal-header-info">
-        <button id="cust-back" onclick="backToChat()" style="display:none;cursor:pointer;border:1px solid #d1d5db;background:#fff;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;color:#374151;margin-bottom:8px">‹ Back to chat</button>
+        <button id="cust-back" onclick="backToChat()" style="display:none;cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--tx);margin-bottom:8px">‹ Back to chat</button>
         <div class="modal-title" id="cust-modal-title">Customer</div>
         <div class="modal-meta" id="cust-modal-meta"></div>
       </div>
@@ -624,7 +624,7 @@
       <button class="modal-close" onclick="closeConvModal()">✕</button>
     </div>
     <div class="modal-summary" id="conv-modal-summary"></div>
-    <div id="conv-topic-editor" style="padding:10px 24px;border-bottom:1px solid #eef0f4"></div>
+    <div id="conv-topic-editor" style="padding:10px 24px;border-bottom:1px solid var(--line)"></div>
     <div class="chat-body" id="conv-chat-body"><div class="loading">Loading transcript...</div></div>
   </div>
 </div>
@@ -799,10 +799,10 @@ async function loadWeeklyMetrics() {
     const ed = document.getElementById(idd); if (!ed) return;
     const delta = m.delta;
     const fmt = v => dec ? Math.abs(v).toFixed(1) : Math.abs(v);
-    ed.innerHTML = (delta > 0 ? `<span style="color:#16a34a">▲ +${fmt(delta)}</span>`
+    ed.innerHTML = (delta > 0 ? `<span style="color:var(--ok)">▲ +${fmt(delta)}</span>`
                   : delta < 0 ? `<span style="color:#dc2626">▼ -${fmt(delta)}</span>`
-                  : `<span style="color:#9ca3af">– 0</span>`)
-                  + ` <span style="color:#9ca3af;font-weight:500">vs prev (${m.prev})</span>`;
+                  : `<span style="color:var(--faint)">– 0</span>`)
+                  + ` <span style="color:var(--faint);font-weight:500">vs prev (${m.prev})</span>`;
   };
   set('wk-chats', 'wk-chats-d', d.chats);
   set('wk-users', 'wk-users-d', d.users);
@@ -986,8 +986,8 @@ function renderQThemes() {
   if (!_qThemes.length) { tw.innerHTML = '<div class="loading" style="padding:16px">No questions extracted yet.</div>'; return; }
   tw.innerHTML = _qThemes.map(t => {
     const on = t.slug === _qActiveTheme;
-    return `<div class="q-theme" data-slug="${t.slug}" style="cursor:pointer;display:flex;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:8px;margin:2px 0;font-size:13px;${on ? 'background:#7c3aed;color:#fff' : 'color:#374151'}">
-      <span>${escHtml(t.name)}</span><b style="${on ? '' : 'color:#7c3aed'}">${t.count}</b></div>`;
+    return `<div class="q-theme" data-slug="${t.slug}" style="cursor:pointer;display:flex;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:8px;margin:2px 0;font-size:13px;${on ? 'background:var(--blue);color:#fff' : 'color:var(--tx)'}">
+      <span>${escHtml(t.name)}</span><b style="${on ? '' : 'color:var(--blue)'}">${t.count}</b></div>`;
   }).join('');
   tw.querySelectorAll('.q-theme').forEach(el => el.onclick = () => selectQTheme(el.dataset.slug));
 }
@@ -1013,15 +1013,15 @@ function renderQuestions(list) {
   const search = (document.getElementById('q-search').value || '').trim();
   const themeName = (_qThemes.find(t => t.slug === _qActiveTheme) || {}).name || '';
   const head = search ? `Search “${escHtml(search)}” · ${list.length}` : `${escHtml(themeName)} · ${list.length} questions`;
-  if (!list.length) { lw.innerHTML = `<div style="padding:14px 18px;font-size:12px;color:#9ca3af">${head}<br>No questions.</div>`; return; }
-  let h = `<div style="padding:12px 18px 8px;font-size:12px;color:#6b7280;font-weight:700;position:sticky;top:0;background:#fff;border-bottom:1px solid #eef0f4">${head}</div>`;
+  if (!list.length) { lw.innerHTML = `<div style="padding:14px 18px;font-size:12px;color:var(--faint)">${head}<br>No questions.</div>`; return; }
+  let h = `<div style="padding:12px 18px 8px;font-size:12px;color:var(--mut);font-weight:700;position:sticky;top:0;background:var(--card-2);border-bottom:1px solid var(--line)">${head}</div>`;
   for (const q of list) {
-    h += `<div style="padding:10px 18px;border-bottom:1px solid #f3f4f6;display:flex;gap:12px;align-items:flex-start">
+    h += `<div style="padding:10px 18px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start">
       <div style="flex:1">
-        <div style="font-size:13px;color:#1f2937">${escHtml(q.text)}</div>
-        <div style="font-size:10px;color:#9ca3af;margin-top:3px">${q.created_at ? formatPlain(q.created_at) : ''}</div>
+        <div style="font-size:13px;color:var(--tx)">${escHtml(q.text)}</div>
+        <div style="font-size:10px;color:var(--faint);margin-top:3px">${q.created_at ? formatPlain(q.created_at) : ''}</div>
       </div>
-      <a onclick="openConv('${q.conversation_id}')" style="cursor:pointer;color:#7c3aed;font-weight:600;font-size:12px;white-space:nowrap">open chat ↗</a>
+      <a onclick="openConv('${q.conversation_id}')" style="cursor:pointer;color:var(--blue);font-weight:600;font-size:12px;white-space:nowrap">open chat ↗</a>
     </div>`;
   }
   lw.innerHTML = h;
@@ -1035,8 +1035,8 @@ let indInboxInited = false, indUsersInited = false;
 function setLine(line) {
   LINE = line;
   const bp = document.getElementById('line-pyme'), bi = document.getElementById('line-individuals');
-  bp.style.background = line === 'pyme' ? '#7c3aed' : '#fff'; bp.style.color = line === 'pyme' ? '#fff' : '#374151';
-  bi.style.background = line === 'individuals' ? '#7c3aed' : '#fff'; bi.style.color = line === 'individuals' ? '#fff' : '#374151';
+  bp.style.background = line === 'pyme' ? 'var(--blue)' : 'var(--card-2)'; bp.style.color = line === 'pyme' ? '#fff' : 'var(--tx)';
+  bi.style.background = line === 'individuals' ? 'var(--blue)' : 'var(--card-2)'; bi.style.color = line === 'individuals' ? '#fff' : 'var(--tx)';
   document.getElementById('pyme-view').style.display = line === 'pyme' ? '' : 'none';
   document.getElementById('individuals-view').style.display = line === 'individuals' ? '' : 'none';
   if (line === 'individuals') switchITab('inbox');
@@ -1052,7 +1052,7 @@ function switchITab(name) {
 
 function indProductBadges(list) {
   if (!list || !list.length) return '';
-  return list.map(p => `<span style="background:#e0f2fe;color:#0369a1;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:4px;white-space:nowrap">${escHtml(p)}</span>`).join('');
+  return list.map(p => `<span style="background:var(--blue-soft);color:var(--blue);font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:4px;white-space:nowrap">${escHtml(p)}</span>`).join('');
 }
 function indTag(tags) { return ((tags || '').split('|')[0] || '').trim() || '—'; }
 
@@ -1089,10 +1089,10 @@ function buildIndFilters() {
     const items = vals.sort().map(v =>
       `<label class="ind-dd-item" style="display:flex;align-items:center;gap:8px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap">
         <input type="checkbox" data-kind="${kind}" data-val="${escHtml(v)}" ${sel.has(v) ? 'checked' : ''}> ${escHtml(v)}</label>`).join('')
-      || '<div style="padding:8px 12px;color:#9ca3af;font-size:12px">—</div>';
+      || '<div style="padding:8px 12px;color:var(--faint);font-size:12px">—</div>';
     return `<div class="ind-dd" data-kind="${kind}" style="position:relative">
-      <button class="ind-dd-btn" style="cursor:pointer;border:1px solid ${n ? '#7c3aed' : '#d1d5db'};background:${n ? '#f5f3ff' : '#fff'};color:#374151;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600">${label}${n ? ` · ${n}` : ''} ▾</button>
-      <div class="ind-dd-panel" style="display:none;position:absolute;z-index:50;top:calc(100% + 4px);left:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);max-height:300px;overflow:auto;min-width:210px;padding:4px 0">${items}</div>
+      <button class="ind-dd-btn" style="cursor:pointer;border:1px solid ${n ? 'var(--blue)' : 'var(--line)'};background:${n ? 'var(--blue-soft)' : 'var(--card-2)'};color:var(--tx);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600">${label}${n ? ` · ${n}` : ''} ▾</button>
+      <div class="ind-dd-panel" style="display:none;position:absolute;z-index:50;top:calc(100% + 4px);left:0;background:var(--card-2);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);max-height:300px;overflow:auto;min-width:210px;padding:4px 0">${items}</div>
     </div>`;
   };
   el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">${dd('prod', 'Products', [...prodSet], _indProdFilter)}${dd('tag', 'Category', [...tagSet], _indTagFilter)}${dd('sub', 'Subtag', [...subSet], _indSubFilter)}</div>`;
@@ -1113,8 +1113,8 @@ function buildIndFilters() {
         cb.checked ? s.add(cb.dataset.val) : s.delete(cb.dataset.val);
         const n = s.size, lbl = LBL[cb.dataset.kind];
         btn.textContent = `${lbl}${n ? ` · ${n}` : ''} ▾`;
-        btn.style.borderColor = n ? '#7c3aed' : '#d1d5db';
-        btn.style.background = n ? '#f5f3ff' : '#fff';
+        btn.style.borderColor = n ? 'var(--blue)' : 'var(--line)';
+        btn.style.background = n ? 'var(--blue-soft)' : 'var(--card-2)';
         renderIndInbox();
       };
     });
@@ -1139,11 +1139,11 @@ function renderIndInbox() {
   if (!_indFiltered.length) { wrap.innerHTML = '<div class="loading">No dialogues match the filters.</div>'; return; }
   let h = '<table class="sessions-table"><thead><tr><th>DATE</th><th>TYPE</th><th>TOPIC / TAGS</th><th>PRODUCTS</th><th>LINK</th><th></th></tr></thead><tbody>';
   for (const c of _indFiltered) {
-    const link = c.record_url ? `<a href="${escHtml(c.record_url)}" target="_blank" onclick="event.stopPropagation()" style="color:#7c3aed">🔗 rec</a>` : '<span style="color:#d1d5db">—</span>';
+    const link = c.record_url ? `<a href="${escHtml(c.record_url)}" target="_blank" onclick="event.stopPropagation()" style="color:var(--blue)">🔗 rec</a>` : '<span style="color:var(--faint)">—</span>';
     h += `<tr class="session-row" data-id="${c.id}" onclick="openIndConv('${c.id}')">
       <td class="time-text">${formatPlain(c.created_at)}</td>
       <td>${convTypeBadge(c.type)}</td>
-      <td style="color:#374151">${escHtml(indTag(c.tags))}</td>
+      <td style="color:var(--tx)">${escHtml(indTag(c.tags))}</td>
       <td>${indProductBadges(c.products)}</td>
       <td>${link}</td>
       <td><span class="view-link">View →</span></td>
@@ -1155,15 +1155,15 @@ function renderIndInbox() {
 function markIndOpenRow() {
   document.querySelectorAll('#ind-inbox-wrap tr.session-row').forEach(tr => {
     const on = tr.dataset.id === openIndId;
-    tr.style.background = on ? '#f5f3ff' : '';
-    tr.style.boxShadow = on ? 'inset 3px 0 0 #7c3aed' : '';
+    tr.style.background = on ? 'var(--blue-soft)' : '';
+    tr.style.boxShadow = on ? 'inset 3px 0 0 var(--blue)' : '';
     const topicCell = tr.children[2];
     let mark = tr.querySelector('.ind-open-mark');
     if (on && !mark && topicCell) {
       mark = document.createElement('span');
       mark.className = 'ind-open-mark';
       mark.textContent = ' ← open';
-      mark.style.cssText = 'color:#7c3aed;font-weight:700;font-size:11px;margin-left:6px';
+      mark.style.cssText = 'color:var(--blue);font-weight:700;font-size:11px;margin-left:6px';
       topicCell.appendChild(mark);
     } else if (!on && mark) { mark.remove(); }
   });
@@ -1230,16 +1230,16 @@ function renderIndModal(c) {
     (c.products && c.products.length) ? `<span>🏦 ${indProductBadges(c.products)}</span>` : '',
     c.created_at ? `<span>🕐 ${formatPlain(c.created_at)}</span>` : '',
     dur ? `<span>⏱ ${dur}</span>` : '',
-    c.record_url ? `<span><a href="${escHtml(c.record_url)}" target="_blank" style="color:#7c3aed;font-weight:600">🔗 Recording</a></span>` : '',
-    c.customer_id ? `<span>🆔 <code style="font-size:11px">${escHtml(c.customer_id)}</code> <a onclick="closeIndModal();openIndCustomer('${c.customer_id}','${c.id}')" style="cursor:pointer;color:#7c3aed;font-weight:600;margin-left:4px">👥 all chats →</a></span>` : '',
-    c.tags ? `<span style="color:#9ca3af">🏷 ${escHtml(c.tags)}</span>` : '',
+    c.record_url ? `<span><a href="${escHtml(c.record_url)}" target="_blank" style="color:var(--blue);font-weight:600">🔗 Recording</a></span>` : '',
+    c.customer_id ? `<span>🆔 <code style="font-size:11px">${escHtml(c.customer_id)}</code> <a onclick="closeIndModal();openIndCustomer('${c.customer_id}','${c.id}')" style="cursor:pointer;color:var(--blue);font-weight:600;margin-left:4px">👥 all chats →</a></span>` : '',
+    c.tags ? `<span style="color:var(--faint)">🏷 ${escHtml(c.tags)}</span>` : '',
   ].filter(Boolean).join('');
   let html = '';
   const hist = c.customer_history || [];
   if (hist.length) {
     html += `<div class="cust-history" style="margin:0 24px 14px"><div class="cust-history-header">🔁 ${hist.length} other contact${hist.length > 1 ? 's' : ''} from this customer</div><div class="cust-history-list">`;
     for (const h of hist.slice(0, 15))
-      html += `<div class="cust-hist-item" onclick="event.stopPropagation();openIndConv('${h.id}')"><span style="font-size:13px">${h.type === 'call' ? '📞' : '💬'}</span><span style="color:#6b7280;font-size:11px;width:115px;flex-shrink:0">${h.created_at ? formatPlain(h.created_at) : '—'}</span><span style="flex:1;color:#1f2937;font-size:12px">${escHtml(indTag(h.tags))}</span></div>`;
+      html += `<div class="cust-hist-item" onclick="event.stopPropagation();openIndConv('${h.id}')"><span style="font-size:13px">${h.type === 'call' ? '📞' : '💬'}</span><span style="color:var(--mut);font-size:11px;width:115px;flex-shrink:0">${h.created_at ? formatPlain(h.created_at) : '—'}</span><span style="flex:1;color:var(--tx);font-size:12px">${escHtml(indTag(h.tags))}</span></div>`;
     html += `</div></div>`;
   }
   const tr = c.transcript || [];
@@ -1250,7 +1250,7 @@ function renderIndModal(c) {
     const label = isC ? '👤 Cliente' : (isBot ? '🤖 Bot' : '🎧 Agente');
     const initial = isC ? 'C' : (isBot ? 'B' : 'A');
     const en = turn.text_en || '';
-    html += `<div class="bubble-row ${side}" style="margin-bottom:4px"><div class="avatar ${side}">${initial}</div><div><div style="font-size:10px;color:#9ca3af;font-weight:600;margin-bottom:3px">${label}</div><div class="bubble ${side}">${escHtml(turn.text || '')}</div></div></div><div class="bubble-en-wrap ${side}" style="margin-bottom:10px"><div class="bubble-en ${en ? '' : 'empty'}">${en ? escHtml(en) : '…not translated'}</div></div>`;
+    html += `<div class="bubble-row ${side}" style="margin-bottom:4px"><div class="avatar ${side}">${initial}</div><div><div style="font-size:10px;color:var(--faint);font-weight:600;margin-bottom:3px">${label}</div><div class="bubble ${side}">${escHtml(turn.text || '')}</div></div></div><div class="bubble-en-wrap ${side}" style="margin-bottom:10px"><div class="bubble-en ${en ? '' : 'empty'}">${en ? escHtml(en) : '…not translated'}</div></div>`;
   }
   document.getElementById('ind-modal-body').innerHTML = html;
 }
@@ -1272,7 +1272,7 @@ function renderIndUsers() {
   let h = '<table class="sessions-table"><thead><tr><th>CUSTOMER</th><th>CONTACTS</th><th>PRODUCTS</th><th>TOP TAGS</th><th>RANGE</th><th></th></tr></thead><tbody>';
   for (const u of list) {
     const range = (u.first_at && u.last_at) ? `${formatPlain(u.first_at).replace(/ at .*/, '')} → ${formatPlain(u.last_at).replace(/ at .*/, '')}` : '—';
-    h += `<tr class="session-row" onclick="openIndCustomer('${u.customer_id}')"><td><code style="font-size:11px">${escHtml(u.customer_id)}</code></td><td>${u.count}</td><td>${indProductBadges(u.products)}</td><td style="font-size:11px;color:#6b7280">${escHtml((u.top_tags || []).slice(0, 3).join(', '))}</td><td class="time-text">${range}</td><td><span class="view-link">View →</span></td></tr>`;
+    h += `<tr class="session-row" onclick="openIndCustomer('${u.customer_id}')"><td><code style="font-size:11px">${escHtml(u.customer_id)}</code></td><td>${u.count}</td><td>${indProductBadges(u.products)}</td><td style="font-size:11px;color:var(--mut)">${escHtml((u.top_tags || []).slice(0, 3).join(', '))}</td><td class="time-text">${range}</td><td><span class="view-link">View →</span></td></tr>`;
   }
   wrap.innerHTML = h + '</tbody></table>';
 }
@@ -1303,12 +1303,12 @@ function renderIndCustomerModal(d) {
   let body = '', lastDay = null;
   for (const c of convs) {
     const day = (c.created_at || '').slice(0, 10);
-    if (day !== lastDay) { lastDay = day; body += `<div style="font-size:11px;font-weight:700;color:#7c3aed;margin:18px 0 4px;text-transform:uppercase;letter-spacing:.04em;border-top:1px solid #eef0f4;padding-top:14px">${c.created_at ? formatPlain(c.created_at).replace(/ at .*/, '') : 'No date'}</div>`; }
+    if (day !== lastDay) { lastDay = day; body += `<div style="font-size:11px;font-weight:700;color:var(--blue);margin:18px 0 4px;text-transform:uppercase;letter-spacing:.04em;border-top:1px solid var(--line);padding-top:14px">${c.created_at ? formatPlain(c.created_at).replace(/ at .*/, '') : 'No date'}</div>`; }
     const when = c.created_at ? formatPlain(c.created_at) : '—';
-    const link = c.record_url ? `<a href="${escHtml(c.record_url)}" target="_blank" onclick="event.stopPropagation()" style="color:#7c3aed">🔗 rec</a>` : '';
-    body += `<div style="display:flex;align-items:center;gap:8px;margin:8px 0 10px;font-size:12px"><span style="color:#6b7280;font-weight:600;white-space:nowrap">${when}</span>${convTypeBadge(c.type)}<span style="font-weight:600;color:#374151">${escHtml(indTag(c.tags))}</span>${indProductBadges(c.products)}<span style="margin-left:auto">${link}</span><a onclick="closeCustModal();openIndConv('${c.id}')" style="cursor:pointer;color:#7c3aed">open ↗</a></div>`;
+    const link = c.record_url ? `<a href="${escHtml(c.record_url)}" target="_blank" onclick="event.stopPropagation()" style="color:var(--blue)">🔗 rec</a>` : '';
+    body += `<div style="display:flex;align-items:center;gap:8px;margin:8px 0 10px;font-size:12px"><span style="color:var(--mut);font-weight:600;white-space:nowrap">${when}</span>${convTypeBadge(c.type)}<span style="font-weight:600;color:var(--tx)">${escHtml(indTag(c.tags))}</span>${indProductBadges(c.products)}<span style="margin-left:auto">${link}</span><a onclick="closeCustModal();openIndConv('${c.id}')" style="cursor:pointer;color:var(--blue)">open ↗</a></div>`;
     const tr = c.transcript || [];
-    if (!tr.length) body += `<div style="color:#9ca3af;font-size:12px;padding:2px 0 8px">(no transcript)</div>`;
+    if (!tr.length) body += `<div style="color:var(--faint);font-size:12px;padding:2px 0 8px">(no transcript)</div>`;
     for (const turn of tr) {
       const isC = turn.role === 'customer', side = isC ? 'customer' : 'agent';
       const initial = isC ? 'C' : (turn.role === 'bot' ? 'B' : 'A');
@@ -1339,19 +1339,19 @@ async function loadUsers(q) {
   const list = data.customers || [];
   if (!list.length) { wrap.innerHTML = '<div class="loading" style="padding:16px">No users found.</div>'; return; }
   let h = `<table style="width:100%;border-collapse:collapse;font-size:13px">
-    <thead><tr style="text-align:left;color:#6b7280;border-bottom:1px solid #e5e7eb">
+    <thead><tr style="text-align:left;color:var(--mut);border-bottom:1px solid var(--line)">
       <th style="padding:8px 10px">Customer ID</th><th>Account</th><th>Contacts</th><th>First</th><th>Last</th><th>Top topic</th><th>Avg</th><th></th>
     </tr></thead><tbody>`;
   for (const u of list) {
-    h += `<tr style="border-bottom:1px solid #f1f1f4;cursor:pointer" onclick="openCustomer('${u.customer_id}')">
+    h += `<tr style="border-bottom:1px solid var(--line);cursor:pointer" onclick="openCustomer('${u.customer_id}')">
       <td style="padding:7px 10px"><code style="font-size:11px">${escHtml(u.customer_id)}</code></td>
-      <td>${u.account_type ? accountBadge(u.account_type, 0) + (u.tariff ? ' ' + tariffChip(u.tariff) : '') : '<span style="color:#d1d5db">—</span>'}</td>
+      <td>${u.account_type ? accountBadge(u.account_type, 0) + (u.tariff ? ' ' + tariffChip(u.tariff) : '') : '<span style="color:var(--faint)">—</span>'}</td>
       <td style="font-weight:600">${u.count}</td>
-      <td style="color:#6b7280">${u.first_at ? formatPlain(u.first_at).split(',')[0] : '—'}</td>
-      <td style="color:#6b7280">${u.last_at ? formatPlain(u.last_at).split(',')[0] : '—'}</td>
-      <td style="color:#374151">${escHtml(u.top_topic || '—')}</td>
+      <td style="color:var(--mut)">${u.first_at ? formatPlain(u.first_at).split(',')[0] : '—'}</td>
+      <td style="color:var(--mut)">${u.last_at ? formatPlain(u.last_at).split(',')[0] : '—'}</td>
+      <td style="color:var(--tx)">${escHtml(u.top_topic || '—')}</td>
       <td>${scorePill(u.avg_score)}</td>
-      <td style="color:#7c3aed;white-space:nowrap">view →</td>
+      <td style="color:var(--blue);white-space:nowrap">view →</td>
     </tr>`;
   }
   wrap.innerHTML = h + '</tbody></table>';
@@ -1400,9 +1400,9 @@ function renderCustomerModal(d) {
     + (d.avg_score != null ? `<span>⭐ avg ${d.avg_score}</span>` : '');
   // topic chips
   const chips = (d.topics || []).map(t =>
-    `<span style="background:#f3f4f6;color:#374151;font-size:11px;padding:2px 8px;border-radius:10px;margin:0 4px 4px 0;display:inline-block">${escHtml(t.name)} <b>${t.count}</b></span>`).join('');
+    `<span style="background:var(--card-2);color:var(--tx);font-size:11px;padding:2px 8px;border-radius:10px;margin:0 4px 4px 0;display:inline-block">${escHtml(t.name)} <b>${t.count}</b></span>`).join('');
   document.getElementById('cust-modal-summary').innerHTML =
-    `<div style="padding:4px 0"><div style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Topics</div>${chips || '<span style="color:#9ca3af;font-size:12px">—</span>'}</div>`;
+    `<div style="padding:4px 0"><div style="font-size:11px;color:var(--faint);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Topics</div>${chips || '<span style="color:var(--faint);font-size:12px">—</span>'}</div>`;
   // история по датам: старые сверху → новые снизу (как обычный чат). Бэкенд отдаёт DESC — разворачиваем.
   const convs = [...(d.conversations || [])].reverse();
   let body = '';
@@ -1412,25 +1412,25 @@ function renderCustomerModal(d) {
     if (day !== lastDay) {
       lastDay = day;
       const dayLbl = c.created_at ? formatPlain(c.created_at).replace(/ at .*/, '') : 'No date';
-      body += `<div style="font-size:11px;font-weight:700;color:#7c3aed;margin:18px 0 4px;text-transform:uppercase;letter-spacing:.04em;border-top:1px solid #eef0f4;padding-top:14px">${dayLbl}</div>`;
+      body += `<div style="font-size:11px;font-weight:700;color:var(--blue);margin:18px 0 4px;text-transform:uppercase;letter-spacing:.04em;border-top:1px solid var(--line);padding-top:14px">${dayLbl}</div>`;
     }
     const tag = (c.product_line && c.product_line !== 'NA' ? c.product_line : '') + (c.direction === 'outbound' ? ' ↗' : '');
     const when = c.created_at ? formatPlain(c.created_at) : '—';
     // заголовок диалога
-    const fragTag = c.merged_into ? `<span title="Continuation fragment — folded into the main dialogue, not scored separately" style="background:#fef3c7;color:#92400e;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px">↳ continuation</span>` : '';
+    const fragTag = c.merged_into ? `<span title="Continuation fragment — folded into the main dialogue, not scored separately" style="background:var(--warn-soft);color:var(--warn);font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px">↳ continuation</span>` : '';
     body += `<div style="display:flex;align-items:center;gap:8px;margin:8px 0 10px;font-size:12px${c.merged_into ? ';opacity:.7' : ''}">
-      <span style="color:#6b7280;font-weight:600;white-space:nowrap">${when}</span>
+      <span style="color:var(--mut);font-weight:600;white-space:nowrap">${when}</span>
       ${convTypeBadge(c.type)}
-      <span style="font-weight:600;color:#374151">${escHtml(c.topic_name || c.topic || '—')}</span>
+      <span style="font-weight:600;color:var(--tx)">${escHtml(c.topic_name || c.topic || '—')}</span>
       ${fragTag}
-      <span style="color:#9ca3af;font-size:10px;font-weight:700">${escHtml(tag)}</span>
-      ${c.agent_name ? `<span style="color:#9ca3af">· ${escHtml(c.agent_name)}</span>` : ''}
+      <span style="color:var(--faint);font-size:10px;font-weight:700">${escHtml(tag)}</span>
+      ${c.agent_name ? `<span style="color:var(--faint)">· ${escHtml(c.agent_name)}</span>` : ''}
       <span style="margin-left:auto">${c.merged_into ? '' : scorePill(c.avg_score)}</span>
-      <a onclick="closeCustModal();openConv('${c.id}')" style="cursor:pointer;color:#7c3aed">open ↗</a>
+      <a onclick="closeCustModal();openConv('${c.id}')" style="cursor:pointer;color:var(--blue)">open ↗</a>
     </div>`;
     // сами реплики
     const tr = c.transcript || [];
-    if (!tr.length) body += `<div style="color:#9ca3af;font-size:12px;padding:2px 0 8px">(no transcript)</div>`;
+    if (!tr.length) body += `<div style="color:var(--faint);font-size:12px;padding:2px 0 8px">(no transcript)</div>`;
     for (const turn of tr) {
       const isCust = turn.role === 'customer';
       const side = isCust ? 'customer' : 'agent';
@@ -1475,27 +1475,27 @@ async function loadKnowledge() {
       rh = '<div class="loading">No crawls yet.</div>';
     } else {
       rh = `<table style="width:100%;border-collapse:collapse;font-size:13px">
-        <thead><tr style="text-align:left;color:#6b7280;border-bottom:1px solid #e5e7eb">
+        <thead><tr style="text-align:left;color:var(--mut);border-bottom:1px solid var(--line)">
           <th style="padding:8px 10px">Date</th><th>Status</th><th>Pages</th>
           <th>+ new</th><th>~ changed</th><th>- removed</th><th>Characters</th>
         </tr></thead><tbody>`;
       for (const r of runs) {
-        const badge = { success: '#16a34a', partial: '#d97706', failed: '#dc2626', running: '#6b7280' }[r.status] || '#6b7280';
+        const badge = { success: 'var(--ok)', partial: 'var(--warn)', failed: 'var(--bad)', running: 'var(--mut)' }[r.status] || 'var(--mut)';
         const dt = r.started_at ? new Date(r.started_at).toLocaleString() : '—';
-        rh += `<tr style="border-bottom:1px solid #f1f1f4;cursor:pointer" onclick="toggleRunChanges(${r.id})">
+        rh += `<tr style="border-bottom:1px solid var(--line);cursor:pointer" onclick="toggleRunChanges(${r.id})">
           <td style="padding:8px 10px">${dt}</td>
           <td><span style="color:${badge};font-weight:600">${r.status}</span></td>
           <td>${r.pages_total ?? 0}</td>
-          <td style="color:#16a34a">${r.pages_added ?? 0}</td>
-          <td style="color:#d97706">${r.pages_updated ?? 0}</td>
+          <td style="color:var(--ok)">${r.pages_added ?? 0}</td>
+          <td style="color:var(--warn)">${r.pages_updated ?? 0}</td>
           <td style="color:#dc2626">${r.pages_removed ?? 0}</td>
           <td>${(r.chars_total || 0).toLocaleString()}</td>
         </tr>
-        <tr id="run-changes-${r.id}" style="display:none"><td colspan="7" style="padding:6px 14px;background:#fafafa;font-size:12px;color:#374151">
+        <tr id="run-changes-${r.id}" style="display:none"><td colspan="7" style="padding:6px 14px;background:var(--card-2);font-size:12px;color:var(--tx)">
           ${r.error_text ? `<div style="color:#b45309;margin-bottom:6px">${r.error_text}</div>` : ''}
           ${(r.changes && r.changes.length)
-            ? r.changes.map(c => `<div>${c.change}: <span style="color:#6b7280">${c.url}</span></div>`).join('')
-            : '<div style="color:#9ca3af">No changes</div>'}
+            ? r.changes.map(c => `<div>${c.change}: <span style="color:var(--mut)">${c.url}</span></div>`).join('')
+            : '<div style="color:var(--faint)">No changes</div>'}
         </td></tr>`;
       }
       rh += '</tbody></table>';
@@ -1505,16 +1505,16 @@ async function loadKnowledge() {
     // Documents
     const docs = docsData.documents || [];
     let dh = `<table style="width:100%;border-collapse:collapse;font-size:13px">
-      <thead><tr style="text-align:left;color:#6b7280;border-bottom:1px solid #e5e7eb">
+      <thead><tr style="text-align:left;color:var(--mut);border-bottom:1px solid var(--line)">
         <th style="padding:8px 10px">Document</th><th>Characters</th><th>Updated</th><th>Status</th>
       </tr></thead><tbody>`;
     for (const d of docs) {
       const removed = !!d.removed_at;
-      dh += `<tr style="border-bottom:1px solid #f1f1f4;${removed ? 'opacity:.5' : ''}">
-        <td style="padding:8px 10px"><a href="${d.url}" target="_blank" style="color:#7c3aed;text-decoration:none">${d.title || d.slug}</a></td>
+      dh += `<tr style="border-bottom:1px solid var(--line);${removed ? 'opacity:.5' : ''}">
+        <td style="padding:8px 10px"><a href="${d.url}" target="_blank" style="color:var(--blue);text-decoration:none">${d.title || d.slug}</a></td>
         <td>${(d.chars || 0).toLocaleString()}</td>
         <td>${d.updated_at ? new Date(d.updated_at).toLocaleDateString() : '—'}</td>
-        <td>${removed ? '<span style="color:#dc2626">removed</span>' : '<span style="color:#16a34a">active</span>'}</td>
+        <td>${removed ? '<span style="color:#dc2626">removed</span>' : '<span style="color:var(--ok)">active</span>'}</td>
       </tr>`;
     }
     dh += '</tbody></table>';
@@ -1595,29 +1595,29 @@ async function loadPullRuns() {
       wrap.innerHTML = '<div class="loading">No pulls yet. The job runs nightly at 05:00 (Mexico City).</div>';
       return;
     }
-    const badge = { success: '#16a34a', partial: '#d97706', failed: '#dc2626', no_data: '#6b7280' };
+    const badge = { success: 'var(--ok)', partial: 'var(--warn)', failed: 'var(--bad)', no_data: 'var(--mut)' };
     let h = `<table style="width:100%;border-collapse:collapse;font-size:13px">
-      <thead><tr style="text-align:left;color:#6b7280;border-bottom:1px solid #e5e7eb">
+      <thead><tr style="text-align:left;color:var(--mut);border-bottom:1px solid var(--line)">
         <th style="padding:8px 10px">Run at</th><th>Day(s)</th><th>Status</th>
         <th>Exported</th><th>+ new</th><th>Dups</th><th>Scored</th><th>Pending</th><th>Src</th>
       </tr></thead><tbody>`;
     for (const r of runs) {
       const dt = r.started_at ? new Date(r.started_at).toLocaleString() : '—';
       const range = r.date_from ? (r.date_to && r.date_to !== r.date_from ? `${r.date_from} → ${r.date_to}` : r.date_from) : '—';
-      const col = badge[r.status] || '#6b7280';
-      h += `<tr style="border-bottom:1px solid #f1f1f4"${r.error_text ? ` title="${(r.error_text+'').replace(/"/g,'&quot;')}"` : ''}>
+      const col = badge[r.status] || 'var(--mut)';
+      h += `<tr style="border-bottom:1px solid var(--line)"${r.error_text ? ` title="${(r.error_text+'').replace(/"/g,'&quot;')}"` : ''}>
         <td style="padding:8px 10px">${dt}</td>
-        <td style="color:#6b7280">${range}</td>
+        <td style="color:var(--mut)">${range}</td>
         <td><span style="color:${col};font-weight:600">${r.status}</span></td>
         <td>${r.rows_exported ?? 0}</td>
-        <td style="color:#16a34a">${r.imported ?? 0}</td>
-        <td style="color:#9ca3af">${r.skipped_duplicates ?? 0}</td>
+        <td style="color:var(--ok)">${r.imported ?? 0}</td>
+        <td style="color:var(--faint)">${r.skipped_duplicates ?? 0}</td>
         <td style="color:#2563eb">${r.processed ?? 0}</td>
-        <td style="color:${(r.remaining|0) > 0 ? '#d97706' : '#9ca3af'}">${r.remaining ?? 0}</td>
-        <td style="color:#9ca3af;font-size:11px">${r.source || ''}</td>
+        <td style="color:${(r.remaining|0) > 0 ? 'var(--warn)' : 'var(--faint)'}">${r.remaining ?? 0}</td>
+        <td style="color:var(--faint);font-size:11px">${r.source || ''}</td>
       </tr>`;
       if (r.error_text) {
-        h += `<tr><td colspan="9" style="padding:4px 14px;background:#fef2f2;color:#b91c1c;font-size:12px">${(r.error_text+'').slice(0,300)}</td></tr>`;
+        h += `<tr><td colspan="9" style="padding:4px 14px;background:var(--bad-soft);color:var(--bad);font-size:12px">${(r.error_text+'').slice(0,300)}</td></tr>`;
       }
     }
     h += '</tbody></table>';
@@ -1654,8 +1654,8 @@ function renderInboxStats(s) {
             <div style="height:${chatH}px;background:#a78bfa;border-radius:${callH ? '0' : '3px 3px'} 0 0"></div>
           </div>
         </div>
-        <div style="font-size:9px;color:#9ca3af;line-height:1">${d.date.slice(8)}</div>
-        <div style="font-size:10px;color:#6b7280;font-weight:600;line-height:1">${d.total}</div>
+        <div style="font-size:9px;color:var(--faint);line-height:1">${d.date.slice(8)}</div>
+        <div style="font-size:10px;color:var(--mut);font-weight:600;line-height:1">${d.total}</div>
       </div>`;
     }).join('');
     el.innerHTML = `<div style="display:flex;align-items:flex-end;gap:3px;overflow-x:auto;padding-top:4px">${cols}</div>`;
@@ -1671,7 +1671,7 @@ let _dayTip = null;
 function ensureDayTip() {
   if (_dayTip) return _dayTip;
   _dayTip = document.createElement('div');
-  _dayTip.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;display:none;background:#1f2937;color:#fff;font-size:12px;line-height:1.5;padding:8px 11px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.22);white-space:nowrap';
+  _dayTip.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;display:none;background:var(--card-2);color:#fff;font-size:12px;line-height:1.5;padding:8px 11px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.22);white-space:nowrap';
   document.body.appendChild(_dayTip);
   return _dayTip;
 }
@@ -1682,7 +1682,7 @@ function showDayTip(e) {
   tip.innerHTML = `<div style="font-weight:700;margin-bottom:4px">📅 ${dateLbl}</div>`
     + `<div><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#a78bfa;margin-right:6px"></span>Chats: <b>${c.dataset.chat}</b></div>`
     + `<div><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#60a5fa;margin-right:6px"></span>Calls: <b>${c.dataset.call}</b></div>`
-    + `<div style="border-top:1px solid #374151;margin-top:4px;padding-top:4px">Total: <b>${c.dataset.total}</b></div>`;
+    + `<div style="border-top:1px solid var(--line);margin-top:4px;padding-top:4px">Total: <b>${c.dataset.total}</b></div>`;
   tip.style.display = 'block';
   moveDayTip(e);
 }
@@ -1700,7 +1700,7 @@ function hideDayTip() { if (_dayTip) _dayTip.style.display = 'none'; }
 function convTypeBadge(type) {
   return type === 'call'
     ? '<span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">📞 Call</span>'
-    : '<span style="background:#ede9fe;color:#6d28d9;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">💬 Chat</span>';
+    : '<span style="background:var(--blue-soft);color:var(--blue);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">💬 Chat</span>';
 }
 
 function renderConversations(list) {
@@ -1750,7 +1750,7 @@ function renderConversations(list) {
     const topicMain = c.topic
       ? `<span class="conv-topic-main">${escHtml(c.topic)}</span>`
       : '<span class="empty-cell">—</span>';
-    const topicSub = c.topic_es ? `<br><span style="color:#9ca3af;font-size:11px">${escHtml(c.topic_es)}</span>` : '';
+    const topicSub = c.topic_es ? `<br><span style="color:var(--faint);font-size:11px">${escHtml(c.topic_es)}</span>` : '';
     const tagBadges = topicTagBadges(c);
 
     const markers = [];
@@ -1759,12 +1759,12 @@ function renderConversations(list) {
     else if (isViewed) markers.push('<span class="read-chip">✓ read</span>');
     const markerHtml = markers.length ? ' ' + markers.join(' ') : '';
 
-    const agent = c.agent_name || '<span style="color:#d1d5db">unknown</span>';
+    const agent = c.agent_name || '<span style="color:var(--faint)">unknown</span>';
     const statusPill = c.status === 'done'
       ? '<span style="color:#059669;font-size:12px">✓ done</span>'
       : c.status === 'failed'
         ? '<span style="color:#dc2626;font-size:12px">✕ failed</span>'
-        : '<span style="color:#d97706;font-size:12px">⏳ pending</span>';
+        : '<span style="color:var(--warn);font-size:12px">⏳ pending</span>';
 
     let rowCls = 'session-row';
     if (isViewed) rowCls += ' conv-viewed';
@@ -1775,7 +1775,7 @@ function renderConversations(list) {
       if (idx === total) rowCls += ' conv-group-last';
     }
 
-    const contBadge = c.child_count ? ` <span title="${c.child_count} continuation fragment(s) merged in" style="background:#eef2ff;color:#6366f1;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap">↳ ${c.child_count}</span>` : '';
+    const contBadge = c.child_count ? ` <span title="${c.child_count} continuation fragment(s) merged in" style="background:var(--blue-soft);color:var(--blue);font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap">↳ ${c.child_count}</span>` : '';
     html += `<tr class="${rowCls}" onclick="openConv('${c.id}')">
       <td class="time-text">${formatPlain(c.created_at)}</td>
       <td>${convTypeBadge(c.type)}</td>
@@ -1869,25 +1869,25 @@ async function ensureTopics(force) {
 
 const SOURCE_BADGE = {
   human: '<span style="background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px">✓ human</span>',
-  llm:   '<span style="background:#ede9fe;color:#6d28d9;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px">AI</span>',
-  seed:  '<span style="background:#e0f2fe;color:#0369a1;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px">seed</span>',
+  llm:   '<span style="background:var(--blue-soft);color:var(--blue);font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px">AI</span>',
+  seed:  '<span style="background:var(--blue-soft);color:var(--blue);font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px">seed</span>',
 };
 
 const ACCT_COLORS = {
-  'PFAE Golden':   ['#fef9c3', '#854d0e'],
-  'PFAE External': ['#ede9fe', '#6d28d9'],
-  'Persona Moral': ['#dcfce7', '#15803d'],
-  'No Empresa account': ['#f3f4f6', '#9ca3af'],
+  'PFAE Golden':   ['var(--warn-soft)', 'var(--warn)'],
+  'PFAE External': ['var(--blue-soft)', 'var(--blue)'],
+  'Persona Moral': ['var(--ok-soft)', 'var(--ok)'],
+  'No Empresa account': ['var(--card-2)', 'var(--faint)'],
 };
 function accountBadge(at, ml) {
   if (!at) return '';
-  const c = ACCT_COLORS[at] || ['#f3f4f6', '#6b7280'];
+  const c = ACCT_COLORS[at] || ['var(--card-2)', 'var(--mut)'];
   return `<span style="background:${c[0]};color:${c[1]};font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:${ml || 6}px;white-space:nowrap">${escHtml(at)}</span>`;
 }
 
 function tariffChip(t, ml) {
   if (!t) return '';
-  return `<span title="Tariff" style="background:#eef2ff;color:#4338ca;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:${ml == null ? 4 : ml}px;white-space:nowrap">${escHtml(t)}</span>`;
+  return `<span title="Tariff" style="background:var(--blue-soft);color:var(--blue);font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:${ml == null ? 4 : ml}px;white-space:nowrap">${escHtml(t)}</span>`;
 }
 
 function topicTagBadges(c) {
@@ -1895,13 +1895,13 @@ function topicTagBadges(c) {
   if (c.account_type) b.push(accountBadge(c.account_type));
   if (c.tariff) b.push(tariffChip(c.tariff));
   if (c.product_line && c.product_line !== 'NA') {
-    const col = c.product_line === 'PM' ? '#0369a1' : '#7c3aed';
-    b.push(`<span style="background:#f3f4f6;color:${col};font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px">${escHtml(c.product_line)}</span>`);
+    const col = c.product_line === 'PM' ? 'var(--blue)' : 'var(--acc)';
+    b.push(`<span style="background:var(--card-2);color:${col};font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px">${escHtml(c.product_line)}</span>`);
   }
   if (c.direction === 'outbound')
-    b.push(`<span style="background:#fef3c7;color:#92400e;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:4px">↗ out</span>`);
+    b.push(`<span style="background:var(--warn-soft);color:var(--warn);font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:4px">↗ out</span>`);
   if (c.topic_source === 'human')
-    b.push(`<span title="set by human" style="color:#16a34a;font-size:10px;margin-left:4px">✓</span>`);
+    b.push(`<span title="set by human" style="color:var(--ok);font-size:10px;margin-left:4px">✓</span>`);
   return b.join('');
 }
 
@@ -1921,16 +1921,16 @@ function renderTopicEditor(c) {
   const prodSel = ['', 'PFAE', 'PM', 'NA'].map(v => `<option value="${v}" ${v === (c.product_line||'') ? 'selected' : ''}>${v || '—'}</option>`).join('');
   const dirSel = ['', 'inbound', 'outbound'].map(v => `<option value="${v}" ${v === (c.direction||'') ? 'selected' : ''}>${v || '—'}</option>`).join('');
   const src = SOURCE_BADGE[c.topic_source] || '';
-  const conf = (c.topic_confidence != null && c.topic_source === 'llm') ? `<span style="font-size:10px;color:#9ca3af">conf ${(c.topic_confidence*100).toFixed(0)}%</span>` : '';
-  const selStyle = 'padding:5px 8px;border:1px solid #d1d5db;border-radius:7px;font-size:12px;background:#fff;cursor:pointer';
+  const conf = (c.topic_confidence != null && c.topic_source === 'llm') ? `<span style="font-size:10px;color:var(--faint)">conf ${(c.topic_confidence*100).toFixed(0)}%</span>` : '';
+  const selStyle = 'padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-size:12px;background:var(--card-2);cursor:pointer';
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <span style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Topic</span>
+      <span style="font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Topic</span>
       <select id="conv-topic-sel" style="${selStyle};min-width:240px">${opts}</select>
       <select id="conv-prod-sel" title="Product line" style="${selStyle}">${prodSel}</select>
       <select id="conv-dir-sel" title="Direction" style="${selStyle}">${dirSel}</select>
       ${src} ${conf}
-      <span id="conv-topic-saved" style="font-size:11px;color:#16a34a;opacity:0;transition:opacity .2s">saved ✓</span>
+      <span id="conv-topic-saved" style="font-size:11px;color:var(--ok);opacity:0;transition:opacity .2s">saved ✓</span>
     </div>`;
   const save = () => saveConvTopic(c.id);
   document.getElementById('conv-topic-sel').onchange = save;
@@ -1972,9 +1972,9 @@ function setTopicSegment(s) {
   topicSegment = s;
   document.querySelectorAll('.tp-seg').forEach(b => {
     const on = b.dataset.s === s;
-    b.style.background = on ? '#7c3aed' : '#fff';
-    b.style.color = on ? '#fff' : '#374151';
-    b.style.borderColor = on ? '#7c3aed' : '#d1d5db';
+    b.style.background = on ? 'var(--blue)' : 'var(--card-2)';
+    b.style.color = on ? '#fff' : 'var(--tx)';
+    b.style.borderColor = on ? 'var(--blue)' : 'var(--line)';
   });
   loadTopicTrends();
 }
@@ -1996,22 +1996,22 @@ async function renderTopicBank() {
   const byCat = {};
   for (const t of topics) (byCat[t.category || '—'] = byCat[t.category || '—'] || []).push(t);
   let html = `<table style="width:100%;border-collapse:collapse;font-size:13px">
-    <thead><tr style="text-align:left;color:#6b7280;border-bottom:1px solid #e5e7eb">
+    <thead><tr style="text-align:left;color:var(--mut);border-bottom:1px solid var(--line)">
       <th style="padding:8px 10px">Topic (EN)</th><th>ES</th><th>Conversations</th><th>Status</th><th></th>
     </tr></thead><tbody>`;
   for (const [cat, list] of Object.entries(byCat)) {
-    html += `<tr><td colspan="5" style="padding:10px 10px 4px;font-weight:700;color:#7c3aed;font-size:12px;text-transform:uppercase;letter-spacing:.04em">${escHtml(cat)}</td></tr>`;
+    html += `<tr><td colspan="5" style="padding:10px 10px 4px;font-weight:700;color:var(--blue);font-size:12px;text-transform:uppercase;letter-spacing:.04em">${escHtml(cat)}</td></tr>`;
     for (const t of list) {
       const archived = t.status === 'archived';
-      html += `<tr style="border-bottom:1px solid #f1f1f4;${archived ? 'opacity:.45' : ''}">
-        <td style="padding:7px 10px"><span style="font-weight:600">${escHtml(t.name_en || t.slug)}</span><br><code style="font-size:10px;color:#9ca3af">${escHtml(t.slug)}</code></td>
-        <td style="color:#6b7280">${escHtml(t.name_es || '')}</td>
+      html += `<tr style="border-bottom:1px solid var(--line);${archived ? 'opacity:.45' : ''}">
+        <td style="padding:7px 10px"><span style="font-weight:600">${escHtml(t.name_en || t.slug)}</span><br><code style="font-size:10px;color:var(--faint)">${escHtml(t.slug)}</code></td>
+        <td style="color:var(--mut)">${escHtml(t.name_es || '')}</td>
         <td style="font-weight:600">${t.count || 0}</td>
-        <td>${archived ? '<span style="color:#9ca3af">archived</span>' : '<span style="color:#16a34a">active</span>'}</td>
+        <td>${archived ? '<span style="color:var(--faint)">archived</span>' : '<span style="color:var(--ok)">active</span>'}</td>
         <td style="text-align:right;white-space:nowrap">
-          <a onclick="editTopic(${t.id})" style="cursor:pointer;color:#7c3aed;font-size:12px;margin-right:8px">edit</a>
-          <a onclick="mergeTopic(${t.id},'${escHtml(t.name_en||t.slug)}')" style="cursor:pointer;color:#6b7280;font-size:12px;margin-right:8px">merge</a>
-          <a onclick="toggleArchiveTopic(${t.id},'${archived ? 'active' : 'archived'}')" style="cursor:pointer;color:${archived ? '#16a34a' : '#dc2626'};font-size:12px">${archived ? 'restore' : 'archive'}</a>
+          <a onclick="editTopic(${t.id})" style="cursor:pointer;color:var(--blue);font-size:12px;margin-right:8px">edit</a>
+          <a onclick="mergeTopic(${t.id},'${escHtml(t.name_en||t.slug)}')" style="cursor:pointer;color:var(--mut);font-size:12px;margin-right:8px">merge</a>
+          <a onclick="toggleArchiveTopic(${t.id},'${archived ? 'active' : 'archived'}')" style="cursor:pointer;color:${archived ? 'var(--ok)' : 'var(--bad)'};font-size:12px">${archived ? 'restore' : 'archive'}</a>
         </td>
       </tr>`;
     }
@@ -2066,9 +2066,9 @@ let topicCustom = null;   // {from, to} при кастомном диапазо
 function highlightTopicPeriod(active) {   // active = 'day'|'week'|'month'|'custom'
   document.querySelectorAll('.tp-period').forEach(b => {
     const on = b.dataset.p === active;
-    b.style.background = on ? '#7c3aed' : '#fff';
-    b.style.color = on ? '#fff' : '#374151';
-    b.style.borderColor = on ? '#7c3aed' : '#d1d5db';
+    b.style.background = on ? 'var(--blue)' : 'var(--card-2)';
+    b.style.color = on ? '#fff' : 'var(--tx)';
+    b.style.borderColor = on ? 'var(--blue)' : 'var(--line)';
   });
 }
 
@@ -2095,9 +2095,9 @@ function setTrendMode(m) {
   trendMode = m;
   document.querySelectorAll('.tp-mode').forEach(b => {
     const on = b.dataset.m === m;
-    b.style.background = on ? '#7c3aed' : '#fff';
-    b.style.color = on ? '#fff' : '#374151';
-    b.style.borderColor = on ? '#7c3aed' : '#d1d5db';
+    b.style.background = on ? 'var(--blue)' : 'var(--card-2)';
+    b.style.color = on ? '#fff' : 'var(--tx)';
+    b.style.borderColor = on ? 'var(--blue)' : 'var(--line)';
   });
   renderTrends();
 }
@@ -2114,8 +2114,8 @@ async function loadTopicTrends() {
 
 function deltaHtml(d) {
   return d > 0 ? `<span style="color:#dc2626">▲ ${d}</span>`
-       : d < 0 ? `<span style="color:#16a34a">▼ ${-d}</span>`
-               : '<span style="color:#9ca3af">– 0</span>';
+       : d < 0 ? `<span style="color:var(--ok)">▼ ${-d}</span>`
+               : '<span style="color:var(--faint)">– 0</span>';
 }
 
 function trendBarRow(type, key, label, sub, current, delta, max, users, usersDelta) {
@@ -2125,10 +2125,10 @@ function trendBarRow(type, key, label, sub, current, delta, max, users, usersDel
     : '';
   return `<div style="margin-bottom:9px">
     <div class="trend-head" data-type="${type}" data-key="${escHtml(key)}" style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px;cursor:pointer">
-      <span style="color:#374151"><span class="trend-caret" style="color:#9ca3af;font-size:10px;margin-right:5px">▸</span>${escHtml(label)}${sub ? ` <span style="color:#cbd5e1">·</span> <span style="color:#9ca3af;font-size:10px">${escHtml(sub)}</span>` : ''}</span>
-      <span style="color:#374151"><span style="font-weight:600">${current}</span> <span style="font-size:10px;font-weight:500;color:#94a3b8">chats</span> <span style="font-size:11px;font-weight:500;margin-left:2px">${deltaHtml(delta)}</span>${usersHtml}</span>
+      <span style="color:var(--tx)"><span class="trend-caret" style="color:var(--faint);font-size:10px;margin-right:5px">▸</span>${escHtml(label)}${sub ? ` <span style="color:#cbd5e1">·</span> <span style="color:var(--faint);font-size:10px">${escHtml(sub)}</span>` : ''}</span>
+      <span style="color:var(--tx)"><span style="font-weight:600">${current}</span> <span style="font-size:10px;font-weight:500;color:#94a3b8">chats</span> <span style="font-size:11px;font-weight:500;margin-left:2px">${deltaHtml(delta)}</span>${usersHtml}</span>
     </div>
-    <div style="height:6px;background:#f3f4f6;border-radius:3px"><div style="width:${w}%;height:100%;background:#c4b5fd;border-radius:3px"></div></div>
+    <div style="height:6px;background:var(--card-2);border-radius:3px"><div style="width:${w}%;height:100%;background:var(--blue);border-radius:3px"></div></div>
     <div class="trend-drill" style="display:none;margin:8px 0 6px 16px"></div>
   </div>`;
 }
@@ -2146,7 +2146,7 @@ function renderTrends() {
     const spanLbl = { day: 'vs prev day', week: 'vs prev 7 days', month: 'vs prev 30 days' }[topicPeriod] || '';
     head = `Last ${data.span_days} day(s) ${spanLbl}`;
   }
-  let html = `<div style="font-size:11px;color:#9ca3af;margin-bottom:10px">${head} · click a row to drill down</div>`;
+  let html = `<div style="font-size:11px;color:var(--faint);margin-bottom:10px">${head} · click a row to drill down</div>`;
   if (trendMode === 'group') {
     const cats = {};
     for (const t of items) { const c = t.category || '—'; (cats[c] = cats[c] || { current: 0, previous: 0, users: 0, users_prev: 0 }); cats[c].current += t.current; cats[c].previous += t.previous; cats[c].users += (t.users || 0); cats[c].users_prev += (t.users_prev || 0); }
@@ -2187,17 +2187,17 @@ async function onTrendClick(h) {
 }
 
 function renderConvMiniList(list) {
-  if (!Array.isArray(list) || !list.length) return '<div style="color:#9ca3af;font-size:12px;padding:4px">No conversations in this window.</div>';
+  if (!Array.isArray(list) || !list.length) return '<div style="color:var(--faint);font-size:12px;padding:4px">No conversations in this window.</div>';
   let h = '<table style="width:100%;border-collapse:collapse;font-size:12px">';
   for (const c of list) {
     const tag = (c.product_line && c.product_line !== 'NA' ? c.product_line : '') + (c.direction === 'outbound' ? ' ↗' : '');
-    h += `<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer" onclick="openConv('${c.id}')">
-      <td style="padding:4px 8px;color:#6b7280;white-space:nowrap">${formatPlain(c.created_at)}</td>
+    h += `<tr style="border-bottom:1px solid var(--line);cursor:pointer" onclick="openConv('${c.id}')">
+      <td style="padding:4px 8px;color:var(--mut);white-space:nowrap">${formatPlain(c.created_at)}</td>
       <td style="padding:4px 8px">${convTypeBadge(c.type)}</td>
-      <td style="padding:4px 8px;color:#9ca3af;font-size:10px;font-weight:700">${escHtml(tag)}</td>
-      <td style="padding:4px 8px;color:#374151">${escHtml(c.agent_name || '')}</td>
+      <td style="padding:4px 8px;color:var(--faint);font-size:10px;font-weight:700">${escHtml(tag)}</td>
+      <td style="padding:4px 8px;color:var(--tx)">${escHtml(c.agent_name || '')}</td>
       <td style="padding:4px 8px;text-align:right">${scorePill(c.avg_score)}</td>
-      <td style="padding:4px 8px;color:#7c3aed;white-space:nowrap">view →</td>
+      <td style="padding:4px 8px;color:var(--blue);white-space:nowrap">view →</td>
     </tr>`;
   }
   return h + '</table>';
@@ -2209,18 +2209,18 @@ async function loadSuggestions() {
   try { list = await fetch(`${API}/admin/topic-suggestions`).then(r => r.json()); }
   catch (e) { wrap.innerHTML = '<div class="loading" style="padding:8px">—</div>'; return; }
   if (!Array.isArray(list) || !list.length) {
-    wrap.innerHTML = '<div style="color:#9ca3af;font-size:12px;padding:6px">No pending suggestions. Click “Detect now” to scan recent unclassified contacts.</div>';
+    wrap.innerHTML = '<div style="color:var(--faint);font-size:12px;padding:6px">No pending suggestions. Click “Detect now” to scan recent unclassified contacts.</div>';
     return;
   }
   let html = '';
   for (const s of list) {
-    html += `<div style="border-bottom:1px solid #f1f1f4;padding:10px 0;display:flex;justify-content:space-between;gap:12px">
+    html += `<div style="border-bottom:1px solid var(--line);padding:10px 0;display:flex;justify-content:space-between;gap:12px">
       <div>
-        <div style="font-weight:600">${escHtml(s.proposed_name || '')} <span style="color:#9ca3af;font-weight:500;font-size:11px">${escHtml(s.proposed_category || '')} · ${s.count} contacts · ${escHtml(s.period || '')}</span></div>
-        <div style="font-size:12px;color:#6b7280;margin-top:3px">${escHtml(s.rationale || '')}</div>
+        <div style="font-weight:600">${escHtml(s.proposed_name || '')} <span style="color:var(--faint);font-weight:500;font-size:11px">${escHtml(s.proposed_category || '')} · ${s.count} contacts · ${escHtml(s.period || '')}</span></div>
+        <div style="font-size:12px;color:var(--mut);margin-top:3px">${escHtml(s.rationale || '')}</div>
       </div>
       <div style="white-space:nowrap">
-        <a onclick="acceptSuggestion(${s.id})" style="cursor:pointer;color:#16a34a;font-size:12px;margin-right:8px">accept</a>
+        <a onclick="acceptSuggestion(${s.id})" style="cursor:pointer;color:var(--ok);font-size:12px;margin-right:8px">accept</a>
         <a onclick="rejectSuggestion(${s.id})" style="cursor:pointer;color:#dc2626;font-size:12px">reject</a>
       </div>
     </div>`;
@@ -2258,16 +2258,16 @@ function renderConvModal(c) {
     dur = sec < 60 ? `${sec}s` : `${Math.floor(sec/60)}m ${sec%60}s`;
   }
   document.getElementById('conv-modal-meta').innerHTML = [
-    c.merged_into ? `<span style="background:#fef3c7;color:#92400e;font-weight:700;padding:2px 8px;border-radius:5px">↳ Часть объединённого диалога — не оценивается отдельно · <a onclick="openConv('${c.merged_into}')" style="cursor:pointer;color:#7c3aed">открыть весь диалог →</a></span>` : '',
-    (c.task_count > 1) ? `<span style="background:#eef2ff;color:#4338ca;font-weight:700;padding:2px 8px;border-radius:5px">🧩 Объединённый диалог из ${c.task_count} тасок</span>` : '',
+    c.merged_into ? `<span style="background:var(--warn-soft);color:var(--warn);font-weight:700;padding:2px 8px;border-radius:5px">↳ Часть объединённого диалога — не оценивается отдельно · <a onclick="openConv('${c.merged_into}')" style="cursor:pointer;color:var(--blue)">открыть весь диалог →</a></span>` : '',
+    (c.task_count > 1) ? `<span style="background:var(--blue-soft);color:var(--blue);font-weight:700;padding:2px 8px;border-radius:5px">🧩 Объединённый диалог из ${c.task_count} тасок</span>` : '',
     c.account_type ? `<span>🏦 ${accountBadge(c.account_type, 0)}${c.tariff ? ' ' + tariffChip(c.tariff) : ''}</span>` : '',
     c.agent_name ? `<span>🎧 ${escHtml(c.agent_name)}</span>` : '',
     c.topic_es   ? `<span>🏷 ${escHtml(c.topic_es)}</span>` : '',
     dur          ? `<span>⏱ ${dur}</span>` : '',
     c.created_at ? `<span>🕐 ${formatPlain(c.created_at)}</span>` : '',
     c.closed_at  ? `<span>🏁 ${formatPlain(c.closed_at)}</span>` : '',
-    c.customer_id ? `<span>🆔 Customer: <code style="font-size:11px">${escHtml(c.customer_id)}</code> <a onclick="closeConvModal();openCustomer('${c.customer_id}','${c.id}')" style="cursor:pointer;color:#7c3aed;font-weight:600;margin-left:4px">👥 all chats →</a></span>` : '',
-    `<span style="color:#9ca3af">Task ID: <code style="font-size:11px">${escHtml(c.id)}</code></span>`,
+    c.customer_id ? `<span>🆔 Customer: <code style="font-size:11px">${escHtml(c.customer_id)}</code> <a onclick="closeConvModal();openCustomer('${c.customer_id}','${c.id}')" style="cursor:pointer;color:var(--blue);font-weight:600;margin-left:4px">👥 all chats →</a></span>` : '',
+    `<span style="color:var(--faint)">Task ID: <code style="font-size:11px">${escHtml(c.id)}</code></span>`,
   ].filter(Boolean).join('');
 
   const ev = c.evaluation || {};
@@ -2287,8 +2287,8 @@ function renderConvModal(c) {
       <div class="modal-stat-lbl">${c.task_count > 1 ? 'Turns (' + c.task_count + ' tasks)' : 'Turns'}</div>
     </div>
     ${c.summary ? `<div class="modal-stat" style="flex:1;text-align:left;min-width:200px">
-      <div style="font-size:11px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">AI Summary</div>
-      <div style="font-size:12px;color:#374151;line-height:1.5">${escHtml(c.summary)}</div>
+      <div style="font-size:11px;color:var(--faint);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">AI Summary</div>
+      <div style="font-size:12px;color:var(--tx);line-height:1.5">${escHtml(c.summary)}</div>
     </div>` : ''}
   `;
 
@@ -2310,18 +2310,18 @@ function renderConvModal(c) {
       const dateStr = h.created_at ? formatPlain(h.created_at) : '—';
       const today = sameDay(h.created_at, c.created_at) ? '<span style="color:#dc2626;font-weight:600;font-size:10px;margin-left:4px">SAME DAY</span>' : '';
       const topic = h.topic ? escHtml(h.topic) : '(no topic)';
-      const score = h.avg_score != null ? `<span style="color:${h.avg_score>=7?'#059669':h.avg_score>=4?'#d97706':'#dc2626'};font-weight:700">${h.avg_score.toFixed(1)}</span>` : '—';
+      const score = h.avg_score != null ? `<span style="color:${h.avg_score>=7?'#059669':h.avg_score>=4?'var(--warn)':'var(--bad)'};font-weight:700">${h.avg_score.toFixed(1)}</span>` : '—';
       const typeIcon = h.type === 'call' ? '📞' : '💬';
       html += `<div class="cust-hist-item" onclick="event.stopPropagation();openConv('${h.id}')">
         <span style="font-size:13px">${typeIcon}</span>
-        <span style="color:#6b7280;font-size:11px;width:115px;flex-shrink:0">${dateStr}${today}</span>
-        <span style="flex:1;color:#1f2937;font-size:12px">${topic}</span>
-        <span style="font-size:11px;color:#9ca3af">${escHtml(h.agent_name || '')}</span>
+        <span style="color:var(--mut);font-size:11px;width:115px;flex-shrink:0">${dateStr}${today}</span>
+        <span style="flex:1;color:var(--tx);font-size:12px">${topic}</span>
+        <span style="font-size:11px;color:var(--faint)">${escHtml(h.agent_name || '')}</span>
         <span style="font-size:12px;width:30px;text-align:right">${score}</span>
       </div>`;
     }
     if (hist.length > 15) {
-      html += `<div style="text-align:center;font-size:11px;color:#9ca3af;padding:6px">+ ${hist.length - 15} more</div>`;
+      html += `<div style="text-align:center;font-size:11px;color:var(--faint);padding:6px">+ ${hist.length - 15} more</div>`;
     }
     html += `</div></div>`;
   }
@@ -2344,17 +2344,17 @@ function renderConvModal(c) {
   const useCombined = (c.task_count > 1) && Array.isArray(c.combined_transcript) && c.combined_transcript.length;
   const rows = useCombined ? c.combined_transcript : transcript;
   if (useCombined) {
-    html += `<div style="margin:0 24px 12px;padding:8px 12px;background:#eef2ff;border-radius:8px;font-size:12px;color:#4338ca;font-weight:600">🧩 Объединённый диалог из ${c.task_count} тасок (оценён как одно целое)</div>`;
+    html += `<div style="margin:0 24px 12px;padding:8px 12px;background:var(--blue-soft);border-radius:8px;font-size:12px;color:var(--blue);font-weight:600">🧩 Объединённый диалог из ${c.task_count} тасок (оценён как одно целое)</div>`;
   }
   if (!rows.length) {
     html += '<div class="loading">No transcript.</div>';
   } else {
     for (const turn of rows) {
       if (turn.boundary) {   // разделитель между тасками в объединённом треде
-        html += `<div style="display:flex;align-items:center;gap:8px;margin:14px 24px 8px;color:#9ca3af;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">
-          <span style="flex:1;height:1px;background:#e5e7eb"></span>
+        html += `<div style="display:flex;align-items:center;gap:8px;margin:14px 24px 8px;color:var(--faint);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">
+          <span style="flex:1;height:1px;background:var(--card-2)"></span>
           <span>Task ${turn.part} · ${formatPlain(turn.created_at)}</span>
-          <span style="flex:1;height:1px;background:#e5e7eb"></span>
+          <span style="flex:1;height:1px;background:var(--card-2)"></span>
         </div>`;
         continue;
       }
@@ -2367,7 +2367,7 @@ function renderConvModal(c) {
         <div class="bubble-row ${side}" style="margin-bottom:4px">
           <div class="avatar ${side}">${initial}</div>
           <div>
-            <div style="font-size:10px;color:#9ca3af;font-weight:600;margin-bottom:3px">${label}</div>
+            <div style="font-size:10px;color:var(--faint);font-weight:600;margin-bottom:3px">${label}</div>
             <div class="bubble ${side}">${escHtml(turn.text || '')}</div>
           </div>
         </div>

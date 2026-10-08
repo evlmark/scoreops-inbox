@@ -343,7 +343,14 @@
       border-radius: 12px; font-size: 11px; font-weight: 600;
       white-space: nowrap;
     }
-  </style>
+  
+  /* Вкладки с нашими отчётами: у них своя шапка и свои фильтры, поэтому недельная
+     сводка дашборда только отнимает высоту. Прячем её и отдаём место кадру.
+     Родных вкладок Марка это не касается — там сводка остаётся. */
+  .report-frame{ width:100%; height:calc(100vh - 170px); border:0; border-radius:10px; background:var(--bg); display:block; }
+  body.report-tab #weekly-kpis{ display:none; }
+  body.report-tab .report-frame{ height:calc(100vh - 152px); }  /* запасное значение; точное ставит fitReportFrame() */
+</style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
@@ -538,15 +545,15 @@
 
   <div class="tab-panel" id="tab-inquiries">
     <iframe id="frame-inquiries" data-src="/dashboard-pages/types-of-inquiries-live" title="Types of Inquiries"
-            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:var(--bg)"></iframe>
+            class="report-frame"></iframe>
   </div>
   <div class="tab-panel" id="tab-longcases">
     <iframe id="frame-longcases" data-src="/dashboard-pages/pyme-long-cases" title="Long Cases"
-            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:var(--bg)"></iframe>
+            class="report-frame"></iframe>
   </div>
   <div class="tab-panel" id="tab-roadmap">
     <iframe id="frame-roadmap" data-src="/dashboard-pages/cst-roadmap" title="CST Roadmap"
-            style="width:100%;height:calc(100vh - 170px);border:0;border-radius:10px;background:var(--bg)"></iframe>
+            class="report-frame"></iframe>
   </div>
  </div><!-- /pyme-view -->
 
@@ -931,9 +938,29 @@ function timeAgo(iso) {
 /* ── Tabs ── */
 
 let inboxTabInited = false;
+const REPORT_TABS = ['inquiries', 'longcases', 'roadmap'];
+
+// Высоту кадра считаем от его фактического верха: он зависит от шапки и ряда вкладок,
+// а те переносятся на вторую строку на узком экране. Константа в CSS этого не ловит
+// и даёт либо полосу прокрутки, либо пустоту под отчётом.
+function fitReportFrame(name) {
+  const f = document.querySelector('#tab-' + (name || '') + ' .report-frame')
+         || document.querySelector('.tab-panel.active .report-frame');
+  if (!f) return;
+  const top = f.getBoundingClientRect().top;
+  // нижний отступ .container идёт после кадра, поэтому вычитаем именно его:
+  // любое другое число оставляет либо полосу прокрутки, либо пустоту
+  const pad = parseFloat(getComputedStyle(f.closest('.container') || document.body).paddingBottom) || 0;
+  f.style.height = Math.max(320, Math.round(window.innerHeight - top - pad)) + 'px';
+}
+window.addEventListener('resize', () => { if (document.body.classList.contains('report-tab')) fitReportFrame(); });
+
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.body.classList.toggle('report-tab', REPORT_TABS.includes(name));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-'+name));
+  // только после того, как панель стала видимой: у скрытой getBoundingClientRect() даёт нули
+  if (REPORT_TABS.includes(name)) fitReportFrame(name);
   // Отчёты живут отдельными страницами: грузим их в iframe при первом открытии вкладки,
   // чтобы вести себя так же, как остальные вкладки, и не тянуть мегабайты на старте.
   const frame = document.getElementById('frame-'+name);

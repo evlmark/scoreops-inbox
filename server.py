@@ -579,7 +579,7 @@ def case_acks_set(payload: AckIn):
 
 
 @app.post("/admin/kb-documents/purge-removed")
-def kb_purge_removed(older_than_days: int = 0, dry_run: int = 1):
+def kb_purge_removed(older_than_days: int = 0, dry_run: int = 1, duplicates_only: int = 1):
     """Физически удаляет документы, помеченные removed.
 
     Нужна после разовой заливки, где адреса пришли в процентной кодировке: исходные
@@ -594,10 +594,20 @@ def kb_purge_removed(older_than_days: int = 0, dry_run: int = 1):
         if older_than_days:
             q = q.filter(DBDocument.removed_at < datetime.utcnow() - _td(days=older_than_days))
         rows = q.all()
+        if duplicates_only:
+            # Удаляем только тени: ту же страницу, которая уже лежит активной под другим
+            # написанием адреса (процентная кодировка). Страницы, реально пропавшие с сайта,
+            # остаются помеченными — это история, а не мусор.
+            from urllib.parse import unquote
+            def key(u):
+                return unquote(u or "").rstrip("/").lower()
+            active = {key(d.url) for d in db.query(DBDocument).filter(DBDocument.removed_at.is_(None)).all()}
+            rows = [r for r in rows if key(r.url) in active]
         sample = [{"url": r.url, "removed_at": r.removed_at.isoformat() if r.removed_at else None}
                   for r in rows[:20]]
         if dry_run:
-            return {"dry_run": True, "would_delete": len(rows), "sample": sample}
+            return {"dry_run": True, "duplicates_only": bool(duplicates_only),
+                    "would_delete": len(rows), "sample": sample}
         for r in rows:
             db.delete(r)
         db.commit()

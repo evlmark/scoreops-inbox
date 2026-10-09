@@ -1057,6 +1057,46 @@ async def merge_topic(topic_id: int, request: Request):
         db.close()
 
 
+@app.post("/admin/conversation-customers")
+async def admin_set_customers(request: Request):
+    """Проставить customer_id обращениям, у которых его нет.
+
+    Тело: {"items":[{"id": "<task_id>", "customer_id": "..."}], "only_missing": 1}.
+    В карточке задачи CRM идентификатор клиента отсутствует примерно у каждого
+    десятого обращения, но он есть в смежных таблицах — в сообщениях чата
+    (`client_id`) и в результатах CSAT (`user_id`). Оба проверены на пересечении
+    с известными: совпадение 100%. Эта ручка принимает восстановленные пары,
+    чтобы обращения перестали выпадать из разреза ПФАЭ/ПМ.
+
+    only_missing=1 (по умолчанию) — не трогать уже заполненные значения.
+    """
+    body = await request.json()
+    items = body.get("items") or []
+    only_missing = body.get("only_missing", 1)
+    db = SessionLocal()
+    try:
+        updated = skipped = not_found = 0
+        for it in items:
+            cid = (it.get("customer_id") or "").strip()
+            tid = (it.get("id") or "").strip()
+            if not cid or not tid:
+                continue
+            c = db.query(DBConversation).filter_by(id=tid).first()
+            if not c:
+                not_found += 1
+                continue
+            if only_missing and clean_customer_id(c.customer_id):
+                skipped += 1
+                continue
+            c.customer_id = cid
+            updated += 1
+        db.commit()
+        return {"ok": True, "updated": updated, "skipped": skipped,
+                "not_found": not_found, "only_missing": bool(only_missing)}
+    finally:
+        db.close()
+
+
 @app.get("/admin/untagged")
 def admin_untagged(limit: int = 20000, include_merged: int = 0, include_text: int = 0):
     """Обращения без темы — вход для пакетной разметки.

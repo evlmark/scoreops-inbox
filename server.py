@@ -1373,10 +1373,15 @@ def weekly_metrics(cohort: Optional[str] = None, week_offset: int = 0,
 @app.post("/admin/user-accounts")
 async def set_user_accounts(request: Request):
     """Bulk-апдейт account_type по customer_id (из ночного funnel-запроса).
-    Тело JSON: {"accounts": [{"customer_id": "...", "account_type": "PFAE External|PFAE Golden|Persona Moral|No Empresa account", "tariff": "..."}]}.
+    Тело JSON: {"accounts": [...], "only_missing": 0|1}.
+    only_missing=1 трогает только обращения с пустым account_type.
     Проставляет conversations.account_type/tariff всем обращениям пользователя."""
     body = await request.json()
     accounts = body.get("accounts") or []
+    # only_missing=1 — заполнять лишь пустые значения. Без него запрос перетирает
+    # account_type у всех обращений клиента, включая те, что проставил собственный
+    # funnel Марка, а его определение PM расходится с нашим и спор не закрыт.
+    only_missing = bool(body.get("only_missing"))
     db = SessionLocal()
     updated = users = 0
     try:
@@ -1385,13 +1390,15 @@ async def set_user_accounts(request: Request):
             label = a.get("account_type")
             if not cid or not label:
                 continue
-            n = db.query(DBConversation).filter(DBConversation.customer_id == cid).update(
-                {DBConversation.account_type: label, DBConversation.tariff: a.get("tariff")},
-                synchronize_session=False)
+            q = db.query(DBConversation).filter(DBConversation.customer_id == cid)
+            if only_missing:
+                q = q.filter(DBConversation.account_type.is_(None))
+            n = q.update({DBConversation.account_type: label, DBConversation.tariff: a.get("tariff")},
+                         synchronize_session=False)
             updated += n
             users += 1
         db.commit()
-        return {"ok": True, "users": users, "rows_updated": updated}
+        return {"ok": True, "users": users, "rows_updated": updated, "only_missing": only_missing}
     finally:
         db.close()
 

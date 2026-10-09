@@ -350,6 +350,9 @@
      Родных вкладок Марка это не касается — там сводка остаётся. */
   .report-frame{ width:100%; height:calc(100vh - 170px); border:0; border-radius:10px; background:var(--bg); display:block; }
   body.report-tab #weekly-kpis{ display:none; }
+  /* На вкладках с нашими отчётами шапка дашборда тоже не нужна: у отчёта своя шапка
+     и своя навигация, а здесь она только съедает высоту. Остаётся ряд вкладок. */
+  body.report-tab > header{ display:none; }
   body.report-tab .report-frame{ height:calc(100vh - 152px); }  /* запасное значение; точное ставит fitReportFrame() */
 </style>
   <script src="https://accounts.google.com/gsi/client" async defer></script>

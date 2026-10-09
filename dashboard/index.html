@@ -5,22 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ScoreOPS Dashboard</title>
   <style>  :root{
-    /* Plata Empresa: чёрный с синим подтоном, оранжевый основной, синий Empresa вторым.
-       Та же палитра, что на страницах отчётов, чтобы дашборд и вкладки были одним целым. */
-    --bg:#070A12; --card:rgba(255,255,255,.055); --card-2:rgba(255,255,255,.085);
-    --line:rgba(255,255,255,.12); --line-2:rgba(255,255,255,.2);
-    --tx:#EEF2FA; --mut:#9BA8BF; --faint:#6E7B92;
-    --acc:#FF7A1A; --acc-2:#FF9A4D; --acc-soft:rgba(255,122,26,.16);
-    --blue:#3B82F6; --blue-soft:rgba(59,130,246,.18);
-    --ok:#3DD68C; --ok-soft:rgba(61,214,140,.16);
-    --bad:#FF5D55; --bad-soft:rgba(255,93,85,.16);
-    --warn:#F2A33C; --warn-soft:rgba(242,163,60,.16);
-    --glass:rgba(255,255,255,.06); --glass-strong:rgba(10,14,24,.72);
-    color-scheme: dark;
+    /* Plata Empresa, светлая тема: белая бумага с холодным подтоном, оранжевый основной,
+       синий Empresa вторым. Та же палитра, что на страницах отчётов, чтобы дашборд и
+       вкладки были одним целым. Тёмной ветки нет: светлая независимо от настройки системы. */
+    --bg:#F6F7FB; --card:#FFFFFF; --card-2:#EEF1F7;
+    --line:rgba(15,23,42,.10); --line-2:rgba(15,23,42,.20);
+    --tx:#101828; --mut:#51607A; --faint:#7C8AA3;
+    --acc:#D95800; --acc-2:#B84700; --acc-soft:rgba(217,88,0,.10);
+    --blue:#1D4ED8; --blue-soft:rgba(29,78,216,.10);
+    --ok:#15803D; --ok-soft:rgba(21,128,61,.12);
+    --bad:#C62828; --bad-soft:rgba(198,40,40,.10);
+    --warn:#B45309; --warn-soft:rgba(180,83,9,.12);
+    --glass:rgba(255,255,255,.72); --glass-strong:rgba(255,255,255,.92);
+    color-scheme: light;
   }
   body{ background:
-    radial-gradient(900px 600px at 10% -10%, rgba(255,122,26,.16), transparent 60%),
-    radial-gradient(800px 600px at 90% 0%, rgba(37,99,235,.20), transparent 60%),
+    radial-gradient(900px 600px at 10% -10%, rgba(217,88,0,.10), transparent 60%),
+    radial-gradient(800px 600px at 90% 0%, rgba(29,78,216,.10), transparent 60%),
     var(--bg) !important; background-attachment: fixed; color: var(--tx); }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }

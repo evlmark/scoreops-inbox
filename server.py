@@ -1051,6 +1051,71 @@ async def merge_topic(topic_id: int, request: Request):
         db.close()
 
 
+@app.get("/admin/untagged")
+def admin_untagged(limit: int = 20000, include_merged: int = 0):
+    """Обращения без темы — вход для пакетной разметки.
+
+    Отдаётся под X-Extension-Key, чтобы разметку можно было гонять скриптом:
+    парный /conversations/{id}/topic закрыт Google-сессией и работает по одному,
+    а размечать нужно десятки тысяч.
+    """
+    db = SessionLocal()
+    try:
+        q = db.query(DBConversation).filter(DBConversation.topic_slug.is_(None))
+        if not include_merged:
+            q = q.filter(DBConversation.merged_into.is_(None))
+        rows = q.order_by(desc(DBConversation.created_at)).limit(limit).all()
+        return {"count": len(rows), "conversations": [
+            {"id": c.id, "type": c.type, "customer_id": c.customer_id,
+             "created_at": c.created_at.isoformat() if c.created_at else None,
+             "turns": c.turns, "status": c.status} for c in rows]}
+    finally:
+        db.close()
+
+
+@app.post("/admin/conversation-topics")
+async def admin_set_topics(request: Request):
+    """Пакетная установка тем: {"items":[{"id","topic_slug"}], "topic_source":"claude"}.
+
+    Метку человека не трогаем никогда — это единственный источник, который
+    авторазметка не имеет права перетирать. only_missing=1 (по умолчанию) ставит
+    тему лишь там, где её нет, чтобы backfill не спорил с классификатором Марка.
+    """
+    body = await request.json()
+    items = body.get("items") or []
+    source = (body.get("topic_source") or "claude").strip().lower()
+    if source not in ("human", "claude"):
+        return {"error": f"unknown topic_source '{source}', expected 'human' or 'claude'"}
+    only_missing = body.get("only_missing", 1)
+    db = SessionLocal()
+    try:
+        topics = {t.slug: t for t in db.query(DBTopic).all()}
+        updated = skipped = unknown_slug = not_found = 0
+        for it in items:
+            slug = (it.get("topic_slug") or "").strip()
+            t = topics.get(slug)
+            if not t:
+                unknown_slug += 1
+                continue
+            c = db.query(DBConversation).filter_by(id=(it.get("id") or "").strip()).first()
+            if not c:
+                not_found += 1
+                continue
+            if c.topic_source == "human" or (only_missing and c.topic_slug):
+                skipped += 1
+                continue
+            c.topic_slug = slug
+            c.topic_source = source
+            c.topic = t.name_en
+            c.topic_es = t.name_es
+            updated += 1
+        db.commit()
+        return {"ok": True, "updated": updated, "skipped": skipped,
+                "unknown_slug": unknown_slug, "not_found": not_found, "only_missing": bool(only_missing)}
+    finally:
+        db.close()
+
+
 @app.post("/conversations/{conv_id}/topic")
 async def set_conversation_topic(conv_id: str, request: Request):
     """Установка топика извне автоклассификатора.

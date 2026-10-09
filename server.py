@@ -1068,7 +1068,7 @@ def admin_untagged(limit: int = 20000, include_merged: int = 0):
         return {"count": len(rows), "conversations": [
             {"id": c.id, "type": c.type, "customer_id": c.customer_id,
              "created_at": c.created_at.isoformat() if c.created_at else None,
-             "turns": c.turns, "status": c.status} for c in rows]}
+             "turns": len(c.transcript or []), "status": c.status} for c in rows]}
     finally:
         db.close()
 

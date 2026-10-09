@@ -822,7 +822,13 @@ def _process_one_conversation(conv_id: str):
             c.summary   = result.get("explanation")
             c.evaluation = result
 
-        c.status = "done" if all_translated else "pending"
+        # «done» означает «обработано», а не «переведено». Раньше статус зависел только от
+        # перевода: если классификатор возвращал пустоту, диалог всё равно помечался done и
+        # больше не переобрабатывался — тема, product_line, direction и avg_score оставались
+        # пустыми навсегда и молча. Так накопилось 7 876 обращений со статусом done без темы.
+        c.status = "done" if (all_translated and result) else "pending"
+        if all_translated and not result:
+            print(f"[process-conv] {conv_id}: классификация не вернула результат, оставляем pending")
         db.commit()
         return True
     except Exception as e:

@@ -1052,12 +1052,16 @@ async def merge_topic(topic_id: int, request: Request):
 
 
 @app.get("/admin/untagged")
-def admin_untagged(limit: int = 20000, include_merged: int = 0):
+def admin_untagged(limit: int = 20000, include_merged: int = 0, include_text: int = 0):
     """Обращения без темы — вход для пакетной разметки.
 
     Отдаётся под X-Extension-Key, чтобы разметку можно было гонять скриптом:
     парный /conversations/{id}/topic закрыт Google-сессией и работает по одному,
     а размечать нужно десятки тысяч.
+
+    include_text=1 отдаёт и сам диалог: часть обращений пришла из очередей, которых
+    нет в нашей выгрузке, и тянуть их текст из DWH пришлось бы задачами на весь
+    PyME-периметр — а здесь он уже лежит.
     """
     db = SessionLocal()
     try:
@@ -1065,10 +1069,17 @@ def admin_untagged(limit: int = 20000, include_merged: int = 0):
         if not include_merged:
             q = q.filter(DBConversation.merged_into.is_(None))
         rows = q.order_by(desc(DBConversation.created_at)).limit(limit).all()
-        return {"count": len(rows), "conversations": [
-            {"id": c.id, "type": c.type, "customer_id": c.customer_id,
-             "created_at": c.created_at.isoformat() if c.created_at else None,
-             "turns": len(c.transcript or []), "status": c.status} for c in rows]}
+        def one(c):
+            d = {"id": c.id, "type": c.type, "customer_id": c.customer_id,
+                 "created_at": c.created_at.isoformat() if c.created_at else None,
+                 "turns": len(c.transcript or []), "status": c.status}
+            if include_text:
+                # роли помечаем C:/A: — классификатор обучен на таком же виде
+                d["text"] = "\n".join(
+                    ("C: " if (t.get("role") == "client") else "A: ") + (t.get("text") or "")
+                    for t in (c.transcript or []) if (t.get("text") or "").strip())
+            return d
+        return {"count": len(rows), "conversations": [one(c) for c in rows]}
     finally:
         db.close()
 

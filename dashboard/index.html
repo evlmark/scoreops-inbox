@@ -943,6 +943,7 @@ function timeAgo(iso) {
 
 let inboxTabInited = false;
 const REPORT_TABS = ['inquiries', 'longcases', 'roadmap'];
+const PAGE_LOADED_AT = Date.now();
 
 // Высоту кадра считаем от его фактического верха: он зависит от шапки и ряда вкладок,
 // а те переносятся на вторую строку на узком экране. Константа в CSS этого не ловит
@@ -968,7 +969,14 @@ function switchTab(name) {
   // Отчёты живут отдельными страницами: грузим их в iframe при первом открытии вкладки,
   // чтобы вести себя так же, как остальные вкладки, и не тянуть мегабайты на старте.
   const frame = document.getElementById('frame-'+name);
-  if (frame && !frame.src && frame.dataset.src) frame.src = frame.dataset.src;
+  // К адресу кадра добавляем метку времени загрузки дашборда. Сам сервер отдаёт
+  // страницы с Cache-Control: no-cache, но iframe грузится один раз за открытие
+  // дашборда — у открытой часами вкладки внутри остаётся версия отчёта на момент
+  // первой загрузки. Julia дважды смотрела на устаревшую страницу и принимала
+  // уже исправленные дефекты за текущие.
+  if (frame && !frame.src && frame.dataset.src) {
+    frame.src = frame.dataset.src + '?t=' + PAGE_LOADED_AT;
+  }
   if (name === 'inbox' && !inboxTabInited) {
     inboxTabInited = true;
     loadInbox();

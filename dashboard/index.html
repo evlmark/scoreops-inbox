@@ -393,17 +393,7 @@
   <!-- Weekly KPIs -->
   <div id="weekly-kpis" style="margin-bottom:20px">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <div style="font-size:12px;color:var(--mut);font-weight:600">📅 <span id="wk-title">This week</span> <span id="wk-range" style="color:var(--blue)">—</span> <span style="color:var(--faint);font-weight:500">(vs previous period)</span></div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:12px;color:var(--mut);font-weight:600">📥 Queue:</span>
-          <select id="queue-sel" onchange="onQueueChange()" style="font-size:12px;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card-2);max-width:280px">
-            <option value="pyme">PyME queues</option>
-            <option value="all">All queues</option>
-          </select>
-          <span id="queue-note" style="font-size:11px;color:var(--faint)"></span>
-        </div>
-      </div>
+      <div style="font-size:12px;color:var(--mut);font-weight:600">📅 <span id="wk-title">This week</span> <span id="wk-range" style="color:var(--blue)">—</span> <span style="color:var(--faint);font-weight:500">(vs previous period)</span></div>
       <div style="display:flex;align-items:center;gap:6px">
         <button class="wk-nav" onclick="shiftWeek(1)"  title="Previous week" style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600">◀</button>
         <button class="wk-nav" onclick="thisWeek()"    title="Back to this week" style="cursor:pointer;border:1px solid var(--line);background:var(--card-2);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600">This week</button>
@@ -778,7 +768,6 @@ function bootApp() {
   // загрузку данных делаем при КАЖДОМ заходе/логине (после повторного логина
   // данные должны появиться без перезагрузки страницы) — сбрасываем ленивые флаги вкладок
   inboxTabInited = knowledgeTabInited = topicsTabInited = usersTabInited = false;
-  initQueueFilter();            // список очередей подтягивается из базы, а не зашит в разметку
   loadWeeklyMetrics();
   switchTab('inbox');
   openFromHash();
@@ -800,73 +789,10 @@ function applyWeekCustom() {
   wkCustom = { from: f, to: t }; loadWeeklyMetrics();
 }
 
-// --- фильтр по очереди ------------------------------------------------------
-// queue_name лежит в базе с самого импорта, но интерфейс его не показывал: KPI
-// считались по всем очередям сразу. Из-за этого «обращения PyME» означало
-// «обращения клиентов PyME куда угодно» — в очередь PyME приходит около шестой
-// части из них, остальное это Inbound Chats, Debit, Expertos и Inversiones.
-let QUEUE_PYME = ['Inbound PyME Chats', 'Inbound PyME Calls'];
-let queueSel = localStorage.getItem('scoreops_queue') || 'pyme';
-
-function queueParam() {
-  if (queueSel === 'all') return '';
-  if (queueSel === 'pyme') return QUEUE_PYME.join(',');
-  return queueSel;                      // одна конкретная очередь
-}
-function qsQueue(prefix) {              // prefix: '?' либо '&'
-  const v = queueParam();
-  return v ? `${prefix}queues=${encodeURIComponent(v)}` : '';
-}
-function onQueueChange() {
-  queueSel = document.getElementById('queue-sel').value;
-  localStorage.setItem('scoreops_queue', queueSel);
-  syncQueueNote();
-  reloadForQueue();
-}
-function reloadForQueue() {
-  loadWeeklyMetrics();
-  if (typeof loadInbox === 'function') loadInbox();
-  if (typeof loadTopicTrends === 'function') loadTopicTrends();
-  if (typeof loadUsers === 'function' && document.getElementById('users-wrap')) {
-    const sb = document.getElementById('users-search');
-    loadUsers(sb ? sb.value.trim() : '');
-  }
-}
-async function initQueueFilter() {
-  const sel = document.getElementById('queue-sel');
-  if (!sel) return;
-  let d;
-  try { d = await fetch(`${API}/queues`).then(r => r.json()); } catch (e) { return; }
-  if (!d || !d.queues) return;
-  if (Array.isArray(d.pyme_default) && d.pyme_default.length) QUEUE_PYME = d.pyme_default;
-  const pymeTotal = d.queues.filter(q => QUEUE_PYME.includes(q.queue_name))
-                            .reduce((a, q) => a + q.count, 0);
-  const all = d.queues.reduce((a, q) => a + q.count, 0);
-  sel.innerHTML =
-    `<option value="pyme">PyME queues (${pymeTotal.toLocaleString()})</option>` +
-    `<option value="all">All queues (${all.toLocaleString()})</option>` +
-    `<optgroup label="One queue">` +
-    d.queues.filter(q => q.queue_name)
-            .map(q => `<option value="${q.queue_name.replace(/"/g, '&quot;')}">${q.queue_name} (${q.count.toLocaleString()})</option>`)
-            .join('') +
-    `</optgroup>`;
-  sel.value = queueSel;
-  if (sel.value !== queueSel) { queueSel = 'pyme'; sel.value = 'pyme'; }
-  syncQueueNote();
-}
-function syncQueueNote() {
-  const el = document.getElementById('queue-note');
-  if (!el) return;
-  el.textContent = queueSel === 'all'
-    ? 'counts every queue a PyME customer wrote to'
-    : '';
-}
-
 async function loadWeeklyMetrics() {
   let qs;
   if (wkCustom) qs = `?from_date=${wkCustom.from}&to_date=${wkCustom.to}`;
   else qs = `?week_offset=${wkOffset}`;
-  qs += qsQueue('&');
   let d;
   try { d = await fetch(`${API}/metrics/weekly${qs}`).then(r => r.json()); }
   catch (e) { return; }
@@ -1446,7 +1372,7 @@ async function loadUsers(q) {
   const wrap = document.getElementById('users-wrap');
   wrap.innerHTML = '<div class="loading">Loading…</div>';
   let data;
-  try { data = await fetch(`${API}/customers?limit=300${q ? `&q=${encodeURIComponent(q)}` : ''}${qsQueue('&')}`).then(r => r.json()); }
+  try { data = await fetch(`${API}/customers${q ? `?q=${encodeURIComponent(q)}` : ''}`).then(r => r.json()); }
   catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
   document.getElementById('users-count').textContent = data.total != null ? `· ${data.total}` : '';
   const list = data.customers || [];
@@ -1678,8 +1604,8 @@ let _lastConvList = [];   // кэш для перерисовки списка �
 async function loadInbox() {
   try {
     const [list, stats] = await Promise.all([
-      fetch(`${API}/conversations?limit=500${qsQueue('&')}`).then(r => r.json()),
-      fetch(`${API}/conversations/stats?_=1${qsQueue('&')}`).then(r => r.json()),
+      fetch(`${API}/conversations?limit=500`).then(r => r.json()),
+      fetch(`${API}/conversations/stats`).then(r => r.json()),
       ensureTopics(),
     ]);
     renderInboxStats(stats);
@@ -2220,7 +2146,6 @@ async function loadTopicTrends() {
   const exOut = document.getElementById('topic-exclude-out').checked ? 1 : 0;
   let qs = `?exclude_outbound=${exOut}&segment=${topicSegment}`;
   qs += topicCustom ? `&from_date=${topicCustom.from}&to_date=${topicCustom.to}` : `&period=${topicPeriod}`;
-  qs += qsQueue('&');
   try { lastTrend = await fetch(`${API}/conversations/topic-stats${qs}`).then(r => r.json()); }
   catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
   renderTrends();
@@ -2294,7 +2219,7 @@ async function onTrendClick(h) {
     if (topicCustom) win = `from_date=${topicCustom.from}&to_date=${topicCustom.to}`;
     else win = `days=${lastTrend.span_days || 7}`;
     let list;
-    try { list = await fetch(`${API}/conversations?topic_slug=${encodeURIComponent(key)}&${win}&exclude_outbound=${exOut}&limit=200${qsQueue('&')}`).then(r => r.json()); }
+    try { list = await fetch(`${API}/conversations?topic_slug=${encodeURIComponent(key)}&${win}&exclude_outbound=${exOut}&limit=200`).then(r => r.json()); }
     catch (e) { drill.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
     drill.innerHTML = renderConvMiniList(list);
   }

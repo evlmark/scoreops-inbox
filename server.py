@@ -1211,8 +1211,7 @@ async def set_conversation_topic(conv_id: str, request: Request):
 
 @app.get("/conversations/topic-stats")
 def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outbound: int = 0,
-                segment: str = "all", from_date: Optional[str] = None, to_date: Optional[str] = None,
-                queues: Optional[str] = None):
+                segment: str = "all", from_date: Optional[str] = None, to_date: Optional[str] = None):
     """Тренды по топикам: текущее окно vs предыдущее равной длины + дельта.
     Пресеты period=day(1д)/week(7д)/month(30д) ИЛИ кастомный диапазон from_date..to_date (вкл.),
     тогда предыдущее окно — такой же длины непосредственно перед текущим.
@@ -1240,7 +1239,6 @@ def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outb
     try:
         tmap = {t["slug"]: t for t in load_topics()}
         q = db.query(DBConversation)
-        q = _apply_queue_filter(q, queues)
         if cohort:
             q = q.filter(DBConversation.cohort == cohort)
         else:
@@ -1420,8 +1418,7 @@ def reject_topic_suggestion(sug_id: int):
 
 @app.get("/metrics/weekly")
 def weekly_metrics(cohort: Optional[str] = None, week_offset: int = 0,
-                   from_date: Optional[str] = None, to_date: Optional[str] = None,
-                   queues: Optional[str] = None):
+                   from_date: Optional[str] = None, to_date: Optional[str] = None):
     """KPI за период vs предыдущий равной длины: чаты/пользователи (всего и PFAE)
     + среднее число тасок на пользователя.
     По умолчанию — текущая неделя (Пн–Вс). week_offset=N сдвигает окно на N недель назад.
@@ -1452,7 +1449,6 @@ def weekly_metrics(cohort: Optional[str] = None, week_offset: int = 0,
             DBConversation.merged_into.is_(None),   # фрагменты-продолжения не считаем
             DBConversation.created_at >= prev_start,
             DBConversation.created_at < week_end)
-        q = _apply_queue_filter(q, queues)
         if cohort:
             q = q.filter(DBConversation.cohort == cohort)
         else:
@@ -1830,55 +1826,12 @@ def _start_pending_worker():
         print("[questions-worker] запущен (извлечение вопросов)")
 
 
-PYME_QUEUES = ("Inbound PyME Chats", "Inbound PyME Calls")
-
-
-def _queue_list(queues: Optional[str]):
-    """'a,b' -> ['a','b']. 'all' / пусто -> None (без фильтра по очереди).
-
-    queue_name заполняется на импорте (см. /admin/import-csv), но до сих пор ни один
-    эндпоинт его не использовал: KPI считались по всем очередям сразу, и «обращения
-    PyME» на деле означало «обращения клиентов PyME куда угодно» — в PyME-очередь
-    из них приходит около шестой части.
-    """
-    if not queues or queues.strip().lower() == "all":
-        return None
-    vals = [q.strip() for q in queues.split(",") if q.strip()]
-    return vals or None
-
-
-def _apply_queue_filter(q, queues):
-    """Фильтр по очереди для любого запроса к conversations."""
-    vals = _queue_list(queues)
-    if vals:
-        q = q.filter(DBConversation.queue_name.in_(vals))
-    return q
-
-
-@app.get("/queues")
-def list_queues(days: Optional[int] = None):
-    """Очереди, которые реально встречаются в базе, с числом обращений — из этого
-    списка интерфейс строит фильтр, чтобы он не разъезжался с данными."""
-    db = SessionLocal()
-    try:
-        q = db.query(DBConversation.queue_name, func.count()).filter(
-            DBConversation.merged_into.is_(None))
-        if days:
-            q = q.filter(DBConversation.created_at >= datetime.utcnow() - timedelta(days=days))
-        rows = q.group_by(DBConversation.queue_name).all()
-        out = [{"queue_name": (name or ""), "count": cnt} for name, cnt in rows]
-        out.sort(key=lambda r: -r["count"])
-        return {"queues": out, "pyme_default": list(PYME_QUEUES)}
-    finally:
-        db.close()
-
-
 @app.get("/conversations")
 def list_conversations(limit: int = 500, cohort: Optional[str] = None,
                        topic_slug: Optional[str] = None, days: Optional[int] = None,
                        exclude_outbound: int = 0, customer_id: Optional[str] = None,
                        from_date: Optional[str] = None, to_date: Optional[str] = None,
-                       include_merged: int = 0, queues: Optional[str] = None):
+                       include_merged: int = 0):
     """Список реальных обращений (последние первые).
     cohort=<метка> — только эта выборка; без параметра — обычный Real Inbox (без когорт).
     topic_slug/days/from_date/to_date/exclude_outbound/customer_id — фильтры (drill-down)."""
@@ -1896,7 +1849,6 @@ def list_conversations(limit: int = 500, cohort: Optional[str] = None,
             if not include_merged:
                 # в общих списках/drill-down фрагменты-продолжения скрываем (свёрнуты в основной)
                 q = q.filter(DBConversation.merged_into.is_(None))
-        q = _apply_queue_filter(q, queues)
         if topic_slug:
             q = q.filter(DBConversation.topic_slug == topic_slug)
         if from_date and to_date:
@@ -1946,13 +1898,12 @@ def list_conversations(limit: int = 500, cohort: Optional[str] = None,
 
 
 @app.get("/conversations/stats")
-def conversations_stats(cohort: Optional[str] = None, queues: Optional[str] = None):
+def conversations_stats(cohort: Optional[str] = None):
     """Статистика реальных обращений по дням + топ топиков.
     cohort=<метка> — только эта выборка; без параметра — обычный Real Inbox (без когорт)."""
     db = SessionLocal()
     try:
         q = db.query(DBConversation).filter(DBConversation.merged_into.is_(None))  # фрагменты не считаем
-        q = _apply_queue_filter(q, queues)
         if cohort:
             q = q.filter(DBConversation.cohort == cohort)
         else:
@@ -2112,13 +2063,12 @@ def get_conversation(conv_id: str):
 
 
 @app.get("/customers")
-def list_customers(q: Optional[str] = None, limit: int = 300, queues: Optional[str] = None):
+def list_customers(q: Optional[str] = None, limit: int = 300):
     """Список пользователей (по customer_id) с агрегатами. q — поиск по подстроке id."""
     db = SessionLocal()
     try:
         query = db.query(DBConversation).filter(DBConversation.customer_id.isnot(None),
                                                                                                           DBConversation.merged_into.is_(None))   # фрагменты-продолжения не считаем
-        query = _apply_queue_filter(query, queues)
         if q:
             query = query.filter(DBConversation.customer_id.ilike(f"%{q.strip()}%"))
         rows = query.all()

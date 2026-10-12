@@ -381,7 +381,7 @@
   </div>
   <div class="header-right">
     <span class="badge-live" id="live-badge">● Live</span>
-    <button class="refresh-btn" onclick="loadWeeklyMetrics();switchTab('inbox')">↻ Refresh</button>
+    <button class="refresh-btn" onclick="refreshCurrent()">↻ Refresh</button>
     <span class="user-chip" id="user-chip" style="display:none"></span>
     <button class="signout-btn" id="signout-btn" onclick="signOut()" style="display:none">Sign out</button>
   </div>
@@ -1051,6 +1051,27 @@ function switchTab(name) {
   if (frame && !frame.src && frame.dataset.src) {
     frame.src = frame.dataset.src + '?t=' + PAGE_LOADED_AT;
   }
+}
+
+// Refresh обновляет то, на что человек смотрит. Раньше кнопка звала
+// switchTab('inbox') и уводила с открытой вкладки, а отчёт в iframe не
+// перезагружала вовсе: кадр грузится один раз за открытие дашборда, и у
+// вкладки, открытой с утра, внутри оставалась утренняя версия отчёта.
+function refreshCurrent() {
+  loadWeeklyMetrics();
+  const active = document.querySelector('.tab.active');
+  const name = active ? active.dataset.tab : 'inbox';
+  const frame = document.getElementById('frame-' + name);
+  if (frame && frame.dataset.src) {
+    frame.src = frame.dataset.src + '?t=' + Date.now();   // метка времени нажатия, а не загрузки страницы
+    return;
+  }
+  if (name === 'inbox')     { loadInbox(); return; }
+  if (name === 'topics')    { if (typeof loadTopicTrends === 'function') loadTopicTrends(); return; }
+  if (name === 'users')     { const sb = document.getElementById('users-search');
+                              if (typeof loadUsers === 'function') loadUsers(sb ? sb.value.trim() : ''); return; }
+  if (name === 'knowledge') { if (typeof loadKnowledge === 'function') loadKnowledge(); return; }
+  if (name === 'questions') { if (typeof loadQuestions === 'function') loadQuestions(); return; }
   if (name === 'inbox' && !inboxTabInited) {
     inboxTabInited = true;
     loadInbox();

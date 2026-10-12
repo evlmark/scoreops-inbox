@@ -213,6 +213,30 @@ def _parse_chat_text(raw: str):
     return turns
 
 
+def _apply_transcript(conv, turns):
+    """Обновляет реплики существующего обращения, сохраняя уже готовые переводы.
+
+    Возвращает True, если что-то изменилось. Если порядок и тексты совпадают, строка
+    не трогается — повторный импорт того же окна остаётся безвредным.
+    """
+    old = conv.transcript or []
+    if [(t.get("role"), t.get("text")) for t in old] == [(t.get("role"), t.get("text")) for t in turns]:
+        return False
+    en = {}
+    for t in old:
+        if t.get("text_en"):
+            en.setdefault((t.get("role"), (t.get("text") or "").strip()), t["text_en"])
+    fresh = []
+    for t in turns:
+        n = {"role": t["role"], "text": t["text"]}
+        carried = en.get((t["role"], t["text"].strip()))
+        if carried:
+            n["text_en"] = carried
+        fresh.append(n)
+    conv.transcript = fresh
+    return True
+
+
 _BAD_CUSTOMER_IDS = {"", "<nil>", "nil", "null", "none", "n/a", "na", "-"}
 
 
@@ -693,7 +717,19 @@ def list_pull_runs(limit: int = 30):
 @app.post("/admin/import-csv")
 async def import_csv(request: Request):
     """Принимает сырой CSV-текст в теле запроса, парсит, создаёт строки conversations
-    со status='pending'. AI-обработка — отдельным эндпоинтом."""
+    со status='pending'. AI-обработка — отдельным эндпоинтом.
+
+    `?update=transcript` дополнительно обновляет реплики у уже импортированных обращений.
+    Это нужно потому, что выгрузка из хранилища долго сортировала реплики по `event_dttm` —
+    времени загрузки строки, а не отправки сообщения, — и диалог приезжал блоками: сначала
+    все реплики клиента, потом все реплики оператора. Без этого режима исправленный порядок
+    виден только у новых обращений, а всё уже залитое остаётся перемешанным.
+
+    Переводы при обновлении не теряются: `text_en` переносится на реплику с той же ролью и
+    тем же текстом. Переупорядочивание тем и ограничивается — набор реплик тот же, меняется
+    только их порядок, поэтому перевод находится для каждой. Реплика, которой в старом
+    диалоге не было, остаётся без `text_en` и переводится обычным ходом.
+    Оценки, топики и прочий разбор не трогаются."""
     import csv
     import io
 
@@ -702,11 +738,13 @@ async def import_csv(request: Request):
         return {"error": "Empty body"}
 
     cohort = (request.query_params.get("cohort") or "").strip() or None
+    update_transcript = (request.query_params.get("update") or "").strip().lower() in ("transcript", "1", "true")
 
     reader = csv.DictReader(io.StringIO(raw))
     db = SessionLocal()
     created, skipped_empty, skipped_dup = 0, 0, 0
     tagged = 0
+    retranscribed = 0
     try:
         for row in reader:
             task_id = (row.get("TASK_ID") or "").strip()
@@ -730,6 +768,8 @@ async def import_csv(request: Request):
                 if cohort and existing.cohort != cohort:
                     existing.cohort = cohort
                     tagged += 1
+                if update_transcript and _apply_transcript(existing, turns):
+                    retranscribed += 1
                 skipped_dup += 1
                 continue
 
@@ -769,6 +809,7 @@ async def import_csv(request: Request):
         "imported": created,
         "skipped_empty_text": skipped_empty,
         "skipped_duplicates": skipped_dup,
+        "updated_transcripts": retranscribed,
         "tagged_cohort": tagged,
         "cohort": cohort,
         "note": "Run POST /admin/process-conversations to translate + score them.",

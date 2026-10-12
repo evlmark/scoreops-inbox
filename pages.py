@@ -61,16 +61,6 @@ async def put_page(name: str, request: Request):
             "url": f"/dashboard-pages/{name}"}
 
 
-@router.delete("/admin/pages/{name}")
-def delete_page(name: str):
-    """Убрать страницу из хранилища. Нужно, чтобы опубликованная по ошибке или
-    переехавшая в другое место страница не висела мёртвой ссылкой в дашборде."""
-    _ensure_table()
-    with engine.begin() as conn:
-        res = conn.execute(text("delete from static_pages where name = :n"), {"n": name})
-    return {"ok": True, "name": name, "deleted": res.rowcount or 0}
-
-
 @router.get("/admin/pages")
 def list_pages():
     _ensure_table()

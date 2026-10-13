@@ -1253,7 +1253,7 @@ async def set_conversation_topic(conv_id: str, request: Request):
 @app.get("/conversations/topic-stats")
 def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outbound: int = 0,
                 segment: str = "all", from_date: Optional[str] = None, to_date: Optional[str] = None,
-                queues: Optional[str] = None):
+                queues: Optional[str] = None, merged: str = "exclude"):
     """Тренды по топикам: текущее окно vs предыдущее равной длины + дельта.
     Пресеты period=day(1д)/week(7д)/month(30д) ИЛИ кастомный диапазон from_date..to_date (вкл.),
     тогда предыдущее окно — такой же длины непосредственно перед текущим.
@@ -1286,8 +1286,8 @@ def topic_stats(period: str = "week", cohort: Optional[str] = None, exclude_outb
             q = q.filter(DBConversation.cohort == cohort)
         else:
             q = q.filter(DBConversation.cohort.is_(None))
+        q = _apply_merged_filter(q, merged)
         q = q.filter(DBConversation.topic_slug.isnot(None),
-                     DBConversation.merged_into.is_(None),   # фрагменты-продолжения не считаем
                      DBConversation.created_at.isnot(None),
                      DBConversation.created_at >= prev_start,
                      DBConversation.created_at < cur_end)
@@ -1462,7 +1462,7 @@ def reject_topic_suggestion(sug_id: int):
 @app.get("/metrics/weekly")
 def weekly_metrics(cohort: Optional[str] = None, week_offset: int = 0,
                    from_date: Optional[str] = None, to_date: Optional[str] = None,
-                   queues: Optional[str] = None):
+                   queues: Optional[str] = None, merged: str = "exclude"):
     """KPI за период vs предыдущий равной длины: чаты/пользователи (всего и PFAE)
     + среднее число тасок на пользователя.
     По умолчанию — текущая неделя (Пн–Вс). week_offset=N сдвигает окно на N недель назад.
@@ -1490,9 +1490,9 @@ def weekly_metrics(cohort: Optional[str] = None, week_offset: int = 0,
     try:
         q = db.query(DBConversation).filter(
             DBConversation.created_at.isnot(None),
-            DBConversation.merged_into.is_(None),   # фрагменты-продолжения не считаем
             DBConversation.created_at >= prev_start,
             DBConversation.created_at < week_end)
+        q = _apply_merged_filter(q, merged)
         q = _apply_queue_filter(q, queues)
         if cohort:
             q = q.filter(DBConversation.cohort == cohort)
@@ -1871,6 +1871,22 @@ def _start_pending_worker():
         print("[questions-worker] запущен (извлечение вопросов)")
 
 
+def _apply_merged_filter(q, merged):
+    """Склейки: 'exclude' — как раньше (фрагменты-продолжения не считаем),
+    'include' — считаем все обращения, 'only' — только приклеенные.
+
+    Инбокс склеивает короткое повторное обращение с предыдущим и показывает одну
+    карточку. Для разбора кейсов это верно, но для объёма — нет: в CRM это две
+    задачи, и на тикетах считается всё остальное (время обработки, CSAT, нагрузка).
+    Поэтому режим выбирается, а не зашит.
+    """
+    if merged == "include":
+        return q
+    if merged == "only":
+        return q.filter(DBConversation.merged_into.isnot(None))
+    return q.filter(DBConversation.merged_into.is_(None))
+
+
 PYME_QUEUES = ("Inbound PyME Chats", "Inbound PyME Calls")
 
 
@@ -1919,7 +1935,8 @@ def list_conversations(limit: int = 500, cohort: Optional[str] = None,
                        topic_slug: Optional[str] = None, days: Optional[int] = None,
                        exclude_outbound: int = 0, customer_id: Optional[str] = None,
                        from_date: Optional[str] = None, to_date: Optional[str] = None,
-                       include_merged: int = 0, queues: Optional[str] = None):
+                       include_merged: int = 0, queues: Optional[str] = None,
+                       merged: Optional[str] = None):
     """Список реальных обращений (последние первые).
     cohort=<метка> — только эта выборка; без параметра — обычный Real Inbox (без когорт).
     topic_slug/days/from_date/to_date/exclude_outbound/customer_id — фильтры (drill-down)."""
@@ -1934,9 +1951,9 @@ def list_conversations(limit: int = 500, cohort: Optional[str] = None,
                 q = q.filter(DBConversation.cohort == cohort)
             else:
                 q = q.filter(DBConversation.cohort.is_(None))
-            if not include_merged:
-                # в общих списках/drill-down фрагменты-продолжения скрываем (свёрнуты в основной)
-                q = q.filter(DBConversation.merged_into.is_(None))
+            # merged=... — общий для всех эндпоинтов вид; include_merged=1 оставлен
+            # для прежних вызовов и означает то же, что merged=include
+            q = _apply_merged_filter(q, merged or ("include" if include_merged else "exclude"))
         q = _apply_queue_filter(q, queues)
         if topic_slug:
             q = q.filter(DBConversation.topic_slug == topic_slug)
@@ -1987,12 +2004,13 @@ def list_conversations(limit: int = 500, cohort: Optional[str] = None,
 
 
 @app.get("/conversations/stats")
-def conversations_stats(cohort: Optional[str] = None, queues: Optional[str] = None):
+def conversations_stats(cohort: Optional[str] = None, queues: Optional[str] = None,
+                        merged: str = "exclude"):
     """Статистика реальных обращений по дням + топ топиков.
     cohort=<метка> — только эта выборка; без параметра — обычный Real Inbox (без когорт)."""
     db = SessionLocal()
     try:
-        q = db.query(DBConversation).filter(DBConversation.merged_into.is_(None))  # фрагменты не считаем
+        q = _apply_merged_filter(db.query(DBConversation), merged)
         q = _apply_queue_filter(q, queues)
         if cohort:
             q = q.filter(DBConversation.cohort == cohort)
@@ -2153,12 +2171,13 @@ def get_conversation(conv_id: str):
 
 
 @app.get("/customers")
-def list_customers(q: Optional[str] = None, limit: int = 300, queues: Optional[str] = None):
+def list_customers(q: Optional[str] = None, limit: int = 300, queues: Optional[str] = None,
+                   merged: str = "exclude"):
     """Список пользователей (по customer_id) с агрегатами. q — поиск по подстроке id."""
     db = SessionLocal()
     try:
-        query = db.query(DBConversation).filter(DBConversation.customer_id.isnot(None),
-                                                                                                          DBConversation.merged_into.is_(None))   # фрагменты-продолжения не считаем
+        query = _apply_merged_filter(
+            db.query(DBConversation).filter(DBConversation.customer_id.isnot(None)), merged)
         query = _apply_queue_filter(query, queues)
         if q:
             query = query.filter(DBConversation.customer_id.ilike(f"%{q.strip()}%"))

@@ -401,6 +401,12 @@
             <option value="pyme">PyME queues</option>
             <option value="all">All queues</option>
           </select>
+          <span style="font-size:12px;color:var(--mut);font-weight:600;margin-left:4px">🧵 Merges:</span>
+          <select id="merged-sel" onchange="onMergedChange()" style="font-size:12px;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card-2)">
+            <option value="include">Count every contact</option>
+            <option value="exclude">Merged folded into parent</option>
+            <option value="only">Only merged follow-ups</option>
+          </select>
           <span id="queue-note" style="font-size:11px;color:var(--faint)"></span>
         </div>
       </div>
@@ -807,6 +813,17 @@ function applyWeekCustom() {
 // части из них, остальное это Inbound Chats, Debit, Expertos и Inversiones.
 let QUEUE_PYME = ['Inbound PyME Chats', 'Inbound PyME Calls'];
 let queueSel = localStorage.getItem('scoreops_queue') || 'pyme';
+// Склейки. Инбокс приклеивает короткое повторное обращение к предыдущему и в KPI
+// его не считает — для разбора кейсов верно, для объёма нет: в CRM это две задачи.
+// По умолчанию считаем каждое обращение, чтобы числа сходились с отчётом Types of
+// Inquiries, который считает тикетами; режим со склейками остаётся выбором.
+let mergedSel = localStorage.getItem('scoreops_merged') || 'include';
+function mergedParam(prefix){ return `${prefix}merged=${encodeURIComponent(mergedSel)}`; }
+function onMergedChange(){
+  mergedSel = document.getElementById('merged-sel').value;
+  localStorage.setItem('scoreops_merged', mergedSel);
+  reloadForQueue();
+}
 
 function queueParam() {
   if (queueSel === 'all') return '';
@@ -851,6 +868,7 @@ async function initQueueFilter() {
             .join('') +
     `</optgroup>`;
   sel.value = queueSel;
+  const ms = document.getElementById('merged-sel'); if(ms) ms.value = mergedSel;
   if (sel.value !== queueSel) { queueSel = 'pyme'; sel.value = 'pyme'; }
   syncQueueNote();
 }
@@ -866,7 +884,7 @@ async function loadWeeklyMetrics() {
   let qs;
   if (wkCustom) qs = `?from_date=${wkCustom.from}&to_date=${wkCustom.to}`;
   else qs = `?week_offset=${wkOffset}`;
-  qs += qsQueue('&');
+  qs += qsQueue('&') + '&' + mergedParam('');
   let d;
   try { d = await fetch(`${API}/metrics/weekly${qs}`).then(r => r.json()); }
   catch (e) { return; }
@@ -1467,7 +1485,7 @@ async function loadUsers(q) {
   const wrap = document.getElementById('users-wrap');
   wrap.innerHTML = '<div class="loading">Loading…</div>';
   let data;
-  try { data = await fetch(`${API}/customers?limit=300${q ? `&q=${encodeURIComponent(q)}` : ''}${qsQueue('&')}`).then(r => r.json()); }
+  try { data = await fetch(`${API}/customers?limit=300${q ? `&q=${encodeURIComponent(q)}` : ''}${qsQueue('&')}&${mergedParam('')}`).then(r => r.json()); }
   catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
   document.getElementById('users-count').textContent = data.total != null ? `· ${data.total}` : '';
   const list = data.customers || [];
@@ -1699,8 +1717,8 @@ let _lastConvList = [];   // кэш для перерисовки списка �
 async function loadInbox() {
   try {
     const [list, stats] = await Promise.all([
-      fetch(`${API}/conversations?limit=500${qsQueue('&')}`).then(r => r.json()),
-      fetch(`${API}/conversations/stats?_=1${qsQueue('&')}`).then(r => r.json()),
+      fetch(`${API}/conversations?limit=500${qsQueue('&')}&${mergedParam('')}`).then(r => r.json()),
+      fetch(`${API}/conversations/stats?_=1${qsQueue('&')}&${mergedParam('')}`).then(r => r.json()),
       ensureTopics(),
     ]);
     renderInboxStats(stats);
@@ -2241,7 +2259,7 @@ async function loadTopicTrends() {
   const exOut = document.getElementById('topic-exclude-out').checked ? 1 : 0;
   let qs = `?exclude_outbound=${exOut}&segment=${topicSegment}`;
   qs += topicCustom ? `&from_date=${topicCustom.from}&to_date=${topicCustom.to}` : `&period=${topicPeriod}`;
-  qs += qsQueue('&');
+  qs += qsQueue('&') + '&' + mergedParam('');
   try { lastTrend = await fetch(`${API}/conversations/topic-stats${qs}`).then(r => r.json()); }
   catch (e) { wrap.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
   renderTrends();
@@ -2315,7 +2333,7 @@ async function onTrendClick(h) {
     if (topicCustom) win = `from_date=${topicCustom.from}&to_date=${topicCustom.to}`;
     else win = `days=${lastTrend.span_days || 7}`;
     let list;
-    try { list = await fetch(`${API}/conversations?topic_slug=${encodeURIComponent(key)}&${win}&exclude_outbound=${exOut}&limit=200${qsQueue('&')}`).then(r => r.json()); }
+    try { list = await fetch(`${API}/conversations?topic_slug=${encodeURIComponent(key)}&${win}&exclude_outbound=${exOut}&limit=200${qsQueue('&')}&${mergedParam('')}`).then(r => r.json()); }
     catch (e) { drill.innerHTML = `<div class="loading">Error: ${e.message}</div>`; return; }
     drill.innerHTML = renderConvMiniList(list);
   }

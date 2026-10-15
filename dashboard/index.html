@@ -401,6 +401,12 @@
             <option value="pyme">PyME queues</option>
             <option value="all">All queues</option>
           </select>
+          <span style="font-size:12px;color:var(--mut);font-weight:600;margin-left:4px">🧵 Merges:</span>
+          <select id="merged-sel" onchange="onMergedChange()" style="font-size:12px;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--card-2)">
+            <option value="include">Count every contact</option>
+            <option value="exclude">Merged folded into parent</option>
+            <option value="only">Only merged follow-ups</option>
+          </select>
           <span id="queue-note" style="font-size:11px;color:var(--faint)"></span>
         </div>
       </div>
@@ -811,11 +817,13 @@ let queueSel = localStorage.getItem('scoreops_queue') || 'pyme';
 // его не считает — для разбора кейсов верно, для объёма нет: в CRM это две задачи.
 // По умолчанию считаем каждое обращение, чтобы числа сходились с отчётом Types of
 // Inquiries, который считает тикетами; режим со склейками остаётся выбором.
-// Единица счёта одна: обращение = тикет, как в отчёте Types of Inquiries.
-// Переключателя здесь нет намеренно — две ручки на одно понятие в двух местах
-// означали бы, что числа зависят от того, где смотришь.
-const mergedSel = 'include';
+let mergedSel = localStorage.getItem('scoreops_merged') || 'include';
 function mergedParam(prefix){ return `${prefix}merged=${encodeURIComponent(mergedSel)}`; }
+function onMergedChange(){
+  mergedSel = document.getElementById('merged-sel').value;
+  localStorage.setItem('scoreops_merged', mergedSel);
+  reloadForQueue();
+}
 
 function queueParam() {
   if (queueSel === 'all') return '';
@@ -860,6 +868,7 @@ async function initQueueFilter() {
             .join('') +
     `</optgroup>`;
   sel.value = queueSel;
+  const ms = document.getElementById('merged-sel'); if(ms) ms.value = mergedSel;
   if (sel.value !== queueSel) { queueSel = 'pyme'; sel.value = 'pyme'; }
   syncQueueNote();
 }

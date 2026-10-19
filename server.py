@@ -1138,6 +1138,38 @@ async def admin_set_customers(request: Request):
         db.close()
 
 
+@app.get("/admin/topics-export")
+def admin_topics_export(from_date: str, to_date: str, limit: int = 50000):
+    """Разметка тем по обращениям за период — только чтение, под X-Extension-Key.
+
+    Её забирает ежедневная сборка отчёта Types of Inquiries: темы Марка подставляются
+    туда, где собственный классификатор отчёта темы не нашёл. /conversations отдаёт то же,
+    но закрыт Google-сессией и тянет расшифровку ради числа реплик, а здесь нужны только
+    метки. Выборка та же, что у /conversations?include_merged=1&queues=all: реальные
+    обращения без когорт, фрагменты включены.
+    """
+    try:
+        fd = datetime.fromisoformat(from_date); td = datetime.fromisoformat(to_date)
+    except ValueError:
+        return JSONResponse(status_code=400, content={"error": "from_date/to_date: YYYY-MM-DD"})
+    db = SessionLocal()
+    try:
+        cols = (DBConversation.id, DBConversation.topic_slug, DBConversation.topic_source,
+                DBConversation.topic_confidence, DBConversation.type, DBConversation.created_at,
+                DBConversation.customer_id, DBConversation.account_type)
+        q = (db.query(*cols)
+               .filter(DBConversation.cohort.is_(None))
+               .filter(DBConversation.created_at >= datetime(fd.year, fd.month, fd.day),
+                       DBConversation.created_at < datetime(td.year, td.month, td.day) + timedelta(days=1))
+               .order_by(desc(DBConversation.created_at))
+               .limit(min(max(limit, 1), 200000)))
+        return [{"id": r[0], "topic_slug": r[1], "topic_source": r[2], "topic_confidence": r[3],
+                 "type": r[4], "created_at": r[5].isoformat() if r[5] else None,
+                 "customer_id": r[6], "account_type": r[7]} for r in q.all()]
+    finally:
+        db.close()
+
+
 @app.get("/admin/untagged")
 def admin_untagged(limit: int = 20000, include_merged: int = 0, include_text: int = 0):
     """Обращения без темы — вход для пакетной разметки.

@@ -4,10 +4,13 @@ dashboard without a git push / redeploy.
 
   POST /admin/pages/{name}      body = raw bytes, Content-Type = the type to serve
                                 (auth: X-Extension-Key, like every /admin/* route)
-  GET  /dashboard-pages/{name}  serves it (public, same as /dashboard/* static files:
-                                the path starts with "/dashboard" so AuthMiddleware
-                                treats it as public, and it is NOT under the
-                                StaticFiles mount at /dashboard/, so it reaches us)
+  GET  /dashboard-pages/{name}  serves it to signed-in users only. AuthMiddleware treats
+                                every "/dashboard*" path as public (the dashboard shell has
+                                to load before sign-in), so the check lives here: a valid
+                                Google ID token in the scoreops_id_token cookie (the
+                                dashboard sets it on sign-in, path /dashboard-pages) or
+                                X-Extension-Key. Anyone else is redirected to the
+                                dashboard sign-in and comes back to the page after it.
   GET  /admin/pages             list stored pages
 
 Pages live in Postgres (table static_pages), so they survive redeploys and need no volume.
@@ -16,10 +19,36 @@ so upload the images under the same names.
 """
 from datetime import datetime
 
+from urllib.parse import quote
+
 from fastapi import APIRouter, Request, Response
+from fastapi.responses import RedirectResponse
 from sqlalchemy import text
 
 from db import engine
+
+try:
+    from auth import verify_google_token, EXTENSION_API_KEY
+    _AUTH = True
+except Exception:  # same fallback as server.py: auth broken -> do not lock everyone out
+    _AUTH = False
+
+TOKEN_COOKIE = "scoreops_id_token"
+
+
+def _signed_in(request: Request) -> bool:
+    if not _AUTH:
+        return True
+    if EXTENSION_API_KEY and request.headers.get("X-Extension-Key") == EXTENSION_API_KEY:
+        return True
+    token = request.cookies.get(TOKEN_COOKIE)
+    if not token:
+        return False
+    try:
+        verify_google_token(token)
+        return True
+    except Exception:
+        return False
 
 router = APIRouter()
 MAX_BYTES = 25 * 1024 * 1024
@@ -82,14 +111,21 @@ def list_pages():
 
 
 @router.get("/dashboard-pages/{name}")
-def get_page(name: str):
+def get_page(name: str, request: Request):
+    if not _signed_in(request):
+        if request.headers.get("sec-fetch-dest") == "iframe":
+            # inside a dashboard tab: a redirect would load the whole dashboard into the frame
+            return Response(status_code=401, media_type="text/html", content=(
+                '<p style="font:14px sans-serif;padding:16px">Your session expired. '
+                '<a href="/dashboard/" target="_top">Sign in again</a> to see this report.</p>'))
+        return RedirectResponse("/dashboard/?next=" + quote(f"/dashboard-pages/{name}", safe=""), status_code=302)
     _ensure_table()
     with engine.begin() as conn:
         row = conn.execute(text(
             "select content_type, content, updated_at from static_pages where name = :n"), {"n": name}).fetchone()
     if not row:
         return Response(status_code=404, content="not found")
-    headers = {"Cache-Control": "no-cache"}
+    headers = {"Cache-Control": "private, no-cache"}
     if row[2]:
         headers["Last-Modified"] = row[2].strftime("%a, %d %b %Y %H:%M:%S GMT")
     return Response(content=bytes(row[1]), media_type=row[0], headers=headers)

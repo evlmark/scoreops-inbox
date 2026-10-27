@@ -679,8 +679,30 @@ const USER_KEY  = 'scoreops_user';
 let AUTH_CONFIG = null;
 
 function getToken() { return localStorage.getItem(TOKEN_KEY); }
-function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
-function clearToken() { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY); }
+// The report pages (/dashboard-pages/*) are opened by iframes and direct links, which
+// cannot send the Authorization header, so the same token also goes into a cookie
+// scoped to that path; the server checks it there.
+function setPagesCookie(t) {
+  document.cookie = t
+    ? `${TOKEN_KEY}=${t}; Path=/dashboard-pages; Max-Age=3600; Secure; SameSite=Lax`
+    : `${TOKEN_KEY}=; Path=/dashboard-pages; Max-Age=0; Secure; SameSite=Lax`;
+}
+function setToken(t) { localStorage.setItem(TOKEN_KEY, t); setPagesCookie(t); }
+function clearToken() { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY); setPagesCookie(null); }
+function tokenFresh(t) {
+  const c = t && jwtDecode(t);
+  return !!(c && c.exp && c.exp * 1000 > Date.now() + 60000);
+}
+// A direct link to a report sends a signed-out visitor here with ?next=/dashboard-pages/…;
+// once a fresh token is in place, go back to that report.
+function followNext() {
+  const next = new URLSearchParams(location.search).get('next');
+  if (next && next.startsWith('/dashboard-pages/') && tokenFresh(getToken())) {
+    location.replace(next);
+    return true;
+  }
+  return false;
+}
 
 function getStoredUser() {
   try { return JSON.parse(localStorage.getItem(USER_KEY) || 'null'); } catch { return null; }
@@ -736,6 +758,7 @@ window.handleGoogleSignIn = function(response) {
   localStorage.setItem(USER_KEY, JSON.stringify({
     email: claims.email, name: claims.name, picture: claims.picture, hd: claims.hd,
   }));
+  if (followNext()) return;
   hideGate();
   bootApp();
 };
@@ -933,6 +956,8 @@ async function loadWeeklyMetrics() {
     return;
   }
   if (getToken()) {
+    setPagesCookie(getToken());   // sessions signed in before the cookie existed
+    if (followNext()) return;
     hideGate();
     bootApp();
   } else {

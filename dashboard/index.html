@@ -441,6 +441,7 @@
     <div class="tab"        data-tab="longcases" onclick="switchTab('longcases')">🔎 Long Cases</div>
     <div class="tab"        data-tab="roadmap" onclick="switchTab('roadmap')">🗺 CST Roadmap</div>
     <div class="tab"        data-tab="meeting" onclick="switchTab('meeting')">🗣 Case review</div>
+    <div class="tab"        data-tab="sla" onclick="switchTab('sla')">⏱ SLA</div>
   </div>
 
   <!-- Real Inbox -->
@@ -578,6 +579,10 @@
   </div>
   <div class="tab-panel" id="tab-meeting">
     <iframe id="frame-meeting" data-src="/dashboard-pages/pyme-meeting" title="Case review"
+            class="report-frame"></iframe>
+  </div>
+  <div class="tab-panel" id="tab-sla">
+    <iframe id="frame-sla" data-src="/dashboard-pages/pyme-sla-violations" title="SLA violations"
             class="report-frame"></iframe>
   </div>
  </div><!-- /pyme-view -->
@@ -1039,7 +1044,7 @@ function timeAgo(iso) {
 /* ── Tabs ── */
 
 let inboxTabInited = false;
-const REPORT_TABS = ['inquiries', 'longcases', 'roadmap', 'meeting'];
+const REPORT_TABS = ['inquiries', 'longcases', 'roadmap', 'meeting', 'sla'];
 const PAGE_LOADED_AT = Date.now();
 
 // Высоту кадра считаем от его фактического верха: он зависит от шапки и ряда вкладок,

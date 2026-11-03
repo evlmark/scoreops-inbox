@@ -2402,10 +2402,11 @@ def _questions_worker_loop():
                 except Exception as e:
                     db.rollback()
                     print(f"[questions-worker] {cid}: {e}")
-                    # чтобы не зациклиться на проблемном чате — помечаем обработанным
+                    # чтобы не зациклиться на проблемном чате — помечаем ошибкой (-1), а не «обработан» (1):
+                    # такие чаты отдаёт /admin/questions-pending, и их можно доизвлечь снаружи
                     c2 = db.query(DBConversation).filter_by(id=cid).first()
                     if c2:
-                        c2.questions_extracted = 1
+                        c2.questions_extracted = -1
                         db.commit()
             finally:
                 db.close()
@@ -2413,6 +2414,94 @@ def _questions_worker_loop():
         except Exception as e:
             print(f"[questions-worker] loop: {e}")
             time.sleep(60)
+
+
+def _questions_pending_query(db, since: Optional[str]):
+    """Чаты, из которых вопросы ещё не извлечены: флаг 0/NULL, ошибка воркера (-1)
+    и старые ошибки, когда воркер ставил 1 без единого вопроса (только начиная с `since`)."""
+    base = db.query(DBConversation).filter(DBConversation.type == "chat",
+                                          DBConversation.cohort.is_(None),
+                                          DBConversation.merged_into.is_(None))
+    no_questions = ~db.query(DBQuestion.id).filter(
+        DBQuestion.conversation_id == DBConversation.id).exists()
+    conds = [DBConversation.questions_extracted.is_(None),
+             DBConversation.questions_extracted == 0,
+             DBConversation.questions_extracted == -1]
+    if since:
+        try:
+            since_dt = datetime.strptime(since, "%Y-%m-%d")
+            conds.append((DBConversation.questions_extracted == 1)
+                         & (DBConversation.created_at >= since_dt) & no_questions)
+        except ValueError:
+            pass
+    return base.filter(or_(*conds))
+
+
+@app.get("/admin/questions-pending")
+def questions_pending(limit: int = 0, offset: int = 0, since: Optional[str] = None):
+    """Чаты для внешнего извлечения вопросов (когда LLM сервера недоступен).
+    limit=0 — только счётчик; limit>0 — диалоги {id, created_at, turns:[{role, text}]} по убыванию даты
+    плюс текущий каталог тем (его стоит передавать в промпт, чтобы темы переиспользовались).
+    since=YYYY-MM-DD — добрать и старые чаты, помеченные воркером как обработанные без вопросов."""
+    db = SessionLocal()
+    try:
+        q = _questions_pending_query(db, since)
+        total = q.count()
+        items = []
+        if limit:
+            for c in q.order_by(desc(DBConversation.created_at)).offset(offset).limit(limit).all():
+                items.append({"id": c.id,
+                              "created_at": c.created_at.isoformat() if c.created_at else None,
+                              "turns": [{"role": t.get("role"), "text": t.get("text")}
+                                        for t in (c.transcript or []) if (t.get("text") or "").strip()]})
+        return {"conversations": total, "items": items,
+                "catalog": _question_theme_catalog(db) if limit else []}
+    finally:
+        db.close()
+
+
+class QuestionIn(BaseModel):
+    q: str
+    theme: Optional[str] = None
+
+
+class QuestionsUpload(BaseModel):
+    conversation_id: str
+    questions: List[QuestionIn] = []
+
+
+@app.post("/admin/questions")
+def upload_questions(items: List[QuestionsUpload]):
+    """Заливка вопросов, извлечённых снаружи: [{conversation_id, questions:[{q, theme}]}].
+    Пустой список questions = в чате нет вопросов. Чат помечается обработанным (questions_extracted=2).
+    Идемпотентно: если у чата вопросы уже есть, новые не добавляются."""
+    db = SessionLocal()
+    try:
+        done = 0; added = 0; skipped = 0; missing_ids = []
+        for item in items:
+            c = db.query(DBConversation).filter_by(id=item.conversation_id).first()
+            if not c:
+                missing_ids.append(item.conversation_id)
+                continue
+            has = db.query(DBQuestion.id).filter_by(conversation_id=c.id).first()
+            if has:
+                skipped += 1
+            else:
+                for qi in item.questions:
+                    text = (qi.q or "").strip()
+                    if not text:
+                        continue
+                    slug = _qtheme_get_or_create(db, (qi.theme or "Other").strip())
+                    db.add(DBQuestion(conversation_id=c.id, customer_id=clean_customer_id(c.customer_id),
+                                      created_at=c.created_at, text=text[:1000], theme_slug=slug))
+                    added += 1
+            c.questions_extracted = 2
+            done += 1
+        db.commit()
+        return {"received": len(items), "conversations_marked": done, "questions_added": added,
+                "skipped_existing": skipped, "missing_ids": missing_ids}
+    finally:
+        db.close()
 
 
 @app.get("/questions/themes")

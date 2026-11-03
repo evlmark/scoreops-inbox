@@ -937,17 +937,24 @@ def requeue_incomplete_translations(dry_run: bool = True, limit: int = 0):
 
 
 @app.get("/admin/untranslated-turns")
-def untranslated_turns(limit: int = 0, offset: int = 0, status: Optional[str] = None):
+def untranslated_turns(limit: int = 0, offset: int = 0, status: Optional[str] = None,
+                       since: Optional[str] = None):
     """Реплики без перевода (text есть, text_en нет) для внешнего перевода.
     limit=0 — только статистика (сколько диалогов/реплик/символов).
     limit>0 — первые `limit` диалогов начиная с `offset` (порядок по id),
     каждый как {id, status, turns:[{i, role, text}]} — только непереведённые реплики.
-    status=done|pending — ограничить статусом (по умолчанию оба)."""
+    status=done|pending — ограничить статусом (по умолчанию оба).
+    since=YYYY-MM-DD — только диалоги с created_at не раньше этой даты."""
     db = SessionLocal()
     try:
         q = db.query(DBConversation).filter(DBConversation.transcript.isnot(None))
         if status:
             q = q.filter(DBConversation.status == status)
+        if since:
+            try:
+                q = q.filter(DBConversation.created_at >= datetime.strptime(since, "%Y-%m-%d"))
+            except ValueError:
+                pass
         convs = 0; turns = 0; chars = 0; items = []
         skipped = 0
         for c in q.order_by(DBConversation.id).yield_per(500):
@@ -964,6 +971,7 @@ def untranslated_turns(limit: int = 0, offset: int = 0, status: Optional[str] = 
                     continue
                 if len(items) < limit:
                     items.append({"id": c.id, "status": c.status,
+                                  "created_at": c.created_at.isoformat() if c.created_at else None,
                                   "turns": [{"i": i, "role": t.get("role"), "text": t["text"]}
                                             for i, t in missing]})
         return {"conversations": convs, "turns": turns, "chars": chars, "items": items}

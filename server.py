@@ -543,7 +543,23 @@ def kb_documents_upload(payload: KBUpload):
 
     db = SessionLocal()
     try:
+        started = datetime.utcnow()
         res = apply_documents(db, records, apply_removals=apply_removals)
+        # Пишем запуск в crawl_runs, чтобы вкладка Knowledge Base показывала
+        # реальную дату обновления, а не последний пустой серверный краул.
+        db.add(DBCrawlRun(
+            started_at=started,
+            finished_at=datetime.utcnow(),
+            status="success" if apply_removals or not payload.apply_removals else "partial",
+            pages_total=len(kept),
+            chars_total=sum(len(r.get("markdown") or "") for r in kept),
+            pages_added=res.get("added", 0),
+            pages_updated=res.get("updated", 0),
+            pages_removed=res.get("removed", 0),
+            error_text=None if apply_removals or not payload.apply_removals
+                       else f"client upload: {len(kept)} pages < min_pages={payload.min_pages}, removals skipped",
+            log=(res.get("changes") or [])[:500],
+        ))
         db.commit()
     except Exception as e:
         db.rollback()
@@ -1525,6 +1541,17 @@ def weekly_metrics(cohort: Optional[str] = None, week_offset: int = 0,
         week_end = week_start + timedelta(days=7)
     span = week_end - week_start
     prev_start = week_start - span
+    # Текущая неделя ещё идёт: сравниваем с тем же числом прошедших дней прошлой недели,
+    # иначе 2 дня против 7 всегда дают ложное падение.
+    partial = (not custom) and week_offset <= 0 and now < week_end
+    if partial:
+        days_elapsed = (now.date() - week_start.date()).days + 1
+        cur_end = week_start + timedelta(days=days_elapsed)
+        prev_end = prev_start + timedelta(days=days_elapsed)
+    else:
+        days_elapsed = span.days
+        cur_end = week_end
+        prev_end = week_start
     PFAE = ("PFAE External", "PFAE Golden")
     db = SessionLocal()
     try:
@@ -1541,7 +1568,14 @@ def weekly_metrics(cohort: Optional[str] = None, week_offset: int = 0,
         cur = {"chats": 0, "users": set(), "pfae_chats": 0, "pfae_users": set()}
         prev = {"chats": 0, "users": set(), "pfae_chats": 0, "pfae_users": set()}
         for c in q.all():
-            b = cur if c.created_at >= week_start else prev
+            if c.created_at >= week_start:
+                if c.created_at >= cur_end:
+                    continue
+                b = cur
+            else:
+                if c.created_at >= prev_end:
+                    continue
+                b = prev
             b["chats"] += 1
             cid = clean_customer_id(c.customer_id)
             if cid:
@@ -1572,6 +1606,8 @@ def weekly_metrics(cohort: Optional[str] = None, week_offset: int = 0,
             "pfae_chats": metric("pfae_chats"),
             "pfae_users": metric("pfae_users", True),
             "avg_per_user": avg_metric(),
+            "partial": partial,
+            "days_compared": days_elapsed,
         }
     finally:
         db.close()
@@ -2115,6 +2151,7 @@ def conversations_stats(cohort: Optional[str] = None, queues: Optional[str] = No
             "customers": len(customers),
             "processed": done,
             "avg_score": round(sum(scores) / len(scores), 2) if scores else None,
+            "scored": len(scores),
             "by_day": days,
             "top_topics": top_topics,
             "top_topics_es": [{"topic": t["topic_es"], "count": t["count"]} for t in top_topics],
@@ -2523,7 +2560,15 @@ def questions_themes():
         out = [{"slug": t.slug, "name": t.name or t.slug, "count": counts.get(t.slug, 0)} for t in themes]
         out = [x for x in out if x["count"] > 0]
         out.sort(key=lambda x: -x["count"])
-        return {"themes": out, "total": sum(x["count"] for x in out)}
+        last = db.query(func.max(DBQuestion.created_at)).scalar()
+        pending = db.query(func.count(DBConversation.id)).filter(
+            DBConversation.cohort.is_(None),
+            or_(DBConversation.questions_extracted == 0,
+                DBConversation.questions_extracted == -1,
+                DBConversation.questions_extracted.is_(None))).scalar()
+        return {"themes": out, "total": sum(x["count"] for x in out),
+                "last_chat_at": last.isoformat() if last else None,
+                "pending_chats": int(pending or 0)}
     finally:
         db.close()
 

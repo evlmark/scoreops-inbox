@@ -1270,6 +1270,78 @@ async def admin_set_topics(request: Request):
         db.close()
 
 
+@app.get("/admin/unscored")
+def admin_unscored(limit: int = 2000, offset: int = 0):
+    """Обращения без оценки (avg_score пуст) — вход для внешней оценки, когда LLM сервера
+    недоступен. Отдаёт диалог с ролями, по убыванию даты; склеенные фрагменты не отдаём."""
+    db = SessionLocal()
+    try:
+        q = (db.query(DBConversation)
+               .filter(DBConversation.avg_score.is_(None),
+                       DBConversation.merged_into.is_(None),
+                       DBConversation.cohort.is_(None)))
+        total = q.count()
+        rows = q.order_by(desc(DBConversation.created_at)).offset(offset).limit(limit).all()
+        items = [{"id": c.id, "type": c.type, "topic_slug": c.topic_slug,
+                  "created_at": c.created_at.isoformat() if c.created_at else None,
+                  "turns": [{"role": t.get("role"), "text": t.get("text")}
+                            for t in (c.transcript or []) if (t.get("text") or "").strip()]}
+                 for c in rows]
+        return {"count": total, "items": items}
+    finally:
+        db.close()
+
+
+@app.post("/admin/evaluations")
+async def admin_set_evaluations(request: Request):
+    """Заливка внешних оценок: {"items":[{"id","score","breakdown":{precision,language,protocol,
+    completeness,empathy},"explanation","critical_error","resolved"}], "source":"claude"}.
+
+    Ставит оценку только там, где её нет (avg_score пуст): оценки серверного оценщика не перетираем.
+    score — среднее breakdown, если не передан. В evaluation сохраняется source, чтобы внешние
+    оценки можно было отличить от оценок DeepSeek."""
+    body = await request.json()
+    items = body.get("items") or []
+    source = (body.get("source") or "claude").strip().lower()
+    keys = ("precision", "language", "protocol", "completeness", "empathy")
+    db = SessionLocal()
+    try:
+        updated = skipped = invalid = not_found = 0
+        for it in items:
+            br = it.get("breakdown") or {}
+            try:
+                br = {k: int(br[k]) for k in keys}
+            except (KeyError, TypeError, ValueError):
+                invalid += 1
+                continue
+            if any(v < 1 or v > 10 for v in br.values()):
+                invalid += 1
+                continue
+            score = it.get("score")
+            if score is None:
+                score = round(sum(br.values()) / len(keys))
+            c = db.query(DBConversation).filter_by(id=(it.get("id") or "").strip()).first()
+            if not c:
+                not_found += 1
+                continue
+            if c.avg_score is not None:
+                skipped += 1
+                continue
+            ev = {"score": score, "breakdown": br,
+                  "explanation": (it.get("explanation") or "")[:1000],
+                  "critical_error": bool(it.get("critical_error")),
+                  "resolved": bool(it.get("resolved")), "source": source}
+            c.avg_score = score
+            c.summary = ev["explanation"]
+            c.evaluation = ev
+            updated += 1
+        db.commit()
+        return {"ok": True, "updated": updated, "skipped": skipped,
+                "invalid": invalid, "not_found": not_found}
+    finally:
+        db.close()
+
+
 @app.post("/conversations/{conv_id}/topic")
 async def set_conversation_topic(conv_id: str, request: Request):
     """Установка топика извне автоклассификатора.

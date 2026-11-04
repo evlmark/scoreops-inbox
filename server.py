@@ -486,8 +486,9 @@ def crawl_runs(limit: int = 30):
 
 
 @app.get("/admin/kb-documents")
-def kb_documents():
-    """Текущий список документов базы знаний."""
+def kb_documents(with_text: int = 0):
+    """Текущий список документов базы знаний. with_text=1 — вместе с текстом (markdown):
+    нужен внешнему оценщику, которому оценка идёт по той же базе, что и у сервера."""
     db = SessionLocal()
     try:
         docs = db.query(DBDocument).order_by(DBDocument.slug).all()
@@ -502,6 +503,7 @@ def kb_documents():
                     "updated_at": d.updated_at.isoformat() if d.updated_at else None,
                     "last_seen": d.last_seen.isoformat() if d.last_seen else None,
                     "removed_at": d.removed_at.isoformat() if d.removed_at else None,
+                    **({"markdown": d.markdown or ""} if with_text else {}),
                 }
                 for d in docs
             ],
@@ -1271,18 +1273,20 @@ async def admin_set_topics(request: Request):
 
 
 @app.get("/admin/unscored")
-def admin_unscored(limit: int = 2000, offset: int = 0):
+def admin_unscored(limit: int = 2000, offset: int = 0, queues: Optional[str] = "pyme"):
     """Обращения без оценки (avg_score пуст) — вход для внешней оценки, когда LLM сервера
-    недоступен. Отдаёт диалог с ролями, по убыванию даты; склеенные фрагменты не отдаём."""
+    недоступен. Отдаёт диалог с ролями, по убыванию даты; склеенные фрагменты не отдаём.
+    queues: "pyme" (по умолчанию — те же очереди, что и в дашборде), "all" или список через запятую."""
     db = SessionLocal()
     try:
         q = (db.query(DBConversation)
                .filter(DBConversation.avg_score.is_(None),
                        DBConversation.merged_into.is_(None),
                        DBConversation.cohort.is_(None)))
+        q = _apply_queue_filter(q, ",".join(PYME_QUEUES) if queues == "pyme" else queues)
         total = q.count()
         rows = q.order_by(desc(DBConversation.created_at)).offset(offset).limit(limit).all()
-        items = [{"id": c.id, "type": c.type, "topic_slug": c.topic_slug,
+        items = [{"id": c.id, "type": c.type, "queue_name": c.queue_name, "topic_slug": c.topic_slug,
                   "created_at": c.created_at.isoformat() if c.created_at else None,
                   "turns": [{"role": t.get("role"), "text": t.get("text")}
                             for t in (c.transcript or []) if (t.get("text") or "").strip()]}

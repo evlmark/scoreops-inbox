@@ -486,8 +486,9 @@ def crawl_runs(limit: int = 30):
 
 
 @app.get("/admin/kb-documents")
-def kb_documents():
-    """Текущий список документов базы знаний."""
+def kb_documents(with_text: int = 0):
+    """Текущий список документов базы знаний. with_text=1 — вместе с текстом (markdown):
+    нужен внешнему оценщику, которому оценка идёт по той же базе, что и у сервера."""
     db = SessionLocal()
     try:
         docs = db.query(DBDocument).order_by(DBDocument.slug).all()
@@ -502,6 +503,7 @@ def kb_documents():
                     "updated_at": d.updated_at.isoformat() if d.updated_at else None,
                     "last_seen": d.last_seen.isoformat() if d.last_seen else None,
                     "removed_at": d.removed_at.isoformat() if d.removed_at else None,
+                    **({"markdown": d.markdown or ""} if with_text else {}),
                 }
                 for d in docs
             ],

@@ -2561,11 +2561,10 @@ def questions_themes():
         out = [x for x in out if x["count"] > 0]
         out.sort(key=lambda x: -x["count"])
         last = db.query(func.max(DBQuestion.created_at)).scalar()
-        pending = db.query(func.count(DBConversation.id)).filter(
-            DBConversation.cohort.is_(None),
-            or_(DBConversation.questions_extracted == 0,
-                DBConversation.questions_extracted == -1,
-                DBConversation.questions_extracted.is_(None))).scalar()
+        # Та же выборка, что у /admin/questions-pending: включает чаты, которые старый
+        # воркер пометил 1 при ошибке, — иначе счётчик занижен в разы.
+        pending = _questions_pending_query(
+            db, last.date().isoformat() if last else None).count()
         return {"themes": out, "total": sum(x["count"] for x in out),
                 "last_chat_at": last.isoformat() if last else None,
                 "pending_chats": int(pending or 0)}

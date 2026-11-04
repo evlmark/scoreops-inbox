@@ -1271,18 +1271,20 @@ async def admin_set_topics(request: Request):
 
 
 @app.get("/admin/unscored")
-def admin_unscored(limit: int = 2000, offset: int = 0):
+def admin_unscored(limit: int = 2000, offset: int = 0, queues: Optional[str] = "pyme"):
     """Обращения без оценки (avg_score пуст) — вход для внешней оценки, когда LLM сервера
-    недоступен. Отдаёт диалог с ролями, по убыванию даты; склеенные фрагменты не отдаём."""
+    недоступен. Отдаёт диалог с ролями, по убыванию даты; склеенные фрагменты не отдаём.
+    queues: "pyme" (по умолчанию — те же очереди, что и в дашборде), "all" или список через запятую."""
     db = SessionLocal()
     try:
         q = (db.query(DBConversation)
                .filter(DBConversation.avg_score.is_(None),
                        DBConversation.merged_into.is_(None),
                        DBConversation.cohort.is_(None)))
+        q = _apply_queue_filter(q, ",".join(PYME_QUEUES) if queues == "pyme" else queues)
         total = q.count()
         rows = q.order_by(desc(DBConversation.created_at)).offset(offset).limit(limit).all()
-        items = [{"id": c.id, "type": c.type, "topic_slug": c.topic_slug,
+        items = [{"id": c.id, "type": c.type, "queue_name": c.queue_name, "topic_slug": c.topic_slug,
                   "created_at": c.created_at.isoformat() if c.created_at else None,
                   "turns": [{"role": t.get("role"), "text": t.get("text")}
                             for t in (c.transcript or []) if (t.get("text") or "").strip()]}

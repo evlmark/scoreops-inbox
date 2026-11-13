@@ -438,7 +438,6 @@
     <div class="tab"        data-tab="knowledge" onclick="switchTab('knowledge')">🧠 Knowledge Base</div>
     <div class="tab"        data-tab="questions" onclick="switchTab('questions')">❓ Questions</div>
     <div class="tab"        data-tab="inquiries" onclick="switchTab('inquiries')">📊 Types of Inquiries</div>
-    <div class="tab"        data-tab="longcases" onclick="switchTab('longcases')">🔎 Long Cases</div>
     <div class="tab"        data-tab="roadmap" onclick="switchTab('roadmap')">🗺 CST Roadmap</div>
     <div class="tab"        data-tab="meeting" onclick="switchTab('meeting')">🗣 Case review</div>
   </div>
@@ -566,10 +565,6 @@
 
   <div class="tab-panel" id="tab-inquiries">
     <iframe id="frame-inquiries" data-src="/dashboard-pages/types-of-inquiries-live" title="Types of Inquiries"
-            class="report-frame"></iframe>
-  </div>
-  <div class="tab-panel" id="tab-longcases">
-    <iframe id="frame-longcases" data-src="/dashboard-pages/pyme-long-cases" title="Long Cases"
             class="report-frame"></iframe>
   </div>
   <div class="tab-panel" id="tab-roadmap">
@@ -1068,7 +1063,7 @@ function timeAgo(iso) {
 /* ── Tabs ── */
 
 let inboxTabInited = false;
-const REPORT_TABS = ['inquiries', 'longcases', 'roadmap', 'meeting'];
+const REPORT_TABS = ['inquiries', 'roadmap', 'meeting'];
 const PAGE_LOADED_AT = Date.now();
 
 // Высоту кадра считаем от его фактического верха: он зависит от шапки и ряда вкладок,

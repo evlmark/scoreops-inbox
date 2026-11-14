@@ -166,6 +166,16 @@ EVALUATOR = Evaluator(KNOWLEDGE_BASE)
 print("Готово. Сервер запущен на http://localhost:8000\n")
 
 
+# ── Мастер-выключатель всех вызовов DeepSeek ────────────────────────────────
+# Отключает ВСЕ походы в DeepSeek: перевод, топик+оценка, извлечение вопросов,
+# семантическая группировка, детектор топиков. При выключенном флаге воркеры и
+# эндпоинты ПРОПУСКАЮТ работу, оставляя записи в status='pending' (НЕ помечают
+# пустыми) — после повторного включения бэклог до-обработается штатно.
+# Выключено по умолчанию по запросу (ноя 2026). Включить обратно: env DEEPSEEK_ENABLED=1.
+def _ds_on() -> bool:
+    return os.getenv("DEEPSEEK_ENABLED", "0") == "1"
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 #  ИМПОРТ РЕАЛЬНЫХ ОБРАЩЕНИЙ (CSV → conversations)
 # ══════════════════════════════════════════════════════════════════════════════
@@ -382,6 +392,8 @@ def translate_test(text: str = "Hola, ¿cómo estás?"):
     """Синхронный тест перевода — возвращает результат прямо в ответе."""
     import traceback
     has_key = bool(os.getenv("DEEPSEEK_API_KEY"))
+    if not _ds_on():
+        return {"disabled": True, "note": "DeepSeek отключён (DEEPSEEK_ENABLED!=1)."}
     try:
         result = translate_to_english(text)
         out = {
@@ -908,6 +920,9 @@ def _process_one_conversation(conv_id: str):
 @app.post("/admin/process-conversations")
 def process_conversations(batch: int = 5):
     """Обрабатывает пачку pending-обращений (перевод + топик + оценка). Дёргать в цикле."""
+    if not _ds_on():
+        return {"disabled": True, "processed_this_batch": 0,
+                "note": "DeepSeek отключён (DEEPSEEK_ENABLED!=1): обработка пропущена, записи остались pending."}
     db = SessionLocal()
     try:
         pending = db.query(DBConversation).filter_by(status="pending").limit(batch).all()
@@ -1492,6 +1507,8 @@ def list_topic_suggestions(status: str = "pending"):
 def detect_emerging_topics(days: int = 7, min_cluster: int = 3):
     """Кластеризует недавние необработанные обращения (proc_other / низкая уверенность)
     через DeepSeek и предлагает новые топики (TopicSuggestion)."""
+    if not _ds_on():
+        return {"disabled": True, "suggestions": 0}
     since = datetime.utcnow() - timedelta(days=days)
     db = SessionLocal()
     try:
@@ -1916,6 +1933,8 @@ def _group_conversations(db, from_date: Optional[str] = None, to_date: Optional[
 def admin_group_conversations(from_date: Optional[str] = None, to_date: Optional[str] = None):
     """Семантическая группировка чатов клиента в объединённые диалоги + переоценка.
     Вызывается пуллером после обработки (с окном выгрузки). Без дат — по всей базе."""
+    if not _ds_on():
+        return {"ok": False, "disabled": True}
     db = SessionLocal()
     try:
         return {"ok": True, **_group_conversations(db, from_date, to_date)}
@@ -1936,6 +1955,8 @@ def _pending_worker_loop():
     dirty_days = set()
     while True:
         try:
+            if not _ds_on():
+                time.sleep(60); continue
             db = SessionLocal()
             ids = [c.id for c in db.query(DBConversation.id.label("id"))
                      .filter(DBConversation.status == "pending")
@@ -1984,6 +2005,8 @@ def _ind_translate_worker_loop():
     Спит, когда всё переведено."""
     while True:
         try:
+            if not _ds_on():
+                time.sleep(120); continue
             db = SessionLocal()
             try:
                 q = db.query(DBIndividual).filter(DBIndividual.status != "translated").limit(6)
@@ -2504,6 +2527,8 @@ def _questions_worker_loop():
     Дренажит PyME-чаты (не фрагменты, не когорты), где вопросы ещё не извлечены."""
     while True:
         try:
+            if not _ds_on():
+                time.sleep(120); continue
             db = SessionLocal()
             try:
                 conv = (db.query(DBConversation)
@@ -2723,6 +2748,8 @@ def _translate_individual(dlg, chunk: int = 15) -> bool:
 @app.post("/admin/individuals/translate")
 def admin_individuals_translate(batch: int = 5):
     """Переводит пачку непереведённых диалогов физиков. Гоняется циклом до конца."""
+    if not _ds_on():
+        return {"disabled": True, "done": 0, "remaining": None}
     db = SessionLocal()
     try:
         # claim distinct rows so несколько параллельных воркеров не берут одни и те же
